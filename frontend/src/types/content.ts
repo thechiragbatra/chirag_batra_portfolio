@@ -54,6 +54,7 @@ export interface Resume {
   }
   experience: Experience[]
   education: Education[]
+  certifications: string[]
   projects: ResumeProject[]
   skills: SkillGroup[]
 }

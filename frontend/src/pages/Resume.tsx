@@ -49,6 +49,16 @@ const tabs: TabItem[] = [
             {ed.details && <p className="text-sm text-zinc-500">{ed.details}</p>}
           </Entry>
         ))}
+        {resume.certifications.length > 0 && (
+          <div className="space-y-2">
+            <h3 className="font-semibold">Certifications</h3>
+            <ul className="list-disc space-y-1 pl-5 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
+              {resume.certifications.map((c) => (
+                <li key={c}>{c}</li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     ),
   },

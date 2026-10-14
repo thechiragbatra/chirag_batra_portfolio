@@ -1,55 +1,92 @@
 {
   "basics": {
     "name": "Chirag Batra",
-    "title": "Software Engineer",
-    "location": "City, Country",
-    "summary": "Placeholder summary. Engineer who enjoys developer tooling, distributed systems and shipping small, well-tested increments. Edit src/data/resume.json to replace this content.",
+    "title": "Computer Science (Data Science) Undergraduate",
+    "location": "Dehradun, India",
+    "summary": "Computer Science (Data Science) undergraduate with hands-on experience building end-to-end machine learning and data analytics solutions in Python. Skilled in exploratory data analysis, feature engineering, predictive modeling, and deploying models as working applications. Experienced across financial risk analytics, customer churn modeling, and multi-source data pipelines.",
     "links": [
-      { "label": "GitHub", "url": "https://github.com/your-handle" },
-      { "label": "LinkedIn", "url": "https://www.linkedin.com/in/your-handle" }
+      { "label": "Email", "url": "mailto:batrachirag1123@gmail.com" },
+      { "label": "LinkedIn", "url": "https://www.linkedin.com/in/chirag-batra-ds" },
+      { "label": "GitHub", "url": "https://github.com/thechiragbatra" }
     ]
   },
   "experience": [
     {
-      "role": "Software Engineer",
-      "company": "Placeholder Corp",
+      "role": "Project Intern, Data Science",
+      "company": "IBM",
       "location": "Remote",
-      "start": "2023",
-      "end": "Present",
+      "start": "Jun 2026",
+      "end": "Jul 2026",
       "highlights": [
-        "Built an internal deployment dashboard used by 40+ engineers.",
-        "Cut CI time by 35% by parallelizing test shards and caching dependencies."
+        "Built EventLens AI, a full-stack financial risk analytics platform in Python, computing Value-at-Risk and Monte Carlo projections for portfolio exposure.",
+        "Trained a Random Forest model using a Scikit-learn pipeline on 250+ event-days of GDELT news data to predict abnormal returns from news sentiment and volatility features.",
+        "Developed ETL pipelines aggregating news event data with live market pricing into a SQLAlchemy database, delivered through FastAPI REST services and a React reporting dashboard."
       ]
     },
     {
-      "role": "Software Engineering Intern",
-      "company": "Example Labs",
-      "location": "City, Country",
-      "start": "2022",
-      "end": "2022",
-      "highlights": ["Shipped a REST API for usage analytics with FastAPI and Postgres."]
+      "role": "Research Intern, Data Analysis",
+      "company": "ISVR Aerospace Projects",
+      "location": "Dehradun, India",
+      "start": "Jun 2025",
+      "end": "Jul 2025",
+      "highlights": [
+        "Developed Python preprocessing pipelines to clean drift and noise from four sensor telemetry streams, including GPS, IMU, barometric pressure, and temperature data.",
+        "Implemented automated quality control checks that detected altitude-control anomalies in time-series sensor data.",
+        "Conducted comparative analysis across five operational scenarios, quantifying performance trade-offs for technical stakeholders."
+      ]
     }
   ],
   "education": [
     {
-      "school": "Placeholder University",
-      "degree": "B.Tech, Computer Science",
-      "start": "2019",
-      "end": "2023",
-      "details": "Coursework: distributed systems, databases, compilers."
+      "school": "UPES Dehradun",
+      "degree": "Bachelor of Technology in Computer Science (Data Science)",
+      "start": "2023",
+      "end": "2027",
+      "details": "Dehradun, India"
     }
+  ],
+  "certifications": [
+    "Data Science Tools, IBM SkillsBuild",
+    "Data Analytics Virtual Experience Program, Deloitte Australia (Forage)",
+    "Data Structures and Algorithms using Python, Tutedude"
   ],
   "projects": [
     {
-      "name": "DeploySmith OS",
-      "description": "Multi-agent deployment platform built with LangGraph and FastAPI.",
-      "tech": ["Python", "LangGraph", "React"],
-      "url": "https://github.com/your-handle/deploysmith"
+      "name": "Customer Churn Prediction and Retention Uplift Modeling",
+      "description": "Churn model on a 7,032-customer telecom dataset reaching 0.82 AUC-ROC with XGBoost. Uplift modeling identified persuadable customers, cutting simulated retention campaign spend by 56% while maintaining retention rates. Streamlit and FastAPI dashboard with SHAP explainability; experiments tracked in MLflow.",
+      "tech": ["Python", "XGBoost", "CausalML", "SHAP", "MLflow", "FastAPI", "Streamlit"]
+    },
+    {
+      "name": "Proactive Academic Intervention System",
+      "description": "End-to-end ML web app analyzing 5,000+ records to predict at-risk individuals, reaching 0.887 ROC-AUC with class-balanced Logistic Regression. Automated feature engineering from MySQL, a max-heap priority queue for ranking, and sliding-window anomaly detection. Flask backend deployed on Render.",
+      "tech": ["Python", "Scikit-learn", "Flask", "MySQL", "Render"]
     }
   ],
   "skills": [
-    { "category": "Languages", "items": ["TypeScript", "Python", "SQL"] },
-    { "category": "Frameworks", "items": ["React", "FastAPI", "LangGraph", "Tailwind CSS"] },
-    { "category": "Infrastructure", "items": ["Docker", "GitHub Actions", "Vercel", "Render"] }
+    { "category": "Languages", "items": ["Python", "SQL", "Java", "JavaScript"] },
+    {
+      "category": "Machine Learning",
+      "items": ["Scikit-learn", "XGBoost", "Random Forest", "Logistic Regression", "Uplift Modeling", "CausalML", "SHAP", "Model Evaluation", "Feature Engineering", "Classification", "Predictive Modeling"]
+    },
+    {
+      "category": "Data Analysis",
+      "items": ["Pandas", "NumPy", "EDA", "Data Cleaning", "Data Aggregation", "Statistical Analysis", "Data Visualization"]
+    },
+    {
+      "category": "Data Engineering & MLOps",
+      "items": ["ETL Pipelines", "Data Preprocessing", "MLflow", "Model Deployment", "REST APIs"]
+    },
+    {
+      "category": "Databases & Backend",
+      "items": ["MySQL", "SQL", "SQLAlchemy", "Database Design", "FastAPI", "Flask", "Streamlit", "React"]
+    },
+    {
+      "category": "Tools & Platforms",
+      "items": ["Git", "GitHub", "Jupyter Notebook", "Tableau", "Power BI", "Excel", "Render", "Netlify"]
+    },
+    {
+      "category": "CS Fundamentals",
+      "items": ["Data Structures & Algorithms", "Object-Oriented Programming", "DBMS"]
+    }
   ]
 }
