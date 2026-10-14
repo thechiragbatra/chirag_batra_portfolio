@@ -9,6 +9,7 @@ const NAV = [
   { to: '/projects', label: 'Projects' },
   { to: '/resume', label: 'Resume' },
   { to: '/deployer', label: 'Deployer' },
+  { to: '/apps', label: 'Apps' },
 ]
 
 /** Pill that slides under the active nav link. */

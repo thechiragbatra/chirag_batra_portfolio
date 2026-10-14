@@ -1,3 +1,4 @@
+import type { App, AppsResponse } from '../types/apps'
 import type { CreateDeploymentResponse } from '../types/events'
 
 export const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:8000').replace(/\/+$/, '')
@@ -42,3 +43,34 @@ export async function createDeployment(
 export function deploymentEventsUrl(id: string): string {
   return `${API_URL}/api/deployments/${encodeURIComponent(id)}/events`
 }
+
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  let response: Response
+  try {
+    response = await fetch(`${API_URL}${path}`, init)
+  } catch (error) {
+    throw new Error(`Cannot reach the API at ${API_URL}. Is the backend running?`, { cause: error })
+  }
+  if (!response.ok) throw new Error(await errorMessage(response))
+  if (response.status === 204) return undefined as T
+  const text = await response.text()
+  return (response.headers.get('content-type')?.includes('application/json') ? JSON.parse(text) : text) as T
+}
+
+const appPath = (name: string) => `/api/apps/${encodeURIComponent(name)}`
+
+export const listApps = () => request<AppsResponse>('/api/apps')
+
+export const getDeployLog = (name: string, deployId: string) =>
+  request<string>(`${appPath(name)}/deploys/${encodeURIComponent(deployId)}/log`)
+
+export const rollbackApp = (name: string, deployId: string) =>
+  request<App>(`${appPath(name)}/rollback`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ deploy_id: deployId }),
+  })
+
+export const stopApp = (name: string) => request<void>(`${appPath(name)}/stop`, { method: 'POST' })
+
+export const deleteApp = (name: string) => request<void>(appPath(name), { method: 'DELETE' })

@@ -1,11 +1,13 @@
-import { CircleCheck, CircleX } from 'lucide-react'
+import { CircleCheck, CircleX, ExternalLink } from 'lucide-react'
 import { useEffect, useRef } from 'react'
+import { Link } from 'react-router-dom'
 import { confetti } from '../lib/confetti'
 import type { DeploymentState } from '../types/events'
 
 export function DeploymentSummary({ result, error }: { result: DeploymentState | null; error: string | null }) {
   const ref = useRef<HTMLElement>(null)
   const healthy = result !== null && result.health_report?.healthy === true && result.errors.length === 0
+  const sandbox = result?.deployment_results.some((r) => r.platform === 'sandbox') ?? false
 
   useEffect(() => {
     if (!healthy || !ref.current) return
@@ -58,7 +60,18 @@ export function DeploymentSummary({ result, error }: { result: DeploymentState |
             >
               <span className="font-medium">{r.component}</span>
               <span className="rounded bg-zinc-900/5 px-1.5 font-mono text-[10px] text-zinc-500 dark:bg-white/10">{r.platform}</span>
-              <span className="min-w-0 font-mono text-xs break-all text-zinc-700 dark:text-zinc-300">{r.url}</span>
+              {r.platform === 'sandbox' && r.url ? (
+                <a
+                  href={r.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex min-w-0 items-center gap-1 font-mono text-xs break-all text-emerald-700 hover:underline dark:text-emerald-300"
+                >
+                  {r.url} <ExternalLink className="size-3 shrink-0" aria-hidden />
+                </a>
+              ) : (
+                <span className="min-w-0 font-mono text-xs break-all text-zinc-700 dark:text-zinc-300">{r.url}</span>
+              )}
             </li>
           ))}
         </ul>
@@ -71,7 +84,17 @@ export function DeploymentSummary({ result, error }: { result: DeploymentState |
         </ul>
       )}
       <p className="mt-3 text-xs text-zinc-500">
-        Profiling and planning are real; deployment and health checks are simulated, so these URLs are not live yet.
+        {sandbox ? (
+          <>
+            Built and served in Docker on this machine. Manage deploys and rollbacks on the{' '}
+            <Link to="/apps" className="font-medium text-emerald-700 hover:underline dark:text-emerald-300">
+              Apps page
+            </Link>
+            .
+          </>
+        ) : (
+          'Profiling and planning are real; deployment is simulated, so these URLs are not live.'
+        )}
       </p>
     </section>
   )

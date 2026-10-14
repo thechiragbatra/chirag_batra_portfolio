@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, field_validator
 
+from apps import router as apps_router
 from events import EventAdapter
 from graph import build_graph
 from runs import RunRegistry
@@ -42,10 +43,11 @@ app = FastAPI(title="DeploySmith OS", version="0.1.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_cors_origins(),
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "DELETE"],
     allow_headers=["Content-Type", "Last-Event-ID"],
 )
 registry = RunRegistry(build_graph())
+app.include_router(apps_router)
 
 
 @app.get("/api/health")
