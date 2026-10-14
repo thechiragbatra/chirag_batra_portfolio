@@ -51,7 +51,7 @@ export function DeploymentSummary({ result, error }: { result: DeploymentState |
           ))}
         </ul>
       )}
-      <p className="mt-3 text-xs text-zinc-500">Phase 1 uses mocked agents: nothing was actually deployed.</p>
+      <p className="mt-3 text-xs text-zinc-500">Profiling and planning are real; deployment and health checks are simulated, so these URLs are not live yet.</p>
     </section>
   )
 }

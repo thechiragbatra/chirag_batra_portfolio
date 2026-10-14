@@ -54,3 +54,23 @@ class MockStrategist:
         )
         await log(f"Plan ready: {len(targets)} targets, all free tier", LogLevel.success)
         return {"deployment_plan": plan}
+
+
+class RuleStrategist:
+    """Deterministic free-tier placement (agents/skills/plan.py). No LLM."""
+
+    name = AgentName.strategist
+
+    async def run(self, state: DeploymentState, log: LogFn) -> AgentUpdate:
+        from agents.skills.plan import build_plan
+
+        if state.repo_profile is None:
+            raise ValueError("strategist requires a repo_profile")
+        await log("Matching each component to a free-tier platform")
+        plan = build_plan(state.repo_profile)
+        for target in plan.targets:
+            await log(f"{target.component} -> {target.platform.value}: {target.reason}")
+        for note in plan.notes:
+            await log(note, LogLevel.warn)
+        await log(f"Plan ready: {len(plan.targets)} targets, all free tier", LogLevel.success)
+        return {"deployment_plan": plan}

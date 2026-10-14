@@ -22,13 +22,23 @@ class MockHealer:
     def from_env(cls) -> MockHealer:
         return cls(int(os.getenv("MOCK_HEALER_FAILURES", "1")))
 
+    @staticmethod
+    def _flaky_component(state: DeploymentState) -> str | None:
+        """The component the mock pretends is broken: the first backend, else the first result."""
+        if state.repo_profile:
+            for component in state.repo_profile.components:
+                if component.kind == "backend":
+                    return component.name
+        return state.deployment_results[0].component if state.deployment_results else None
+
     async def run(self, state: DeploymentState, log: LogFn) -> AgentUpdate:
         healthy = state.repair_attempts >= self.failures_before_healthy
+        flaky = self._flaky_component(state)
         checks: list[HealthCheck] = []
         for result in state.deployment_results:
             await log(f"Probing {result.component} ({result.platform.value})")
             await mock_pause(0.5)
-            failing = not healthy and result.component == "api"
+            failing = not healthy and result.component == flaky
             checks.append(
                 HealthCheck(
                     component=result.component,
@@ -46,6 +56,6 @@ class MockHealer:
             await log("All health checks passed", LogLevel.success)
             return {"health_report": HealthReport(healthy=True, checks=checks)}
 
-        diagnosis = "api start command ignores $PORT; bind uvicorn to 0.0.0.0:$PORT"
+        diagnosis = f"{flaky} start command ignores $PORT; bind the server to 0.0.0.0:$PORT"
         await log(f"Diagnosis: {diagnosis}", LogLevel.warn)
         return {"health_report": HealthReport(healthy=False, checks=checks, diagnosis=diagnosis)}

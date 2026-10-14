@@ -4,8 +4,9 @@ A personal developer portfolio that doubles as a multi-agent deployment platform
 GitHub repo URL and four agents (profiler, strategist, provisioner, healer) plan and deploy
 it to free-tier hosting, streaming every step to the browser.
 
-**Status: Phase 1.** Agents are mocks that return realistic data. Nothing is cloned or
-deployed yet.
+**Status:** the profiler and strategist are real. The profiler shallow-clones the repo and
+analyzes it statically, and the strategist picks a free-tier platform per component. The
+provisioner and healer are still mocks, so nothing is actually deployed.
 
 ## Layout
 
@@ -13,12 +14,12 @@ deployed yet.
 | --- | --- |
 | `frontend/` | React + Vite + TypeScript + Tailwind. Routes: `/projects`, `/resume`, `/deployer` |
 | `backend/` | FastAPI app, LangGraph pipeline (`graph.py`), in-memory run registry, tests |
-| `agents/` | `Agent` protocol (`base.py`), shared domain models (`models.py`), mock agents |
+| `agents/` | `Agent` protocol (`base.py`), domain models (`models.py`), agents, and `skills/` (clone, analyze, plan) |
 | `shared/` | JSON Schemas for state and events, the source of truth for both languages ([shared/README.md](shared/README.md)) |
 
 ## Running locally
 
-Requires Node 20+, Python 3.11+ and [uv](https://docs.astral.sh/uv/).
+Requires Node 20+, Python 3.11+, [uv](https://docs.astral.sh/uv/) and `git`.
 
 ```sh
 cp .env.example .env          # optional: every value has a sensible default
@@ -34,10 +35,12 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173/deployer and submit a URL like `https://github.com/acme/shop`.
+Open http://localhost:5173/deployer and submit a public repo such as
+`https://github.com/fastapi/full-stack-fastapi-template`.
 
-The backend reads its settings from the process environment (`CORS_ORIGINS`,
-`MOCK_AGENT_DELAY`, `MOCK_HEALER_FAILURES`; see `.env.example`). Export them in your shell, or
+The backend reads its settings from the process environment (`MOCK_AGENTS`, `CORS_ORIGINS`,
+`MOCK_AGENT_DELAY`, `MOCK_HEALER_FAILURES`; see `.env.example`). `MOCK_AGENTS=1` runs fully
+offline with mock agents. Export them in your shell, or
 prefix the uvicorn command, e.g. `MOCK_HEALER_FAILURES=4 PYTHONPATH=.. uv run uvicorn main:app`
 to watch the healer exhaust its 3 repair attempts. Vite reads `VITE_API_URL` from the root `.env`.
 
@@ -54,7 +57,7 @@ production builds. Set `GITHUB_TOKEN` in `.env` if you hit GitHub's anonymous ra
 
 ```sh
 cd frontend && npm run lint && npm run build
-cd backend && uv run pytest
+cd backend && uv run pytest              # offline; add -m network for the real-clone test
 cd backend && uvx ruff check . ../agents && uvx ruff format --check . ../agents
 ```
 
@@ -76,6 +79,13 @@ profiler → strategist → provisioner → healer ─┐
                              └────────────────┘
 ```
 
+- **Profiler** (`agents/skills/clone.py`, `analyze.py`): `git clone --depth 1` with HTTPS only,
+  no submodules, LFS or hooks, symlinks checked out as plain files, host git config ignored,
+  a 60s timeout and a 200 MB cap. Analysis only reads files (`package.json`, `requirements.txt`,
+  `pyproject.toml`, `.env.example` names, never values). Nothing from the repo is executed.
+- **Strategist** (`agents/skills/plan.py`): deterministic rules, e.g. Vite → Vercel,
+  FastAPI → Render, Streamlit → Hugging Face Spaces, Postgres → Neon. Engines with no free
+  target (MySQL, MongoDB) are reported in the plan notes rather than placed on a paid host.
 - Each agent implements `Agent.run(state, log) -> partial update` (`agents/base.py`). The graph
   wrapper owns status events, the repair counter and error handling, so the real agents can
   replace the mocks without changing the graph.

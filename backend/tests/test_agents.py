@@ -62,3 +62,75 @@ def test_healer_from_env(monkeypatch) -> None:
     monkeypatch.setenv("MOCK_HEALER_FAILURES", "4")
     assert MockHealer.from_env().failures_before_healthy == 4
     assert MockHealer.name is AgentName.healer
+
+
+async def test_real_profiler_analyzes_cloned_checkout(monkeypatch, tmp_path) -> None:
+    from contextlib import asynccontextmanager
+
+    from agents import RealProfiler
+    from agents.skills import clone
+    from tests.repo_fixtures import VITE_FASTAPI_MONOREPO, write
+
+    repo = write(tmp_path, VITE_FASTAPI_MONOREPO)
+    cloned: list[str] = []
+
+    @asynccontextmanager
+    async def fake_clone(url: str):
+        cloned.append(url)
+        yield repo
+
+    monkeypatch.setattr(clone, "shallow_clone", fake_clone)
+    logs = Logs()
+    profile = (await RealProfiler().run(DeploymentState(repo_url=REPO), logs))["repo_profile"]
+
+    assert cloned == [REPO]
+    assert {c.name for c in profile.components} == {"api", "frontend", "db"}
+    messages = [m for _, m in logs.lines]
+    assert any("nothing executed" in m for m in messages)
+    assert any("Detected backend in api/: fastapi" in m for m in messages)
+    assert logs.lines[-1][0] is LogLevel.success
+
+
+async def test_rule_strategist_plans_from_profile(tmp_path) -> None:
+    from agents import RuleStrategist
+    from agents.skills.analyze import analyze_repo
+    from tests.repo_fixtures import VITE_FASTAPI_MONOREPO, write
+
+    state = DeploymentState(repo_url=REPO)
+    state.repo_profile = analyze_repo(write(tmp_path, VITE_FASTAPI_MONOREPO), "acme/shop")
+    logs = Logs()
+    plan = (await RuleStrategist().run(state, logs))["deployment_plan"]
+    assert {t.component: t.platform for t in plan.targets} == {
+        "api": Platform.render,
+        "frontend": Platform.vercel,
+        "db": Platform.neon,
+    }
+    assert any(level is LogLevel.warn for level, _ in logs.lines)  # free-tier caveats
+
+
+async def test_mock_healer_fails_first_backend_component(tmp_path) -> None:
+    from agents.models import Component, DeploymentResult, RepoProfile
+
+    state = DeploymentState(repo_url=REPO)
+    state.repo_profile = RepoProfile(
+        name="acme/shop", default_branch="main", languages=[], frameworks=[],
+        components=[Component(name="site", kind="frontend", path="."),
+                    Component(name="server", kind="backend", path="srv")],
+    )  # fmt: skip
+    state.deployment_results = [
+        DeploymentResult(component=n, platform=Platform.render, status="live", attempt=0)
+        for n in ("site", "server")
+    ]
+    report = (await MockHealer(failures_before_healthy=1).run(state, Logs()))["health_report"]
+    assert [c.ok for c in report.checks] == [True, False]
+    assert report.diagnosis and report.diagnosis.startswith("server ")
+
+
+def test_default_agents_switch(monkeypatch) -> None:
+    from agents import RealProfiler, RuleStrategist, default_agents
+
+    monkeypatch.setenv("MOCK_AGENTS", "0")
+    real = default_agents()
+    assert isinstance(real[0], RealProfiler) and isinstance(real[1], RuleStrategist)
+    monkeypatch.setenv("MOCK_AGENTS", "1")
+    assert isinstance(default_agents()[0], MockProfiler)
