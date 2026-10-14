@@ -97,34 +97,48 @@ class SandboxProvisioner:
         components = {c.name: c for c in profile.components}
         previous = {r.component: r for r in state.deployment_results}
         attempt = state.repair_attempts
-        if attempt > 0 and state.health_report and state.health_report.diagnosis:
-            await log(f"Repair attempt {attempt}: {state.health_report.diagnosis}", LogLevel.warn)
+        report = state.health_report
+        healthy = {c.component for c in report.checks if c.ok} if report else set()
+        if attempt > 0 and report and report.diagnosis:
+            await log(f"Repair attempt {attempt}: {report.diagnosis}", LogLevel.warn)
 
-        results: list[DeploymentResult] = []
+        # On a repair only the unhealthy components are redeployed. The source has not
+        # changed, so a component whose build failed would fail the same way again.
+        results: dict[str, DeploymentResult] = {}
+        pending: list[DeploymentTarget] = []
+        for target in plan.targets:
+            last = previous.get(target.component)
+            if attempt > 0 and last is not None and last.status == "failed":
+                await log(
+                    f"{target.component}: build failed last attempt; not rebuilding", LogLevel.warn
+                )
+                results[target.component] = last.model_copy(update={"attempt": attempt})
+            elif attempt > 0 and last is not None and target.component in healthy:
+                await log(f"{target.component}: healthy; keeping {last.url}")
+                results[target.component] = last.model_copy(update={"attempt": attempt})
+            else:
+                pending.append(target)
+
         single = len(plan.targets) == 1
-        async with shallow_clone(state.repo_url) as checkout:
-            for target in plan.targets:
-                name = target.component
-                last = previous.get(name)
-                if attempt > 0 and last is not None and last.status == "failed":
-                    # The source has not changed, so a failed build would fail the same way.
-                    await log(f"{name}: build failed last attempt; not rebuilding", LogLevel.warn)
-                    results.append(last.model_copy(update={"attempt": attempt}))
-                    continue
-                try:
-                    _, url = await self.engine.deploy(
-                        checkout, state.repo_url, profile.name, components[name], single, log
-                    )
-                except (DeployError, UnsupportedComponent, SandboxError) as exc:
-                    await log(f"{name}: {exc}", LogLevel.error)
-                    results.append(_result(target, attempt, "failed"))
-                else:
-                    results.append(_result(target, attempt, "live", url))
+        if pending:
+            async with shallow_clone(state.repo_url) as checkout:
+                for target in pending:
+                    name = target.component
+                    try:
+                        _, url = await self.engine.deploy(
+                            checkout, state.repo_url, profile.name, components[name], single, log
+                        )
+                    except (DeployError, UnsupportedComponent, SandboxError) as exc:
+                        await log(f"{name}: {exc}", LogLevel.error)
+                        results[name] = _result(target, attempt, "failed")
+                    else:
+                        results[name] = _result(target, attempt, "live", url)
 
-        live = sum(r.status == "live" for r in results)
-        level = LogLevel.success if live == len(results) else LogLevel.warn
-        await log(f"{live}/{len(results)} components live in the sandbox", level)
-        return {"deployment_results": results}
+        ordered = [results[t.component] for t in plan.targets]
+        live = sum(r.status == "live" for r in ordered)
+        level = LogLevel.success if live == len(ordered) else LogLevel.warn
+        await log(f"{live}/{len(ordered)} components live in the sandbox", level)
+        return {"deployment_results": ordered}
 
 
 def _result(
@@ -134,6 +148,9 @@ def _result(
     url: str | None = None,
 ) -> DeploymentResult:
     return DeploymentResult(
-        component=target.component, platform=target.platform, status=status, url=url,
+        component=target.component,
+        platform=target.platform,
+        status=status,
+        url=url,
         attempt=attempt,
-    )  # fmt: skip
+    )

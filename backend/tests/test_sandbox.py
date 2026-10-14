@@ -13,9 +13,10 @@ import pytest
 from agents.models import Component, LogLevel
 from agents.sandbox import docker as dk
 from agents.sandbox import engine as engine_mod
+from agents.sandbox import router as router_mod
 from agents.sandbox.engine import DeployError, Engine, find_output_dir
 from agents.sandbox.recipes import UnsupportedComponent, recipe_for
-from agents.sandbox.router import app_url, sites_config
+from agents.sandbox.router import ROUTER_NAME, app_url, sites_config
 from agents.sandbox.store import (
     AppRecord,
     Deployment,
@@ -388,3 +389,87 @@ async def test_real_static_deploy_through_router(
     finally:
         await engine.stop(name, delete=True)
         await dk.remove_container("deploysmith-router")
+
+
+# --- router lifecycle (scripted docker CLI) -----------------------------------------
+
+
+class FakeCLI:
+    """Scripted `docker` CLI: a router that may be running with a given port and mounts."""
+
+    def __init__(
+        self,
+        running: bool,
+        port: str = "8080",
+        mounts: str = "",
+        run_result: tuple[int, str] = (0, "abc123"),
+    ) -> None:
+        self.running, self.port, self.mounts, self.run_result = running, port, mounts, run_result
+        self.calls: list[tuple[str, ...]] = []
+
+    async def __call__(self, *args: str, timeout: float = 60.0) -> tuple[int, str]:
+        self.calls.append(args)
+        if args[0] == "inspect" and args[-1] == ROUTER_NAME:
+            if not self.running:
+                return 1, "Error: No such object"
+            if "State.Running" in args[2]:
+                return 0, "true"
+            return 0, f"{self.port} {self.mounts}"
+        if args[0] == "run":
+            self.running = True
+            return self.run_result
+        if args[0] == "rm":
+            self.running = False
+            return 0, ""
+        return 0, ""
+
+    def verbs(self) -> list[str]:
+        return [" ".join(c[:2]) if c[0] == "network" else c[0] for c in self.calls]
+
+
+@pytest.fixture
+def cli(monkeypatch: pytest.MonkeyPatch) -> Any:
+    def make(**kwargs: Any) -> FakeCLI:
+        fake = FakeCLI(**kwargs)
+        monkeypatch.setattr(dk, "docker", fake)
+        monkeypatch.setattr(router_mod, "docker", fake)
+        return fake
+
+    return make
+
+
+def _mounts(store: Store) -> str:
+    return f"{store.router_dir / 'nginx.conf'};{store.router_dir};{store.root / 'apps'};"
+
+
+async def test_reload_router_reuses_matching_router(tmp_path: Path, cli: Any) -> None:
+    store = Store(tmp_path)
+    fake = cli(running=True, mounts=_mounts(store))
+    await router_mod.reload_router(store)
+    assert "run" not in fake.verbs() and "rm" not in fake.verbs()
+    assert ("exec", ROUTER_NAME, "nginx", "-s", "reload") in fake.calls
+    assert (store.router_dir / "sites.conf").is_file()
+
+
+@pytest.mark.parametrize("stale", [{"port": "9999"}, {"mounts": "/elsewhere/apps;"}])
+async def test_reload_router_recreates_stale_router(
+    tmp_path: Path, cli: Any, stale: dict[str, str]
+) -> None:
+    store = Store(tmp_path)
+    fake = cli(running=True, **{"mounts": _mounts(store), **stale})
+    await router_mod.reload_router(store)
+    verbs = fake.verbs()
+    assert verbs.index("rm") < verbs.index("run") < verbs.index("network connect")
+
+
+async def test_reload_router_tolerates_concurrent_creation(tmp_path: Path, cli: Any) -> None:
+    conflict = (125, 'docker: Conflict. The container name "/deploysmith-router" is already in use')
+    fake = cli(running=False, run_result=conflict)
+    await router_mod.reload_router(Store(tmp_path))
+    assert "run" in fake.verbs() and ("exec", ROUTER_NAME, "nginx", "-s", "reload") in fake.calls
+
+
+async def test_reload_router_reports_start_failure(tmp_path: Path, cli: Any) -> None:
+    cli(running=False, run_result=(125, "docker: port is already allocated"))
+    with pytest.raises(dk.SandboxError, match="could not start the router"):
+        await router_mod.reload_router(Store(tmp_path))

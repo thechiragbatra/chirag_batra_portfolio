@@ -16,6 +16,7 @@ from agents.models import (
     DeploymentResult,
     DeploymentState,
     DeploymentTarget,
+    HealthCheck,
     HealthReport,
     LogLevel,
     Platform,
@@ -130,12 +131,17 @@ def sandbox_state(**overrides: Any) -> DeploymentState:
 
 
 @pytest.fixture
-def no_clone(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+def no_clone(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> list[str]:
+    """Stub the clone; returns the list of repo URLs that would have been cloned."""
+    clones: list[str] = []
+
     @asynccontextmanager
     async def fake_clone(repo_url: str, **_: Any):  # type: ignore[no-untyped-def]
+        clones.append(repo_url)
         yield tmp_path
 
     monkeypatch.setattr("agents.provisioner.shallow_clone", fake_clone)
+    return clones
 
 
 async def test_sandbox_provisioner_deploys_each_target(no_clone: None) -> None:
@@ -182,6 +188,58 @@ async def test_sandbox_provisioner_does_not_rebuild_failed_source_on_repair(no_c
         ("web", "failed", 1),
         ("api", "live", 1),
     ]
+
+
+def live(component: str, attempt: int = 0) -> DeploymentResult:
+    return DeploymentResult(
+        component=component,
+        platform=Platform.sandbox,
+        status="live",
+        url=f"http://shop-{component}.localhost:8080",
+        attempt=attempt,
+    )
+
+
+async def test_sandbox_provisioner_redeploys_only_unhealthy_components(
+    no_clone: list[str],
+) -> None:
+    engine = FakeEngine()
+    checks = [
+        HealthCheck(component="web", url=live("web").url, ok=False, status_code=502, detail="x"),
+        HealthCheck(component="api", url=live("api").url, ok=True, status_code=200, detail="ok"),
+    ]
+    state = sandbox_state(
+        deployment_results=[live("web"), live("api")],
+        repair_attempts=1,
+        health_report=HealthReport(healthy=False, checks=checks, diagnosis="web on sandbox: 502"),
+    )
+    logs = Logs()
+    results = (await SandboxProvisioner(engine).run(state, logs))["deployment_results"]  # type: ignore[arg-type]
+    assert engine.calls == [("web", False)]
+    assert [(r.component, r.status, r.attempt) for r in results] == [
+        ("web", "live", 1),
+        ("api", "live", 1),
+    ]
+    assert (LogLevel.info, "api: healthy; keeping http://shop-api.localhost:8080") in logs.lines
+    assert no_clone == ["https://github.com/acme/shop"]
+
+
+async def test_sandbox_provisioner_skips_clone_when_nothing_to_redeploy(
+    no_clone: list[str],
+) -> None:
+    engine = FakeEngine()
+    failed = [
+        DeploymentResult(component="web", platform=Platform.sandbox, status="failed", attempt=0),
+        DeploymentResult(component="api", platform=Platform.sandbox, status="failed", attempt=0),
+    ]
+    state = sandbox_state(
+        deployment_results=failed,
+        repair_attempts=2,
+        health_report=HealthReport(healthy=False, checks=[], diagnosis="nothing deployed"),
+    )
+    results = (await SandboxProvisioner(engine).run(state, Logs()))["deployment_results"]  # type: ignore[arg-type]
+    assert engine.calls == [] and no_clone == []
+    assert [(r.status, r.attempt) for r in results] == [("failed", 2), ("failed", 2)]
 
 
 async def test_sandbox_provisioner_rejects_foreign_targets(no_clone: None) -> None:

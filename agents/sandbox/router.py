@@ -10,6 +10,7 @@ unprivileged with the same hardening as the app containers and is published on
 
 from __future__ import annotations
 
+import asyncio
 import os
 
 from agents.sandbox.docker import (
@@ -144,33 +145,72 @@ def router_run_args(store: Store, port: int) -> list[str]:
     ]  # fmt: skip
 
 
-async def _published_port() -> int | None:
-    """The host port the running router is published on, so a changed
-    DEPLOYSMITH_ROUTER_PORT (or another store's router) recreates it."""
+_reload_lock: asyncio.Lock | None = None
+
+
+def _lock() -> asyncio.Lock:
+    global _reload_lock
+    if _reload_lock is None:
+        _reload_lock = asyncio.Lock()
+    return _reload_lock
+
+
+async def _router_matches(store: Store, port: int) -> bool:
+    """True if the running router publishes `port` and serves this store's directories.
+
+    Otherwise a changed DEPLOYSMITH_ROUTER_PORT or DEPLOYSMITH_ENGINE_DIR would leave a
+    stale router answering on the wrong port or serving another store's apps.
+    """
     code, output = await docker(
-        "inspect", "--format", '{{(index (index .HostConfig.PortBindings "8080/tcp") 0).HostPort}}',
+        "inspect",
+        "--format",
+        '{{(index (index .HostConfig.PortBindings "8080/tcp") 0).HostPort}} '
+        "{{range .Mounts}}{{.Source}};{{end}}",
         ROUTER_NAME,
-    )  # fmt: skip
-    return int(output.strip()) if code == 0 and output.strip().isdigit() else None
+    )
+    if code != 0:
+        return False
+    published, _, mounts = output.strip().partition(" ")
+    return published == str(port) and f"{store.root / 'apps'};" in mounts
+
+
+async def _nginx_reload(attempts: int = 3) -> None:
+    """Reload nginx. Retried briefly: a router another process has just started may
+    not have written its pid file yet."""
+    output = ""
+    for attempt in range(attempts):
+        code, output = await docker("exec", ROUTER_NAME, "nginx", "-s", "reload")
+        if code == 0:
+            return
+        if attempt + 1 < attempts:
+            await asyncio.sleep(1.0)
+    raise SandboxError(f"router reload failed: {output}")
 
 
 async def reload_router(store: Store) -> None:
-    """Write the config, start the router if needed, and reload it."""
-    write_config(store)
-    (store.root / "apps").mkdir(parents=True, exist_ok=True)
-    await ensure_network()
+    """Write the config, start (or recreate) the router if needed, and reload it.
 
-    port = router_port()
-    if not await container_running(ROUTER_NAME) or await _published_port() != port:
+    Serialized within the process, since concurrent deploys would otherwise race to
+    create the router container. Two backend processes sharing one store are handled
+    by treating "name already in use" as "someone else just created it".
+    """
+    async with _lock():
+        write_config(store)
+        (store.root / "apps").mkdir(parents=True, exist_ok=True)
+        await ensure_network()
+
+        port = router_port()
+        if await container_running(ROUTER_NAME) and await _router_matches(store, port):
+            await _nginx_reload()
+            return
+
         await remove_container(ROUTER_NAME)
         code, output = await docker(*router_run_args(store, port)[1:])
+        if code != 0 and "already in use" in output:
+            await _nginx_reload()
+            return
         if code != 0:
             raise SandboxError(f"could not start the router: {output}")
         code, output = await docker("network", "connect", APPS_NETWORK, ROUTER_NAME)
         if code != 0 and "already exists" not in output:
             raise SandboxError(f"could not attach the router to {APPS_NETWORK}: {output}")
-        return
-
-    code, output = await docker("exec", ROUTER_NAME, "nginx", "-s", "reload")
-    if code != 0:
-        raise SandboxError(f"router reload failed: {output}")

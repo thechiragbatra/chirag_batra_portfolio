@@ -123,7 +123,9 @@ profiler → strategist → provisioner → healer ─┐
   directories and build logs under `.deploysmith/`, `router.py` generates the config for an
   unprivileged nginx on `127.0.0.1:8080` (static files or a proxy to the app container), and
   `engine.py` runs the deploy: a failed build never replaces the live deploy, a server must
-  answer HTTP before traffic switches, and rollback just re-points the router.
+  answer HTTP before traffic switches, and rollback just re-points the router. On a repair
+  only the unhealthy components are redeployed, and a component whose build failed is not
+  rebuilt (the source has not changed).
 - Each agent implements `Agent.run(state, log) -> partial update` (`agents/base.py`). The graph
   wrapper owns status events, the repair counter and error handling, so the real agents can
   replace the mocks without changing the graph.
