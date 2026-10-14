@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" font-family="ui-sans-serif, system-ui, sans-serif">
+  <rect width="640" height="360" fill="#f4f4f5"/>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#52525b"/>
+    </marker>
+  </defs>
+  <g font-size="15" font-weight="600" text-anchor="middle" fill="#18181b">
+    <rect x="24" y="150" width="120" height="56" rx="10" fill="#fff" stroke="#a1a1aa"/>
+    <text x="84" y="183">Profiler</text>
+    <rect x="178" y="150" width="120" height="56" rx="10" fill="#fff" stroke="#a1a1aa"/>
+    <text x="238" y="183">Strategist</text>
+    <rect x="332" y="150" width="120" height="56" rx="10" fill="#fff" stroke="#a1a1aa"/>
+    <text x="392" y="183">Provisioner</text>
+    <rect x="486" y="150" width="120" height="56" rx="10" fill="#d1fae5" stroke="#059669"/>
+    <text x="546" y="183">Healer</text>
+  </g>
+  <g stroke="#52525b" stroke-width="2" fill="none" marker-end="url(#a)">
+    <path d="M144 178H174"/>
+    <path d="M298 178H328"/>
+    <path d="M452 178H482"/>
+    <path d="M546 206C546 280 392 280 392 210"/>
+  </g>
+  <text x="469" y="296" font-size="13" text-anchor="middle" fill="#52525b">repair loop (max 3)</text>
+  <text x="320" y="60" font-size="20" font-weight="700" text-anchor="middle" fill="#18181b">DeploySmith agent pipeline</text>
+  <text x="320" y="88" font-size="13" text-anchor="middle" fill="#52525b">GitHub repo → free-tier deployment, streamed live over SSE</text>
+</svg>

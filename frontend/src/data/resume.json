@@ -1,0 +1,55 @@
+{
+  "basics": {
+    "name": "Chirag Batra",
+    "title": "Software Engineer",
+    "location": "City, Country",
+    "summary": "Placeholder summary. Engineer who enjoys developer tooling, distributed systems and shipping small, well-tested increments. Edit src/data/resume.json to replace this content.",
+    "links": [
+      { "label": "GitHub", "url": "https://github.com/your-handle" },
+      { "label": "LinkedIn", "url": "https://www.linkedin.com/in/your-handle" }
+    ]
+  },
+  "experience": [
+    {
+      "role": "Software Engineer",
+      "company": "Placeholder Corp",
+      "location": "Remote",
+      "start": "2023",
+      "end": "Present",
+      "highlights": [
+        "Built an internal deployment dashboard used by 40+ engineers.",
+        "Cut CI time by 35% by parallelizing test shards and caching dependencies."
+      ]
+    },
+    {
+      "role": "Software Engineering Intern",
+      "company": "Example Labs",
+      "location": "City, Country",
+      "start": "2022",
+      "end": "2022",
+      "highlights": ["Shipped a REST API for usage analytics with FastAPI and Postgres."]
+    }
+  ],
+  "education": [
+    {
+      "school": "Placeholder University",
+      "degree": "B.Tech, Computer Science",
+      "start": "2019",
+      "end": "2023",
+      "details": "Coursework: distributed systems, databases, compilers."
+    }
+  ],
+  "projects": [
+    {
+      "name": "DeploySmith OS",
+      "description": "Multi-agent deployment platform built with LangGraph and FastAPI.",
+      "tech": ["Python", "LangGraph", "React"],
+      "url": "https://github.com/your-handle/deploysmith"
+    }
+  ],
+  "skills": [
+    { "category": "Languages", "items": ["TypeScript", "Python", "SQL"] },
+    { "category": "Frameworks", "items": ["React", "FastAPI", "LangGraph", "Tailwind CSS"] },
+    { "category": "Infrastructure", "items": ["Docker", "GitHub Actions", "Vercel", "Render"] }
+  ]
+}
