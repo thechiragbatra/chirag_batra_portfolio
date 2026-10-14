@@ -1,37 +1,58 @@
 [
   {
     "title": "DeploySmith OS",
-    "description": "This site. A portfolio that doubles as a multi-agent deployment platform: four LangGraph agents profile a GitHub repo, plan free-tier hosting, deploy it and self-heal.",
+    "description": "This site. A portfolio that doubles as a multi-agent deployment platform: four LangGraph agents profile a GitHub repo, plan its hosting, build it inside a hardened Docker sandbox and health-check the result, streaming every step to the browser. Deploys are immutable, with build logs and one-click rollback.",
     "tags": [
       "React",
       "TypeScript",
       "FastAPI",
       "LangGraph",
+      "Docker",
       "SSE"
     ],
-    "githubUrl": "https://github.com/your-handle/deploysmith",
+    "githubUrl": "https://github.com/thechiragbatra/deploysmith",
     "diagram": "/diagrams/deploysmith.svg"
   },
   {
-    "title": "Placeholder: Realtime Notes",
-    "description": "Collaborative markdown notes with live cursors and offline sync. Replace this entry with a real project in src/data/projects.json.",
-    "tags": [
-      "Next.js",
-      "CRDT",
-      "WebSockets",
-      "Postgres"
-    ],
-    "githubUrl": "https://github.com/your-handle/realtime-notes",
-    "liveUrl": "https://example.com"
-  },
-  {
-    "title": "Placeholder: Metrics CLI",
-    "description": "A small command-line tool that aggregates CI timings across repos and flags regressions. Replace this entry with a real project.",
+    "title": "RADAR: Real-time Agentic Detection and Reporting",
+    "description": "Production-shaped fraud detection on AWS. Transactions are scored off a Kinesis stream in 0.4 ms median (717 req/s in the load test) by an XGBoost model that reaches 89.6% recall at a 1% false-positive rate on 606k synthetic transactions; hourly drift monitoring triggers champion/challenger retraining, and a Bedrock tool-use agent investigates every flagged transaction and commits a schema-validated verdict. About 60 AWS resources in Terraform, CI with OIDC deploys, 42 tests.",
     "tags": [
       "Python",
-      "Typer",
-      "GitHub API"
+      "XGBoost",
+      "AWS",
+      "Terraform",
+      "Amazon Bedrock",
+      "FastAPI"
     ],
-    "githubUrl": "https://github.com/your-handle/metrics-cli"
+    "githubUrl": "https://github.com/thechiragbatra/RADAR-Real-time-Agentic-Detection-and-Reporting",
+    "diagram": "/diagrams/radar.svg"
+  },
+  {
+    "title": "Customer Churn MLOps",
+    "description": "Churn prediction that goes beyond risk scoring. An XGBoost model with SMOTE on 7,032 telecom customers (0.82 AUC-ROC) explains each prediction with SHAP, and T-learner uplift modeling separates persuadable customers from sure things, lost causes and sleeping dogs, cutting simulated retention spend by 56%. Served through FastAPI with a Streamlit dashboard; experiments tracked in MLflow.",
+    "tags": [
+      "Python",
+      "XGBoost",
+      "Causal inference",
+      "SHAP",
+      "FastAPI",
+      "Streamlit"
+    ],
+    "githubUrl": "https://github.com/thechiragbatra/customer-churn-mlops",
+    "diagram": "/projects/customer-churn-mlops.jpg"
+  },
+  {
+    "title": "Proactive Academic Intervention System",
+    "description": "Flags at-risk students four to six weeks before finals, while there is still time to act. A class-balanced logistic regression (0.887 ROC-AUC, 79.9% recall) blended with rule-based signals scores a 5,000-student cohort into risk bands, and six classical DSA modules, from a max-heap priority queue to sliding-window attendance anomalies, power a Flask dashboard deployed on Render.",
+    "tags": [
+      "Python",
+      "scikit-learn",
+      "Flask",
+      "MySQL",
+      "Render"
+    ],
+    "githubUrl": "https://github.com/thechiragbatra/proactive-academic-intervention-system",
+    "liveUrl": "https://thechiragbatra.github.io/proactive-academic-intervention-system/",
+    "diagram": "/projects/pais.jpg"
   }
 ]

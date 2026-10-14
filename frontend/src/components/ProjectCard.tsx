@@ -13,7 +13,7 @@ export function ProjectCard({ project }: { project: Project }) {
           <div className="overflow-hidden border-b border-[var(--glass-border)]">
             <img
               src={project.diagram}
-              alt={`${project.title} architecture diagram`}
+              alt={`${project.title} preview`}
               className="aspect-video w-full object-cover transition-transform duration-700 ease-out group-hover/tilt:scale-[1.06]"
               loading="lazy"
             />

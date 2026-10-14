@@ -6,7 +6,7 @@ export interface Project {
   tags: string[]
   githubUrl: string
   liveUrl?: string
-  /** Path under public/, e.g. "/diagrams/foo.svg". */
+  /** Card image under public/: an architecture diagram or a screenshot, e.g. "/diagrams/foo.svg". */
   diagram?: string
 }
 
