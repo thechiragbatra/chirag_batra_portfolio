@@ -15,7 +15,7 @@ def _now() -> datetime:
 
 
 class _Event(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", json_schema_serialization_defaults_required=True)
 
     timestamp: datetime = Field(default_factory=_now)
 

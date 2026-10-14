@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deploysmith.dev/schemas/event.schema.json",
+  "title": "Event",
+  "description": "One SSE message from GET /api/deployments/{id}/events, sent as `id: <seq>` + `data: <json>`. A stream ends after a `done` or `error` event.",
+  "oneOf": [
+    { "$ref": "#/$defs/StatusEvent" },
+    { "$ref": "#/$defs/LogEvent" },
+    { "$ref": "#/$defs/DoneEvent" },
+    { "$ref": "#/$defs/ErrorEvent" }
+  ],
+  "discriminator": { "propertyName": "type" },
+  "$defs": {
+    "AgentName": { "$ref": "state.schema.json#/$defs/AgentName" },
+    "AgentStatus": { "$ref": "state.schema.json#/$defs/AgentStatus" },
+    "DeploymentState": { "$ref": "state.schema.json" },
+    "LogLevel": {
+      "type": "string",
+      "enum": ["info", "warn", "error", "success"]
+    },
+    "StatusEvent": {
+      "description": "An agent changed status. Agents can re-enter `running` during repair loops.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["timestamp", "type", "agent", "status", "repair_attempts"],
+      "properties": {
+        "timestamp": { "type": "string", "format": "date-time" },
+        "type": { "type": "string", "const": "status" },
+        "agent": { "$ref": "#/$defs/AgentName" },
+        "status": { "$ref": "#/$defs/AgentStatus" },
+        "repair_attempts": { "type": "integer" }
+      }
+    },
+    "LogEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["timestamp", "type", "agent", "level", "message"],
+      "properties": {
+        "timestamp": { "type": "string", "format": "date-time" },
+        "type": { "type": "string", "const": "log" },
+        "agent": {
+          "description": "null for system messages not tied to an agent.",
+          "anyOf": [{ "$ref": "#/$defs/AgentName" }, { "type": "null" }]
+        },
+        "level": { "$ref": "#/$defs/LogLevel" },
+        "message": { "type": "string" }
+      }
+    },
+    "DoneEvent": {
+      "description": "Terminal: the pipeline finished. `success` means healthy with no failed agents.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["timestamp", "type", "success", "state"],
+      "properties": {
+        "timestamp": { "type": "string", "format": "date-time" },
+        "type": { "type": "string", "const": "done" },
+        "success": { "type": "boolean" },
+        "state": { "$ref": "#/$defs/DeploymentState" }
+      }
+    },
+    "ErrorEvent": {
+      "description": "Terminal: the run crashed outside any agent.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["timestamp", "type", "message"],
+      "properties": {
+        "timestamp": { "type": "string", "format": "date-time" },
+        "type": { "type": "string", "const": "error" },
+        "message": { "type": "string" }
+      }
+    }
+  }
+}
