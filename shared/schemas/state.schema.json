@@ -39,7 +39,7 @@
       "enum": ["idle", "running", "done", "failed"]
     },
     "Platform": {
-      "description": "Free-tier hosting targets only.",
+      "description": "Free-tier hosting targets only, or the local sandbox engine.",
       "type": "string",
       "enum": [
         "vercel",
@@ -49,7 +49,8 @@
         "hf_spaces",
         "neon",
         "supabase",
-        "turso"
+        "turso",
+        "sandbox"
       ]
     },
     "Component": {

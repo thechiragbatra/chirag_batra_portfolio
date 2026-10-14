@@ -2,9 +2,13 @@
 
 Mock: pretends to deploy and returns plausible URLs. On a repair run (after the
 healer requested one) it logs that it is applying the fix before redeploying.
+Sandbox: re-clones the repo and hands each component to the local engine
+(agents/sandbox/engine.py), which builds and serves it in Docker.
 """
 
 from __future__ import annotations
+
+from typing import Literal
 
 from agents.base import AgentUpdate, LogFn, mock_pause
 from agents.models import (
@@ -12,9 +16,14 @@ from agents.models import (
     DeploymentPlan,
     DeploymentResult,
     DeploymentState,
+    DeploymentTarget,
     LogLevel,
     Platform,
 )
+from agents.sandbox.docker import SandboxError
+from agents.sandbox.engine import DeployError, Engine
+from agents.sandbox.recipes import UnsupportedComponent
+from agents.skills.clone import shallow_clone
 
 _URL_TEMPLATE: dict[Platform, str] = {
     Platform.vercel: "https://{slug}.vercel.app",
@@ -25,6 +34,7 @@ _URL_TEMPLATE: dict[Platform, str] = {
     Platform.neon: "postgres://***@ep-{slug}.neon.tech/main",
     Platform.supabase: "postgres://***@db.{slug}.supabase.co/postgres",
     Platform.turso: "libsql://{slug}.turso.io",
+    Platform.sandbox: "http://{slug}.localhost:8080",
 }
 
 
@@ -60,3 +70,70 @@ class MockProvisioner:
 
         await log(f"Provisioned {len(results)} resources", LogLevel.success)
         return {"deployment_results": results}
+
+
+class SandboxProvisioner:
+    """Deploys every sandbox target with the local engine. Nothing leaves the machine."""
+
+    name = AgentName.provisioner
+
+    def __init__(self, engine: Engine | None = None) -> None:
+        self._engine = engine
+
+    @property
+    def engine(self) -> Engine:
+        if self._engine is None:
+            self._engine = Engine()
+        return self._engine
+
+    async def run(self, state: DeploymentState, log: LogFn) -> AgentUpdate:
+        plan, profile = state.deployment_plan, state.repo_profile
+        if plan is None or profile is None:
+            raise ValueError("sandbox provisioner requires a repo_profile and a deployment_plan")
+        foreign = [t.component for t in plan.targets if t.platform is not Platform.sandbox]
+        if foreign:
+            raise ValueError(f"sandbox provisioner cannot deploy to other platforms: {foreign}")
+
+        components = {c.name: c for c in profile.components}
+        previous = {r.component: r for r in state.deployment_results}
+        attempt = state.repair_attempts
+        if attempt > 0 and state.health_report and state.health_report.diagnosis:
+            await log(f"Repair attempt {attempt}: {state.health_report.diagnosis}", LogLevel.warn)
+
+        results: list[DeploymentResult] = []
+        single = len(plan.targets) == 1
+        async with shallow_clone(state.repo_url) as checkout:
+            for target in plan.targets:
+                name = target.component
+                last = previous.get(name)
+                if attempt > 0 and last is not None and last.status == "failed":
+                    # The source has not changed, so a failed build would fail the same way.
+                    await log(f"{name}: build failed last attempt; not rebuilding", LogLevel.warn)
+                    results.append(last.model_copy(update={"attempt": attempt}))
+                    continue
+                try:
+                    _, url = await self.engine.deploy(
+                        checkout, state.repo_url, profile.name, components[name], single, log
+                    )
+                except (DeployError, UnsupportedComponent, SandboxError) as exc:
+                    await log(f"{name}: {exc}", LogLevel.error)
+                    results.append(_result(target, attempt, "failed"))
+                else:
+                    results.append(_result(target, attempt, "live", url))
+
+        live = sum(r.status == "live" for r in results)
+        level = LogLevel.success if live == len(results) else LogLevel.warn
+        await log(f"{live}/{len(results)} components live in the sandbox", level)
+        return {"deployment_results": results}
+
+
+def _result(
+    target: DeploymentTarget,
+    attempt: int,
+    status: Literal["live", "failed"],
+    url: str | None = None,
+) -> DeploymentResult:
+    return DeploymentResult(
+        component=target.component, platform=target.platform, status=status, url=url,
+        attempt=attempt,
+    )  # fmt: skip

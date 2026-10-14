@@ -62,11 +62,12 @@ def _error_verdict(component: str, platform: Platform, probe: ProbeResult) -> Ve
             )
             return Verdict(False, "Timed out waiting for a response", f"{where}: {fix}")
         case _:
-            return Verdict(
-                False,
-                probe.error_detail or "Connection failed",
-                f"{where}: could not connect ({probe.error_detail or probe.error})",
+            fix = (
+                "the sandbox router is not running; redeploy to start it"
+                if platform is Platform.sandbox
+                else f"could not connect ({probe.error_detail or probe.error})"
             )
+            return Verdict(False, probe.error_detail or "Connection failed", f"{where}: {fix}")
 
 
 def _status_diagnosis(
@@ -83,6 +84,8 @@ def _status_diagnosis(
             return "the Space is private; make it public"
         return f"the platform returned {code}; the deployment is not publicly reachable"
 
+    if code == 404 and platform is Platform.sandbox and "no app is deployed" in body:
+        return "no live deploy for this app in the sandbox; redeploy"
     if code == 404:
         if vercel_error == "DEPLOYMENT_NOT_FOUND" or "deployment could not be found" in body:
             return "no Vercel deployment at this URL; redeploy and alias it to production"
@@ -98,6 +101,11 @@ def _status_diagnosis(
         return "the root path 404s: serve a health route at / or point the check at one"
 
     if code in {502, 503, 504}:
+        if platform is Platform.sandbox:
+            return (
+                "the app container is not answering on 0.0.0.0:$PORT; "
+                "check its logs on the Apps page"
+            )
         if platform is Platform.render and "suspended" in body:
             return "the Render service is suspended; resume it in the dashboard"
         if platform is Platform.render:

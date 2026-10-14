@@ -3,7 +3,9 @@
 The healer only ever probes URLs the provisioner produced, but the probe does not
 trust them either:
 - https only, and the host must sit on a free-tier platform domain (no localhost,
-  private IPs or arbitrary sites, so a bad URL cannot turn the healer into an SSRF proxy),
+  private IPs or arbitrary sites, so a bad URL cannot turn the healer into an SSRF proxy);
+  the one exception is plain http to http://<app>.localhost:<router port>, where the
+  sandbox engine's router serves local deploys,
 - redirects are followed only while they stay on those domains; a redirect elsewhere
   (e.g. to a custom domain) is returned as the 3xx response itself, not followed,
 - at most MAX_BODY_BYTES of the body are read, and every request has a timeout.
@@ -20,7 +22,9 @@ import urllib.request
 from dataclasses import dataclass, field
 from email.message import Message
 from typing import Literal
-from urllib.parse import urlsplit
+from urllib.parse import SplitResult, urlsplit
+
+from agents.sandbox.router import router_port
 
 MAX_BODY_BYTES = 2048
 USER_AGENT = "DeploySmith-Healer/0.1 (+health check)"
@@ -51,16 +55,33 @@ class ProbeResult:
     error_detail: str = ""
 
 
+def _is_sandbox_url(parts: SplitResult) -> bool:
+    """http://<app>.localhost:<port> where <port> is the sandbox router's, nothing else."""
+    host = (parts.hostname or "").lower()
+    try:
+        port = parts.port
+    except ValueError:
+        return False
+    return (
+        parts.scheme == "http"
+        and host.endswith(".localhost")
+        and host.count(".") == 1
+        and port == router_port()
+    )
+
+
 def check_url(url: str) -> str | None:
     """Why `url` may not be probed, or None if it is allowed."""
     parts = urlsplit(url)
+    if parts.username or parts.password:
+        return "URLs with credentials are not probed"
+    if _is_sandbox_url(parts):
+        return None
     if parts.scheme != "https":
         return "only https URLs are probed"
     host = (parts.hostname or "").lower()
     if not host.endswith(ALLOWED_HOST_SUFFIXES):
         return f"{host or 'empty host'} is not on a free-tier platform domain"
-    if parts.username or parts.password:
-        return "URLs with credentials are not probed"
     return None
 
 

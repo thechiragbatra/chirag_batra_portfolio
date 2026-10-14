@@ -47,6 +47,8 @@ class Platform(StrEnum):
     neon = "neon"
     supabase = "supabase"
     turso = "turso"
+    # The local sandbox engine (agents/sandbox/): Docker on this machine, $0.
+    sandbox = "sandbox"
 
 
 class _Model(BaseModel):

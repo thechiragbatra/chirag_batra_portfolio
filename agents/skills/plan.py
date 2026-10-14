@@ -6,6 +6,9 @@ Only `Platform` members can be returned, so a paid host is unrepresentable.
 from __future__ import annotations
 
 from agents.models import Component, DeploymentPlan, DeploymentTarget, Platform, RepoProfile
+from agents.sandbox.recipes import SUPPORTED as SANDBOX_FRAMEWORKS
+
+SANDBOX_REASON = "Built and served by the local sandbox engine (Docker on this machine)"
 
 # (platform, reason) for each framework; checked before the per-kind default.
 _BY_FRAMEWORK: dict[str, tuple[Platform, str]] = {
@@ -25,6 +28,7 @@ _BY_KIND: dict[str, tuple[Platform, str]] = {
 }
 
 PLATFORM_CAVEATS: dict[Platform, str] = {
+    Platform.sandbox: "Sandbox apps are reachable only from this machine (http://<app>.localhost)",
     Platform.vercel: "Vercel Hobby is for non-commercial use",
     Platform.render: "Render free services sleep when idle; the first request after is slow",
     Platform.hf_spaces: "Free Spaces sleep after a period of inactivity",
@@ -35,7 +39,11 @@ PLATFORM_CAVEATS: dict[Platform, str] = {
 PUBLIC_ENV_PREFIXES = ("VITE_", "NEXT_PUBLIC_", "REACT_APP_", "PUBLIC_", "NUXT_PUBLIC_")
 
 
-def choose_platform(component: Component) -> tuple[Platform, str] | None:
+def choose_platform(component: Component, sandbox: bool = False) -> tuple[Platform, str] | None:
+    if sandbox:
+        if component.kind == "database" or component.framework not in SANDBOX_FRAMEWORKS:
+            return None
+        return Platform.sandbox, SANDBOX_REASON
     if component.framework in _BY_FRAMEWORK:
         return _BY_FRAMEWORK[component.framework]
     return _BY_KIND.get(component.kind)
@@ -53,21 +61,36 @@ def assign_env_vars(component: Component, env_vars: list[str], has_database: boo
     return []
 
 
-def build_plan(profile: RepoProfile) -> DeploymentPlan:
-    """Map every component to a free-tier platform. Raises ValueError if none can be placed."""
+def _unplaced_note(component: Component, sandbox: bool) -> str:
+    what = f"{component.framework or component.kind} ({component.name})"
+    if not sandbox:
+        return (
+            f"No free-tier target for {what}; "
+            "consider migrating it to Postgres (Neon) or SQLite (Turso)"
+        )
+    if component.kind == "database":
+        return (
+            "The sandbox engine does not provision databases; "
+            f"point {component.name} at your own instance"
+        )
+    return f"The sandbox engine has no recipe for {what}"
+
+
+def build_plan(profile: RepoProfile, sandbox: bool = False) -> DeploymentPlan:
+    """Map every component to a free-tier platform, or to the local sandbox engine.
+
+    Raises ValueError if none can be placed.
+    """
     targets: list[DeploymentTarget] = []
     notes: list[str] = []
     placed_database = any(
-        c.kind == "database" and choose_platform(c) is not None for c in profile.components
+        c.kind == "database" and choose_platform(c, sandbox) is not None for c in profile.components
     )
 
     for component in profile.components:
-        choice = choose_platform(component)
+        choice = choose_platform(component, sandbox)
         if choice is None:
-            notes.append(
-                f"No free-tier target for {component.framework or component.kind} "
-                f"({component.name}); consider migrating it to Postgres (Neon) or SQLite (Turso)"
-            )
+            notes.append(_unplaced_note(component, sandbox))
             continue
         platform, reason = choice
         targets.append(
@@ -80,7 +103,8 @@ def build_plan(profile: RepoProfile) -> DeploymentPlan:
         )
 
     if not targets:
-        raise ValueError("No component could be placed on a free-tier platform")
+        where = "in the sandbox engine" if sandbox else "on a free-tier platform"
+        raise ValueError(f"No component could be placed {where}")
 
     used = list(dict.fromkeys(t.platform for t in targets))
     notes.extend(PLATFORM_CAVEATS[p] for p in used if p in PLATFORM_CAVEATS)

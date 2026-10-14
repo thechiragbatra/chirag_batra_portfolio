@@ -64,6 +64,12 @@ def test_check_url_allows_platform_domains(url: str) -> None:
     assert check_url(url) is None
 
 
+def test_check_url_allows_sandbox_router_only(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("DEPLOYSMITH_ROUTER_PORT", "8090")
+    assert check_url("http://shop.localhost:8090/") is None
+    assert check_url("http://shop.localhost:8080/") is not None
+
+
 @pytest.mark.parametrize(
     "url, reason",
     [
@@ -74,7 +80,10 @@ def test_check_url_allows_platform_domains(url: str) -> None:
         ("https://vercel.app.evil.com", "not on a free-tier"),
         ("https://evilvercel.app", "not on a free-tier"),
         ("https://user:pw@shop.vercel.app", "credentials"),
-        ("postgres://u@ep-x.neon.tech/main", "https"),
+        ("postgres://u@ep-x.neon.tech/main", "credentials"),
+        ("http://shop.localhost:8000", "https"),
+        ("http://a.b.localhost:8080", "https"),
+        ("https://shop.localhost:8080", "not on a free-tier"),
     ],
 )
 def test_check_url_rejects_everything_else(url: str, reason: str) -> None:
