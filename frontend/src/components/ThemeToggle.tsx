@@ -10,23 +10,38 @@ export function ThemeToggle() {
 
   const toggle = () => {
     const next = !dark
-    document.documentElement.classList.toggle('dark', next)
+    const apply = () => {
+      document.documentElement.classList.toggle('dark', next)
+      setDark(next)
+    }
+    // Cross-fade the whole page where the View Transitions API exists.
+    const doc = document as Document & { startViewTransition?: (cb: () => void) => unknown }
+    if (doc.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      doc.startViewTransition(apply)
+    } else {
+      apply()
+    }
     try {
       localStorage.setItem('theme', next ? 'dark' : 'light')
     } catch {
       // Storage blocked (private mode): the choice lasts for this page view only.
     }
-    setDark(next)
   }
 
   return (
     <button
       type="button"
       onClick={toggle}
-      className="rounded-lg p-2 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 focus-visible:outline-2 focus-visible:outline-emerald-600 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+      className="group relative grid size-9 place-items-center overflow-hidden rounded-xl text-zinc-600 transition-colors hover:bg-zinc-900/5 hover:text-zinc-900 focus-visible:outline-2 focus-visible:outline-emerald-500 dark:text-zinc-300 dark:hover:bg-white/10 dark:hover:text-white"
       aria-label={dark ? 'Switch to light theme' : 'Switch to dark theme'}
     >
-      {dark ? <Sun className="size-5" /> : <Moon className="size-5" />}
+      <span key={String(dark)} className="animate-pop">
+        {dark ? (
+          <Sun className="size-[18px] transition-transform duration-700 group-hover:rotate-180" />
+        ) : (
+          <Moon className="size-[18px] transition-transform duration-500 group-hover:-rotate-12" />
+        )}
+      </span>
     </button>
   )
 }

@@ -1,0 +1,6 @@
+[
+  { "value": 0.887, "decimals": 3, "label": "ROC-AUC predicting at-risk students" },
+  { "value": 56, "suffix": "%", "label": "lower retention spend with uplift modeling" },
+  { "value": 7032, "label": "telecom customers modeled for churn" },
+  { "value": 250, "suffix": "+", "label": "event-days of GDELT news modeled at IBM" }
+]

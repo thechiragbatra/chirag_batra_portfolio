@@ -5,7 +5,7 @@ import { previewProject, saveProject } from '../lib/projectEditor'
 import type { Project } from '../types/content'
 
 const inputClass =
-  'w-full min-w-0 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm placeholder:text-zinc-400 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950'
+  'w-full min-w-0 rounded-lg border border-zinc-300 bg-white/80 px-3 py-2 text-sm placeholder:text-zinc-400 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20 focus:outline-none dark:border-zinc-700 dark:bg-black/40'
 const primaryButton =
   'inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60'
 const secondaryButton =
@@ -90,7 +90,7 @@ export function AddProjectPanel({ onClose }: { onClose: () => void }) {
   return (
     <section
       aria-labelledby="add-project-heading"
-      className="mb-8 rounded-xl border border-zinc-200 bg-zinc-50 p-5 dark:border-zinc-800 dark:bg-zinc-900"
+      className="glass glow-border animate-blur-in mb-8 rounded-2xl p-5" data-glow
     >
       <div className="mb-4 flex items-start justify-between gap-4">
         <div>

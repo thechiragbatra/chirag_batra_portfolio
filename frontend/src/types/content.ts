@@ -58,3 +58,12 @@ export interface Resume {
   projects: ResumeProject[]
   skills: SkillGroup[]
 }
+
+/** Headline numbers on the home hero (src/data/highlights.json). */
+export interface Highlight {
+  value: number
+  label: string
+  decimals?: number
+  prefix?: string
+  suffix?: string
+}

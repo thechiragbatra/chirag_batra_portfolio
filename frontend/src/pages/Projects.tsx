@@ -1,43 +1,126 @@
-import { Plus } from 'lucide-react'
+import { ArrowRight, FileText, Plus, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AddProjectPanel } from '../components/AddProjectPanel'
-import { PageHeader } from '../components/PageHeader'
+import { AgentOrbit } from '../components/AgentOrbit'
+import { CountUp } from '../components/fx/CountUp'
+import { Magnetic } from '../components/fx/Magnetic'
+import { Reveal } from '../components/fx/Reveal'
+import { ScrambleText } from '../components/fx/ScrambleText'
+import { TypeCycle } from '../components/fx/TypeCycle'
 import { ProjectCard } from '../components/ProjectCard'
+import highlightsData from '../data/highlights.json'
 import projectsData from '../data/projects.json'
-import type { Project } from '../types/content'
+import resumeData from '../data/resume.json'
+import type { Highlight, Project, Resume } from '../types/content'
 
 const projects: Project[] = projectsData
+const highlights: Highlight[] = highlightsData
+const resume: Resume = resumeData
+
+const BUILDS = ['machine learning models', 'data pipelines', 'full-stack ML apps', 'self-healing deployers']
+
+function Hero() {
+  return (
+    <section className="mb-20 grid items-center gap-12 lg:grid-cols-[1.25fr_1fr]">
+      <div>
+        <p className="animate-fade-up glass mb-6 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium text-zinc-700 dark:text-zinc-300">
+          <Sparkles className="size-3.5 text-emerald-500" aria-hidden />
+          {resume.basics.title} · {resume.basics.location}
+        </p>
+        <h1 className="font-display text-5xl leading-[0.95] font-bold sm:text-7xl">
+          <ScrambleText text={resume.basics.name.split(' ')[0]} className="block" />
+          <ScrambleText text={resume.basics.name.split(' ').slice(1).join(' ')} duration={1600} className="text-aurora block" />
+        </h1>
+        <p
+          className="animate-fade-up mt-6 min-h-[2lh] font-mono text-lg text-zinc-700 sm:min-h-0 sm:text-xl dark:text-zinc-300"
+          style={{ animationDelay: '300ms' }}
+        >
+          <span className="text-emerald-600 dark:text-emerald-400">&gt;</span> I build{' '}
+          <TypeCycle phrases={BUILDS} className="font-semibold text-zinc-950 dark:text-white" />
+        </p>
+        <p
+          className="animate-fade-up mt-4 max-w-xl leading-relaxed text-zinc-600 dark:text-zinc-400"
+          style={{ animationDelay: '450ms' }}
+        >
+          Data science undergrad who ships models as working products: risk analytics at IBM,
+          churn and uplift modeling, and this site&apos;s own multi-agent deployment pipeline.
+        </p>
+        <div className="animate-fade-up mt-8 flex flex-wrap gap-3" style={{ animationDelay: '600ms' }}>
+          <Magnetic>
+            <Link
+              to="/deployer"
+              className="shine group inline-flex items-center gap-2 rounded-xl bg-zinc-950 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition-shadow hover:shadow-emerald-500/40 dark:bg-white dark:text-zinc-950"
+            >
+              Launch the deployer
+              <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden />
+            </Link>
+          </Magnetic>
+          <Magnetic>
+            <Link
+              to="/resume"
+              className="glass inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-colors hover:bg-white/80 dark:hover:bg-white/10"
+            >
+              <FileText className="size-4" aria-hidden /> Read résumé
+            </Link>
+          </Magnetic>
+        </div>
+      </div>
+      <div className="animate-blur-in hidden sm:block" style={{ animationDelay: '250ms' }}>
+        <AgentOrbit />
+      </div>
+
+      <dl className="grid grid-cols-2 gap-3 lg:col-span-2 lg:grid-cols-4">
+        {highlights.map((h, i) => (
+          <Reveal key={h.label} delay={i * 100} className="glass-strong glow-border rounded-2xl p-4">
+            <dd className="font-display text-3xl font-bold sm:text-4xl">
+              <span className="text-aurora">
+                <CountUp value={h.value} decimals={h.decimals} prefix={h.prefix} suffix={h.suffix} />
+              </span>
+            </dd>
+            <dt className="mt-1 text-xs leading-snug text-zinc-600 dark:text-zinc-400">{h.label}</dt>
+          </Reveal>
+        ))}
+      </dl>
+    </section>
+  )
+}
 
 export default function Projects() {
   const [adding, setAdding] = useState(false)
 
   return (
     <>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <PageHeader title="Projects">
-          Things I&apos;ve built. Try the{' '}
-          <Link to="/deployer" className="font-medium text-emerald-700 hover:underline dark:text-emerald-400">
-            deployer
-          </Link>{' '}
-          to see the agent pipeline run live.
-        </PageHeader>
-        {import.meta.env.DEV && !adding && (
-          <button
-            type="button"
-            onClick={() => setAdding(true)}
-            className="mb-8 inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
-          >
-            <Plus className="size-4" aria-hidden /> Add project
-          </button>
-        )}
-      </div>
-      {import.meta.env.DEV && adding && <AddProjectPanel onClose={() => setAdding(false)} />}
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {projects.map((project) => (
-          <ProjectCard key={project.githubUrl} project={project} />
-        ))}
-      </div>
+      <Hero />
+      <section aria-labelledby="work-heading">
+        <Reveal className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="mb-2 font-mono text-xs tracking-[0.2em] text-emerald-600 uppercase dark:text-emerald-400">
+              Selected work
+            </p>
+            <h2 id="work-heading" className="font-display text-3xl font-bold sm:text-4xl">
+              Projects
+            </h2>
+          </div>
+          {import.meta.env.DEV && !adding && (
+            <button
+              type="button"
+              onClick={() => setAdding(true)}
+              className="glass inline-flex shrink-0 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors hover:bg-white/80 dark:hover:bg-white/10"
+            >
+              <Plus className="size-4" aria-hidden /> Add project
+            </button>
+          )}
+        </Reveal>
+        {import.meta.env.DEV && adding && <AddProjectPanel onClose={() => setAdding(false)} />}
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {projects.map((project, i) => (
+            <Reveal key={project.githubUrl} delay={(i % 3) * 120}>
+              <ProjectCard project={project} />
+            </Reveal>
+          ))}
+        </div>
+      </section>
     </>
   )
 }
