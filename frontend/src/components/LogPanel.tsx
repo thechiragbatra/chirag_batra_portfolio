@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useLayoutEffect, useRef } from 'react'
 import type { LogLine } from '../hooks/useDeploymentStream'
 import type { LogLevel } from '../types/events'
 
@@ -16,17 +16,17 @@ function time(iso: string): string {
 /** Terminal-style log. Stays dark in both themes; follows new lines unless scrolled up. */
 export function LogPanel({ logs, active }: { logs: LogLine[]; active: boolean }) {
   const scrollRef = useRef<HTMLDivElement>(null)
-  const pinnedRef = useRef(true)
+  const prevHeightRef = useRef(0)
 
-  useEffect(() => {
+  // Before paint, follow new lines only if the view was at the bottom of the
+  // previous content, so scrolling up to read history isn't interrupted.
+  useLayoutEffect(() => {
     const el = scrollRef.current
-    if (el && pinnedRef.current) el.scrollTop = el.scrollHeight
+    if (!el) return
+    const wasAtBottom = prevHeightRef.current - el.scrollTop - el.clientHeight < 24
+    if (wasAtBottom) el.scrollTop = el.scrollHeight
+    prevHeightRef.current = el.scrollHeight
   }, [logs.length])
-
-  const onScroll = () => {
-    const el = scrollRef.current
-    if (el) pinnedRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 24
-  }
 
   return (
     <section
@@ -41,7 +41,6 @@ export function LogPanel({ logs, active }: { logs: LogLine[]; active: boolean })
       </div>
       <div
         ref={scrollRef}
-        onScroll={onScroll}
         role="log"
         aria-live="polite"
         className="h-80 overflow-y-auto p-4 font-mono text-xs leading-relaxed sm:h-[26rem] sm:text-[13px]"
@@ -52,7 +51,7 @@ export function LogPanel({ logs, active }: { logs: LogLine[]; active: boolean })
           logs.map((line) => (
             <div key={line.id} className="flex gap-3 whitespace-pre-wrap break-words">
               <span className="shrink-0 text-zinc-600">{time(line.timestamp)}</span>
-              <span className="w-20 shrink-0 text-zinc-500">{line.agent ?? 'system'}</span>
+              <span className="w-[11ch] shrink-0 text-zinc-500">{line.agent ?? 'system'}</span>
               <span className={`min-w-0 ${LEVEL_CLASS[line.level]}`}>{line.message}</span>
             </div>
           ))
