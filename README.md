@@ -4,9 +4,10 @@ A personal developer portfolio that doubles as a multi-agent deployment platform
 GitHub repo URL and four agents (profiler, strategist, provisioner, healer) plan and deploy
 it to free-tier hosting, streaming every step to the browser.
 
-**Status:** the profiler and strategist are real. The profiler shallow-clones the repo and
-analyzes it statically, and the strategist picks a free-tier platform per component. The
-provisioner and healer are still mocks, so nothing is actually deployed.
+**Status:** the profiler, strategist and healer are real. The profiler shallow-clones the repo
+and analyzes it statically, the strategist picks a free-tier platform per component, and the
+healer probes deployed URLs and diagnoses failures. The provisioner is still a mock, so nothing
+is actually deployed; the real healer is therefore opt-in (`REAL_HEALER=1`).
 
 ## Layout
 
@@ -39,7 +40,7 @@ Open http://localhost:5173/deployer and submit a public repo such as
 `https://github.com/fastapi/full-stack-fastapi-template`.
 
 The backend reads its settings from the process environment (`MOCK_AGENTS`, `CORS_ORIGINS`,
-`MOCK_AGENT_DELAY`, `MOCK_HEALER_FAILURES`; see `.env.example`). `MOCK_AGENTS=1` runs fully
+`MOCK_AGENT_DELAY`, `MOCK_HEALER_FAILURES`, `REAL_HEALER`; see `.env.example`). `MOCK_AGENTS=1` runs fully
 offline with mock agents. Export them in your shell, or
 prefix the uvicorn command, e.g. `MOCK_HEALER_FAILURES=4 PYTHONPATH=.. uv run uvicorn main:app`
 to watch the healer exhaust its 3 repair attempts. Vite reads `VITE_API_URL` from the root `.env`.
@@ -86,6 +87,13 @@ profiler → strategist → provisioner → healer ─┐
 - **Strategist** (`agents/skills/plan.py`): deterministic rules, e.g. Vite → Vercel,
   FastAPI → Render, Streamlit → Hugging Face Spaces, Postgres → Neon. Engines with no free
   target (MySQL, MongoDB) are reported in the plan notes rather than placed on a paid host.
+- **Healer** (`agents/skills/probe.py`, `diagnose.py`): an HTTPS GET per deployed component,
+  only to hosts on `*.vercel.app`, `*.netlify.app`, `*.pages.dev`, `*.onrender.com` or
+  `*.hf.space` (no proxies, redirects off those domains are not followed, 2 KB body cap).
+  Databases are skipped. Render and HF Spaces get one slower retry for free-tier cold starts.
+  Failures map to fixes from the status code and platform headers, e.g. Vercel
+  `DEPLOYMENT_NOT_FOUND`, a redirect to the Vercel login (Deployment Protection), Render
+  `no-server`, or a Render 502 (bind to `0.0.0.0:$PORT`).
 - Each agent implements `Agent.run(state, log) -> partial update` (`agents/base.py`). The graph
   wrapper owns status events, the repair counter and error handling, so the real agents can
   replace the mocks without changing the graph.
