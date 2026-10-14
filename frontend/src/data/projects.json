@@ -2,21 +2,36 @@
   {
     "title": "DeploySmith OS",
     "description": "This site. A portfolio that doubles as a multi-agent deployment platform: four LangGraph agents profile a GitHub repo, plan free-tier hosting, deploy it and self-heal.",
-    "tags": ["React", "TypeScript", "FastAPI", "LangGraph", "SSE"],
+    "tags": [
+      "React",
+      "TypeScript",
+      "FastAPI",
+      "LangGraph",
+      "SSE"
+    ],
     "githubUrl": "https://github.com/your-handle/deploysmith",
     "diagram": "/diagrams/deploysmith.svg"
   },
   {
     "title": "Placeholder: Realtime Notes",
     "description": "Collaborative markdown notes with live cursors and offline sync. Replace this entry with a real project in src/data/projects.json.",
-    "tags": ["Next.js", "CRDT", "WebSockets", "Postgres"],
+    "tags": [
+      "Next.js",
+      "CRDT",
+      "WebSockets",
+      "Postgres"
+    ],
     "githubUrl": "https://github.com/your-handle/realtime-notes",
     "liveUrl": "https://example.com"
   },
   {
     "title": "Placeholder: Metrics CLI",
     "description": "A small command-line tool that aggregates CI timings across repos and flags regressions. Replace this entry with a real project.",
-    "tags": ["Python", "Typer", "GitHub API"],
+    "tags": [
+      "Python",
+      "Typer",
+      "GitHub API"
+    ],
     "githubUrl": "https://github.com/your-handle/metrics-cli"
   }
 ]

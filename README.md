@@ -41,6 +41,15 @@ The backend reads its settings from the process environment (`CORS_ORIGINS`,
 prefix the uvicorn command, e.g. `MOCK_HEALER_FAILURES=4 PYTHONPATH=.. uv run uvicorn main:app`
 to watch the healer exhaust its 3 repair attempts. Vite reads `VITE_API_URL` from the root `.env`.
 
+### Adding portfolio projects
+
+On the local dev server only, `/projects` shows an **Add project** button. Paste a GitHub repo
+URL; it fetches the name, description, topics and homepage from the GitHub API, lets you edit
+them, then appends the project to `frontend/src/data/projects.json`. Commit that file to publish.
+The editor is a Vite dev-server plugin (`frontend/plugins/projectEditor.ts`), so it is absent from
+production builds. Set `GITHUB_TOKEN` in `.env` if you hit GitHub's anonymous rate limit
+(60 requests/hour).
+
 ## Checks
 
 ```sh
