@@ -147,7 +147,13 @@ The Telco data has no record of retention offers, so the uplift model is graded 
 semi-synthetic benchmark: real customers, a planted offer effect (`uplift.planted_effect`)
 and a simulated randomized experiment, repeated over five seeds.
 
-## Deploying to Google Cloud
+## Deploying
+
+Azure (Container Apps + Static Web Apps, free with Azure for Students): see
+[deploy/azure/README.md](deploy/azure/README.md), then `./deploy/azure/deploy.sh`.
+Google Cloud Run is the alternative below.
+
+### Google Cloud
 
 The site (frontend + API) deploys to Google Cloud Run with one script; see
 [deploy/gcp/README.md](deploy/gcp/README.md):

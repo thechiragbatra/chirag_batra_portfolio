@@ -10,7 +10,7 @@ Personal developer portfolio that doubles as a multi-agent deployment platform.
 
 ## Rules
 - Free-tier hosting only: Vercel/Netlify/Cloudflare Pages (frontend), Render/HF Spaces (backend), Neon/Supabase/Turso (DB), or the local sandbox engine. Never route to a paid platform.
-- This site itself is hosted on Google Cloud Run (deploy/gcp/), kept inside the free tier: scale to zero, capped instances, no always-on resources. Never add paid GCP services or raise those caps without asking.
+- This site itself is hosted on Azure (deploy/azure/: Container Apps + Static Web Apps, Azure for Students), with Google Cloud Run (deploy/gcp/) kept as an alternative. Both stay inside free allowances: scale to zero, one API replica at most, no always-on or billed extras (Log Analytics, container registries). Never add paid services or raise those caps without asking.
 - NEVER execute code from a target repo on the host. Clone shallow and analyze statically.
   The only exception is the sandbox engine (agents/sandbox/): repo code (install, build,
   run) may execute solely inside its hardened Docker containers (non-root, all caps

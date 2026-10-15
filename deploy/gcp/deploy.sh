@@ -72,7 +72,7 @@ build deploy/gcp/api.Dockerfile "$REGISTRY/$API:$TAG"
 gcloud run deploy "$API" --image "$REGISTRY/$API:$TAG" --region "$REGION" \
   --allow-unauthenticated --port 8080 --cpu 1 --memory 1Gi \
   --min-instances 0 --max-instances 1 --concurrency 40 --timeout 900 \
-  --session-affinity --cpu-boost "${SECRET_FLAGS[@]}"
+  --session-affinity --cpu-boost ${SECRET_FLAGS[@]+"${SECRET_FLAGS[@]}"}
 API_URLS=$(service_urls "$API")
 API_URL=$(gcloud run services describe "$API" --region "$REGION" --format 'value(status.url)')
 
