@@ -20,8 +20,9 @@ from agents.models import (
     LogLevel,
     Platform,
 )
+from agents.sandbox import docker as dk
 from agents.sandbox.docker import SandboxError
-from agents.sandbox.engine import DeployError, Engine
+from agents.sandbox.engine import DeployError, Engine, default_engine
 from agents.sandbox.recipes import UnsupportedComponent
 from agents.skills.clone import shallow_clone
 
@@ -83,7 +84,7 @@ class SandboxProvisioner:
     @property
     def engine(self) -> Engine:
         if self._engine is None:
-            self._engine = Engine()
+            self._engine = default_engine()  # shared with the dashboard API, so locks agree
         return self._engine
 
     async def run(self, state: DeploymentState, log: LogFn) -> AgentUpdate:
@@ -94,30 +95,55 @@ class SandboxProvisioner:
         if foreign:
             raise ValueError(f"sandbox provisioner cannot deploy to other platforms: {foreign}")
 
+        # One clear error instead of a clone, N failed deploys and three "repairs".
+        await dk.ensure_docker()
+
         components = {c.name: c for c in profile.components}
         previous = {r.component: r for r in state.deployment_results}
         attempt = state.repair_attempts
         report = state.health_report
-        healthy = {c.component for c in report.checks if c.ok} if report else set()
+        checks = {c.component: c for c in report.checks} if report else {}
         if attempt > 0 and report and report.diagnosis:
             await log(f"Repair attempt {attempt}: {report.diagnosis}", LogLevel.warn)
 
-        # On a repair only the unhealthy components are redeployed. The source has not
-        # changed, so a component whose build failed would fail the same way again.
+        # On a repair only components a redeploy can fix are redeployed. The source has
+        # not changed, so a failed build, or an app that answers with an error of its own,
+        # would come back exactly the same.
         results: dict[str, DeploymentResult] = {}
         pending: list[DeploymentTarget] = []
+        unrepairable: list[str] = []
         for target in plan.targets:
-            last = previous.get(target.component)
-            if attempt > 0 and last is not None and last.status == "failed":
-                await log(
-                    f"{target.component}: build failed last attempt; not rebuilding", LogLevel.warn
-                )
-                results[target.component] = last.model_copy(update={"attempt": attempt})
-            elif attempt > 0 and last is not None and target.component in healthy:
-                await log(f"{target.component}: healthy; keeping {last.url}")
-                results[target.component] = last.model_copy(update={"attempt": attempt})
-            else:
+            name = target.component
+            last = previous.get(name)
+            check = checks.get(name)
+            if attempt == 0 or last is None:
                 pending.append(target)
+            elif last.status == "failed":
+                await log(f"{name}: build failed last attempt; not rebuilding", LogLevel.warn)
+                results[name] = last.model_copy(update={"attempt": attempt})
+                unrepairable.append(f"{name} failed to build")
+            elif check is None:
+                pending.append(target)  # no health result for it: redeploy to be safe
+            elif check.ok:
+                await log(f"{name}: healthy; keeping {last.url}")
+                results[name] = last.model_copy(update={"attempt": attempt})
+            elif _redeploy_can_fix(check.status_code):
+                pending.append(target)
+            else:
+                await log(
+                    f"{name}: the app itself answers {check.detail}; source unchanged, "
+                    "so a rebuild would not help",
+                    LogLevel.warn,
+                )
+                results[name] = last.model_copy(update={"attempt": attempt})
+                unrepairable.append(f"{name} answers {check.detail}")
+
+        if attempt > 0 and not pending:
+            raise DeployError(
+                "nothing a redeploy can fix: "
+                + "; ".join(unrepairable or ["no changes"])
+                + ". Fix the repository and deploy again"
+            )
 
         single = len(plan.targets) == 1
         if pending:
@@ -139,6 +165,12 @@ class SandboxProvisioner:
         level = LogLevel.success if live == len(ordered) else LogLevel.warn
         await log(f"{live}/{len(ordered)} components live in the sandbox", level)
         return {"deployment_results": ordered}
+
+
+def _redeploy_can_fix(status_code: int | None) -> bool:
+    """No response, the router's own 404 (no live deploy) or a gateway error: the
+    container or routing is broken, which a fresh deploy can repair."""
+    return status_code is None or status_code in {404, 502, 503, 504}
 
 
 def _result(

@@ -149,6 +149,15 @@ def judge(
         return Verdict(False, detail, f"{component} on {platform.value}: {_VERCEL_PROTECTION}")
     if code is not None and 200 <= code < 400:
         return Verdict(True, f"HTTP {code} -> {location}" if location else f"HTTP {code}")
+    if (
+        platform is Platform.sandbox
+        and code is not None
+        and 400 <= code < 500
+        and "no app is deployed" not in probe.body.lower()
+    ):
+        # The router's own 404 says "No app is deployed"; anything else came from the app,
+        # which is therefore up (an API without a route at / is normal).
+        return Verdict(True, f"HTTP {code} (app is up; no page at /)")
 
     diagnosis = _status_diagnosis(platform, probe, kind, env_vars or [])
     return Verdict(False, f"HTTP {code}", f"{component} on {platform.value}: {diagnosis}")

@@ -140,7 +140,11 @@ def no_clone(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> list[str]:
         clones.append(repo_url)
         yield tmp_path
 
+    async def docker_up() -> None:
+        return None
+
     monkeypatch.setattr("agents.provisioner.shallow_clone", fake_clone)
+    monkeypatch.setattr("agents.sandbox.docker.ensure_docker", docker_up)
     return clones
 
 
@@ -224,7 +228,7 @@ async def test_sandbox_provisioner_redeploys_only_unhealthy_components(
     assert no_clone == ["https://github.com/acme/shop"]
 
 
-async def test_sandbox_provisioner_skips_clone_when_nothing_to_redeploy(
+async def test_sandbox_provisioner_ends_run_when_nothing_can_be_repaired(
     no_clone: list[str],
 ) -> None:
     engine = FakeEngine()
@@ -237,9 +241,27 @@ async def test_sandbox_provisioner_skips_clone_when_nothing_to_redeploy(
         repair_attempts=2,
         health_report=HealthReport(healthy=False, checks=[], diagnosis="nothing deployed"),
     )
-    results = (await SandboxProvisioner(engine).run(state, Logs()))["deployment_results"]  # type: ignore[arg-type]
+    with pytest.raises(DeployError, match="nothing a redeploy can fix: web failed to build"):
+        await SandboxProvisioner(engine).run(state, Logs())  # type: ignore[arg-type]
     assert engine.calls == [] and no_clone == []
-    assert [(r.status, r.attempt) for r in results] == [("failed", 2), ("failed", 2)]
+
+
+async def test_sandbox_provisioner_does_not_rebuild_app_answering_500(no_clone: list[str]) -> None:
+    engine = FakeEngine()
+    checks = [
+        HealthCheck(component="web", url=live("web").url, ok=True, status_code=200, detail="ok"),
+        HealthCheck(
+            component="api", url=live("api").url, ok=False, status_code=500, detail="HTTP 500"
+        ),
+    ]
+    state = sandbox_state(
+        deployment_results=[live("web"), live("api")],
+        repair_attempts=1,
+        health_report=HealthReport(healthy=False, checks=checks, diagnosis="api raises"),
+    )
+    with pytest.raises(DeployError, match="api answers HTTP 500"):
+        await SandboxProvisioner(engine).run(state, Logs())  # type: ignore[arg-type]
+    assert engine.calls == []
 
 
 async def test_sandbox_provisioner_rejects_foreign_targets(no_clone: None) -> None:

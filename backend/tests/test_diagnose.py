@@ -108,3 +108,14 @@ def test_cold_start_only_on_sleepy_platforms(
     platform: Platform, probe: ProbeResult, expected: bool
 ) -> None:
     assert is_cold_start(platform, probe) is expected
+
+
+def test_sandbox_app_404_means_up_but_router_404_does_not() -> None:
+    app_404 = ProbeResult(
+        url="http://api.localhost:8080", status_code=404, body='{"detail":"Not Found"}'
+    )
+    assert judge("api", "backend", Platform.sandbox, app_404).ok
+    router_404 = ProbeResult(
+        url="http://api.localhost:8080", status_code=404, body="No app is deployed at this address."
+    )
+    assert not judge("api", "backend", Platform.sandbox, router_404).ok

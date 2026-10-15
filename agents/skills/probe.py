@@ -123,10 +123,23 @@ def _classify(exc: BaseException) -> tuple[ProbeError, str]:
 
 
 def fetch(
-    url: str, timeout: float, opener: urllib.request.OpenerDirector | None = None
+    url: str,
+    timeout: float,
+    opener: urllib.request.OpenerDirector | None = None,
+    connect_to: str | None = None,
 ) -> ProbeResult:
-    """GET `url` without the domain check. Use `probe` unless you are a test."""
-    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT}, method="GET")
+    """GET `url` without the domain check. Use `probe` unless you are a test.
+
+    connect_to sends the request to that origin instead while keeping `url`'s Host
+    header (used for sandbox URLs, so the probe never depends on *.localhost DNS).
+    """
+    headers = {"User-Agent": USER_AGENT}
+    target = url
+    if connect_to is not None:
+        parts = urlsplit(url)
+        headers["Host"] = parts.netloc
+        target = connect_to + (parts.path or "/") + (f"?{parts.query}" if parts.query else "")
+    request = urllib.request.Request(target, headers=headers, method="GET")
     started = time.monotonic()
 
     def elapsed() -> int:
@@ -160,4 +173,7 @@ def probe(url: str, timeout: float = 15.0) -> ProbeResult:
     reason = check_url(url)
     if reason is not None:
         return ProbeResult(url=url, error="blocked", error_detail=reason)
+    parts = urlsplit(url)
+    if _is_sandbox_url(parts):
+        return fetch(url, timeout, connect_to=f"http://127.0.0.1:{parts.port}")
     return fetch(url, timeout)

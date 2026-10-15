@@ -23,6 +23,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._send(404, b"nope", {"x-vercel-error": "DEPLOYMENT_NOT_FOUND"})
         elif self.path == "/escape":
             self._send(302, b"", {"Location": "https://169.254.169.254/latest/meta-data"})
+        elif self.path == "/host":
+            self._send(200, (self.headers.get("Host") or "").encode())
         elif self.path == "/slow":
             threading.Event().wait(1.0)
             self._send(200, b"late")
@@ -147,3 +149,8 @@ def test_real_platforms_report_missing_deployments(url: str, header: str, value:
     """The headers diagnose.py relies on, as the platforms actually send them."""
     result = probe(url)
     assert result.status_code == 404 and result.headers.get(header) == value
+
+
+def test_fetch_connect_to_keeps_the_virtual_host(server: str) -> None:
+    result = fetch("http://shop.localhost:8080/host", timeout=5, connect_to=server)
+    assert result.status_code == 200 and result.body == "shop.localhost:8080"
