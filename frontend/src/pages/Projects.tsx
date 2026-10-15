@@ -25,7 +25,7 @@ const BUILDS = ['real-time ML systems', 'LLM agents', 'causal uplift models', 's
 
 function Hero() {
   return (
-    <section className="mb-20 grid items-center gap-12 lg:grid-cols-[1.25fr_1fr]">
+    <section data-guide="hero" className="mb-20 grid items-center gap-12 lg:grid-cols-[1.25fr_1fr]">
       <div>
         <p className="animate-fade-up glass mb-6 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium text-zinc-700 dark:text-zinc-300">
           <Sparkles className="size-3.5 text-emerald-500" aria-hidden />
@@ -98,7 +98,7 @@ export default function Projects() {
   return (
     <>
       <Hero />
-      <section aria-labelledby="work-heading">
+      <section data-guide="projects" aria-labelledby="work-heading">
         <Reveal className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="mb-2 font-mono text-xs tracking-[0.2em] text-emerald-600 uppercase dark:text-emerald-400">
@@ -129,7 +129,7 @@ export default function Projects() {
       </section>
 
       {planned.length > 0 && (
-        <section aria-labelledby="building-heading" className="mt-20">
+        <section data-guide="building" aria-labelledby="building-heading" className="mt-20">
           <Reveal className="mb-8">
             <p className="mb-2 font-mono text-xs tracking-[0.2em] text-violet-600 uppercase dark:text-violet-400">
               On the bench

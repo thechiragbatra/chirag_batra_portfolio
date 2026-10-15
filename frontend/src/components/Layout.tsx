@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, ScrollRestoration, useLocation } from 'react-router-dom'
 import { useReducedMotion } from '../hooks/useMediaQuery'
 import { Background } from './fx/Background'
+import { Guide } from './guide/Guide'
 import { CursorGlow } from './fx/CursorGlow'
 import { Logo } from './Logo'
 import { ThemeToggle } from './ThemeToggle'
@@ -69,7 +70,7 @@ export function Layout() {
       </a>
 
       <ScrollRestoration />
-      <header data-scrolled={scrolled || undefined} className="sticky top-0 z-40 px-3 pt-3 sm:px-4">
+      <header data-scrolled={scrolled || undefined} className="site-header sticky top-0 z-40 px-3 pt-3 sm:px-4">
         <div className="glass mx-auto flex max-w-5xl items-center gap-2 rounded-2xl px-3 py-2 shadow-lg shadow-black/[0.03] sm:gap-6 sm:px-4 dark:shadow-black/40">
           <NavLink to="/projects" viewTransition={!reduced} className="group flex items-center gap-2.5 font-display font-semibold">
             <Logo className="size-8 transition-transform duration-500 group-hover:rotate-[360deg]" />
@@ -126,7 +127,9 @@ export function Layout() {
         </div>
       </main>
 
-      <footer className="px-4 pb-8 text-center text-xs text-zinc-500">
+      <Guide />
+
+      <footer className="site-footer px-4 pb-8 text-center text-xs text-zinc-500">
         <span className="glass inline-flex items-center gap-2 rounded-full px-3 py-1.5">
           <span className="relative flex size-2">
             <span className="animate-ping-slow absolute inline-flex size-full rounded-full bg-emerald-400" />

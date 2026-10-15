@@ -308,14 +308,15 @@ body {
    follows the nav order (html[data-nav-dir], set by Layout before the new page paints).
    Names apply only while a transition runs: a named element is a backdrop root, so
    naming the header or page permanently would stop every glass panel inside it from
-   blurring what is behind it. */
+   blurring what is behind it. Classes, not tags: names must be unique, and other
+   components (the AI guide panel) have their own <header>. */
 html[data-vt='route']:active-view-transition main > [data-page] {
   view-transition-name: page;
 }
-html[data-vt='route']:active-view-transition header {
+html[data-vt='route']:active-view-transition .site-header {
   view-transition-name: site-header;
 }
-html[data-vt='route']:active-view-transition footer {
+html[data-vt='route']:active-view-transition .site-footer {
   view-transition-name: site-footer;
 }
 /* The nav pill is its own group, so during a page change it glides (position and width
@@ -476,6 +477,23 @@ html[data-vt='theme']::view-transition-new(root) {
   stroke-dashoffset: 24;
   animation: draw-stroke 0.32s var(--ease-out-quart) 0.18s forwards;
 }
+/* AI guide: the panel rises from its launcher; sections it points at pulse once. */
+.guide-panel {
+  transform-origin: bottom right;
+  animation: guide-in var(--dur-spring-settle) var(--spring-settle) both;
+}
+@keyframes guide-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.96); }
+}
+[data-guide-flash] {
+  border-radius: 1rem;
+  animation: guide-flash 2.4s var(--ease-out);
+}
+@keyframes guide-flash {
+  0%, 100% { box-shadow: 0 0 0 0 transparent; }
+  15%, 60% { box-shadow: 0 0 0 3px color-mix(in oklab, var(--glow-a) 70%, transparent), 0 0 32px color-mix(in oklab, var(--glow-a) 35%, transparent); }
+}
+
 /* Churn Lab: ROC curve draws itself in (pathLength=1, dashoffset 1 -> 0). */
 .lab-draw {
   animation: draw-stroke 1.4s var(--ease-out) 150ms forwards;

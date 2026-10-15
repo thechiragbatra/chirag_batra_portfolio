@@ -122,6 +122,7 @@ async def tools_node(state: GuideState, config: RunnableConfig) -> dict[str, Any
                 {
                     "type": "source",
                     "id": toolbox.label(doc),
+                    "doc": doc.id,
                     "title": doc.title,
                     "page": doc.page,
                     "section": doc.section,

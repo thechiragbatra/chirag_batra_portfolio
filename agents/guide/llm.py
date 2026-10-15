@@ -87,7 +87,7 @@ class GroqChat:
         self,
         api_key: str | None = None,
         model: str | None = None,
-        base_url: str = GROQ_BASE_URL,
+        base_url: str | None = None,
         timeout: float = 60.0,
         max_tokens: int = 700,
         transport: httpx.AsyncBaseTransport | None = None,
@@ -98,7 +98,7 @@ class GroqChat:
         self.model = model or os.getenv("GROQ_MODEL") or DEFAULT_MODEL
         self.max_tokens = max_tokens
         self._client = httpx.AsyncClient(
-            base_url=base_url,
+            base_url=base_url or os.getenv("GROQ_BASE_URL") or GROQ_BASE_URL,
             timeout=timeout,
             headers={"Authorization": f"Bearer {key}"},
             transport=transport,

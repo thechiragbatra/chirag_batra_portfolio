@@ -81,6 +81,7 @@ export function Tabs({ items, label }: { items: TabItem[]; label: string }) {
                   tabRefs.current[index] = el
                 }}
                 id={`${baseId}-tab-${item.id}`}
+                data-guide={item.id}
                 role="tab"
                 type="button"
                 aria-selected={selected}

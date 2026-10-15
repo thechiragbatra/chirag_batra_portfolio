@@ -4,6 +4,7 @@ import { DecisionMap, RiskGauge, RocCurve, ShapBars, TargetingChart } from '../c
 import { segmentColor, STRATEGIES } from '../components/lab/palette'
 import { Reveal } from '../components/fx/Reveal'
 import { PageHeader } from '../components/PageHeader'
+import { onLabCustomer, takeLabCustomer } from '../lib/guide'
 import {
   type Customer,
   FEATURE_LABELS,
@@ -232,9 +233,22 @@ function CustomerForm({
 
 // ---- Result cards ----
 
-function Card({ title, aside, children, className = '' }: { title: string; aside?: ReactNode; children: ReactNode; className?: string }) {
+function Card({
+  title,
+  aside,
+  children,
+  className = '',
+  guide,
+}: {
+  title: string
+  aside?: ReactNode
+  children: ReactNode
+  className?: string
+  /** Section name the AI guide can highlight. */
+  guide?: string
+}) {
   return (
-    <section className={`glass-strong rounded-2xl p-5 ${className}`}>
+    <section data-guide={guide} className={`glass-strong rounded-2xl p-5 ${className}`}>
       <div className="mb-4 flex items-baseline justify-between gap-3">
         <h2 className="font-display text-lg font-semibold">{title}</h2>
         {aside && <span className="text-right text-xs text-zinc-500">{aside}</span>}
@@ -358,6 +372,19 @@ function LabView({ lab }: { lab: LabBundle }) {
   const [budget, setBudget] = useState(0.2)
 
   const result = useMemo(() => score(lab, customer), [lab, customer])
+
+  // Customers sent by the AI guide ("what if this customer had a two-year contract?").
+  useEffect(() => {
+    const apply = () => {
+      const values = takeLabCustomer()
+      if (!values) return
+      setPreset(null)
+      setAutoTotal(false)
+      setCustomer({ ...values })
+    }
+    apply()
+    return onLabCustomer(apply)
+  }, [])
   const set = (name: string, value: string | number) => {
     setPreset(null)
     setCustomer((c) => withChange(c, name, value, autoTotal))
@@ -402,7 +429,7 @@ function LabView({ lab }: { lab: LabBundle }) {
         </div>
 
         <div className="grid items-start gap-6 lg:grid-cols-[22rem_minmax(0,1fr)]">
-          <section className="glass-strong rounded-2xl p-5 lg:sticky lg:top-24" aria-labelledby="customer-heading">
+          <section data-guide="customer" className="glass-strong rounded-2xl p-5 lg:sticky lg:top-24" aria-labelledby="customer-heading">
             <h2 id="customer-heading" className="font-display mb-4 text-lg font-semibold">
               Customer
             </h2>
@@ -413,7 +440,7 @@ function LabView({ lab }: { lab: LabBundle }) {
             <p className="sr-only" aria-live="polite">
               {ordinal(result.percentile)} percentile churn risk. {SEGMENTS[result.segment].label}: {SEGMENTS[result.segment].verdict}.
             </p>
-            <Card title="Churn risk" aside={`XGBoost · ${lab.churn.model.trees.length} trees`}>
+            <Card guide="risk" title="Churn risk" aside={`XGBoost · ${lab.churn.model.trees.length} trees`}>
               <div className="grid items-center gap-4 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)]">
                 <div className="text-zinc-900 dark:text-zinc-100">
                   <RiskGauge percentile={result.percentile} />
@@ -435,7 +462,7 @@ function LabView({ lab }: { lab: LabBundle }) {
               </div>
             </Card>
 
-            <Card title="Why the model thinks so" aside={`exact TreeSHAP · ${result.millis.toFixed(1)} ms in your browser`}>
+            <Card guide="reasons" title="Why the model thinks so" aside={`exact TreeSHAP · ${result.millis.toFixed(1)} ms in your browser`}>
               <ShapBars items={reasons} rest={rest} />
               <p className="mt-4 text-xs leading-relaxed text-zinc-500">
                 Each bar is a feature’s exact Shapley value in log-odds: how far it moves this customer from the
@@ -444,7 +471,7 @@ function LabView({ lab }: { lab: LabBundle }) {
               </p>
             </Card>
 
-            <Card title="Should we send a retention offer?" aside="T-learner uplift model">
+            <Card guide="offer" title="Should we send a retention offer?" aside="T-learner uplift model">
               <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
                 <div className="space-y-4">
                   <SegmentBadge segment={result.segment} />
@@ -473,7 +500,7 @@ function LabView({ lab }: { lab: LabBundle }) {
         </div>
       </div>
 
-      <section aria-labelledby="trust-heading">
+      <section data-guide="evaluation" aria-labelledby="trust-heading">
         <Reveal className="mb-8">
           <p className="mb-2 font-mono text-xs tracking-[0.2em] text-emerald-600 uppercase dark:text-emerald-400">Evaluation</p>
           <h2 id="trust-heading" className="font-display text-3xl font-bold sm:text-4xl">
@@ -527,7 +554,7 @@ function LabView({ lab }: { lab: LabBundle }) {
         </div>
 
         <Reveal variant="scan" className="mt-6">
-          <Card title="Are the segments real?" aside="graded against the planted truth">
+          <Card guide="segments" title="Are the segments real?" aside="graded against the planted truth">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="text-left text-xs text-zinc-500">
@@ -570,7 +597,7 @@ function LabView({ lab }: { lab: LabBundle }) {
       </section>
 
       <Reveal>
-        <section aria-labelledby="method-heading" className="glass rounded-2xl p-6">
+        <section data-guide="method" aria-labelledby="method-heading" className="glass rounded-2xl p-6">
           <h2 id="method-heading" className="font-display mb-3 flex items-center gap-2 text-xl font-semibold">
             <ShieldCheck className="size-5 text-emerald-500" aria-hidden /> Method and honest caveats
           </h2>

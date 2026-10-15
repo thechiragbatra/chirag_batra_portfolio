@@ -16,7 +16,7 @@ provisioner is a mock (nothing is deployed) and the real healer is opt-in via `R
 | --- | --- |
 | `frontend/` | React + Vite + TypeScript + Tailwind. Routes: `/projects`, `/lab`, `/resume`, `/deployer`, `/apps` |
 | `backend/` | FastAPI app, LangGraph pipeline (`graph.py`), in-memory run registry, apps API (`apps.py`), tests |
-| `agents/` | `Agent` protocol (`base.py`), domain models (`models.py`), agents, `skills/` (clone, analyze, plan, probe, diagnose) and `sandbox/` (the local deployment engine) |
+| `agents/` | `Agent` protocol (`base.py`), domain models (`models.py`), agents, `skills/` (clone, analyze, plan, probe, diagnose), `sandbox/` (the local deployment engine) and `guide/` (Smith, the portfolio's AI agent) |
 | `ml/churn/` | Trains the Churn Lab's churn and uplift models and exports them for the browser (see below) |
 | `shared/` | JSON Schemas for state and events, the source of truth for both languages ([shared/README.md](shared/README.md)) |
 
@@ -95,6 +95,30 @@ production builds. Set `GITHUB_TOKEN` in `.env` if you hit GitHub's anonymous ra
 
 ```sh
 cd frontend && npm run resume:pdf     # needs Google Chrome; set CHROME=/path/to/chrome elsewhere
+```
+
+### Smith, the AI guide
+
+Smith (`agents/guide/`, button bottom-right or ⌘K) is a LangGraph tool-use agent that
+answers questions about the portfolio from the site's own content, with citations, and uses
+the site to show its answers:
+
+| Tool | What it does |
+| --- | --- |
+| `search_portfolio` | BM25 over the résumé, projects, planned work and Churn Lab results |
+| `open_page` | Navigates the visitor's browser and highlights a section |
+| `score_customer` | Runs the Churn Lab models server side and loads the customer into `/lab` |
+| `profile_repo` | Runs the real profiler and strategist on any public GitHub repo |
+
+It runs on Groq's free tier: put a key from https://console.groq.com/keys in `.env` as
+`GROQ_API_KEY` (without one, the button stays hidden). Visitors are rate limited, the site has
+a daily cap, and repo profiling has its own limit (`GUIDE_*` in `.env.example`).
+
+Evaluate it on the golden question set (citations, honesty about planned work and unknown
+facts, off-topic refusals, tool use):
+
+```sh
+cd backend && PYTHONPATH=.. uv run python -m agents.guide.evals      # needs GROQ_API_KEY
 ```
 
 ### Churn Lab models

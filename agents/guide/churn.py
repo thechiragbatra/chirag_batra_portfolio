@@ -294,7 +294,8 @@ def score(lab: Lab, customer: Customer, reasons: int = 5) -> dict[str, Any]:
         key=lambda item: -abs(item[2]),
     )
     return {
-        "risk_percentile": round(percentile_of(lab.quantiles, risk), 1),
+        # Half-up like the page's Math.round, so Smith and the Lab quote the same percentile.
+        "risk_percentile": math.floor(percentile_of(lab.quantiles, risk) + 0.5),
         "risk_score": round(risk, 3),
         "top_reasons": [
             {"feature": name, "value": value, "shap_log_odds": round(v, 3)}

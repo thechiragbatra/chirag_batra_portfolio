@@ -22,7 +22,7 @@ from agents.skills.github_url import normalize_github_url
 PAGES: dict[str, tuple[str, ...]] = {
     "/projects": ("hero", "projects", "building"),
     "/lab": ("customer", "risk", "reasons", "offer", "evaluation", "segments", "method"),
-    "/resume": ("experience", "skills", "education"),
+    "/resume": ("experience", "education", "projects", "skills"),
     "/deployer": (),
     "/apps": (),
 }

@@ -21,3 +21,6 @@ dist/
 
 # Sandbox engine state (deploys, build logs, router config)
 .deploysmith/
+
+# Guide agent eval reports (agents/guide/evals.py)
+guide-eval-report.json
