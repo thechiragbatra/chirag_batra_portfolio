@@ -24,7 +24,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field, field_validator
 
 from agents.guide.agent import GuideEvent, build_guide, run_guide
-from agents.guide.llm import ChatModel, GroqChat, LLMError, guide_enabled
+from agents.guide.llm import ChatModel, GroqChat, LLMError, configured_models, guide_enabled
 from agents.guide.tools import Toolbox, profile_github_repo
 
 router = APIRouter(prefix="/api/guide")
@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 MAX_MESSAGE_CHARS = 1500
 MAX_HISTORY = 16
-_CITATION = re.compile(r"\s*\[S\d+\]")
+_CITATION = re.compile(r"\s*[\[【]S\d+[^\]】]*[\]】]")
 
 
 def _env_int(name: str, default: int) -> int:
@@ -71,7 +71,7 @@ class SlidingWindow:
 class Limits:
     def __init__(self) -> None:
         self.per_visitor = SlidingWindow(_env_int("GUIDE_RATE_PER_HOUR", 30), 3600)
-        self.daily = SlidingWindow(_env_int("GUIDE_DAILY_LIMIT", 500), 86400)
+        self.daily = SlidingWindow(_env_int("GUIDE_DAILY_LIMIT", 150), 86400)
         self.profiles = SlidingWindow(_env_int("GUIDE_PROFILES_PER_HOUR", 5), 3600)
         self.clones = asyncio.Semaphore(2)
 
@@ -177,8 +177,7 @@ def _friendly(exc: LLMError) -> str:
 async def guide_status() -> dict[str, Any]:
     service = get_service()
     enabled = service.enabled()
-    model = os.getenv("GROQ_MODEL") or "openai/gpt-oss-120b"
-    return {"enabled": enabled, "model": model if enabled else None}
+    return {"enabled": enabled, "model": configured_models()[0] if enabled else None}
 
 
 @router.post("/chat")

@@ -50,7 +50,8 @@ def load_cases(path: Path = CASES_PATH) -> list[dict[str, Any]]:
 def grade(case: dict[str, Any], t: Transcript) -> Verdict:
     """Check one transcript against a case's expectations. Pure, so it is unit tested."""
     failures: list[str] = []
-    answer = t.answer.lower()
+    # Models write curly quotes (isn’t); compare with straight ones.
+    answer = t.answer.lower().replace("\u2019", "'").replace("\u2018", "'")
     if case.get("cite_any") and not t.cited_docs & set(case["cite_any"]):
         failures.append(
             f"cited {sorted(t.cited_docs) or 'nothing'}, wanted one of {case['cite_any']}"
@@ -84,7 +85,7 @@ async def run_case(model: ChatModel, case: dict[str, Any], graph: Any) -> Transc
     answer = await run_guide(
         graph, [{"role": "user", "content": case["question"]}], "/projects", model, toolbox, emit
     )
-    cited = {labels[m] for m in re.findall(r"\[(S\d+)\]", answer) if m in labels}
+    cited = {labels[m] for m in re.findall(r"[\[【](S\d+)[^\]】]*[\]】]", answer) if m in labels}
     return Transcript(answer=answer, tools=tools, cited_docs=cited)
 
 
@@ -126,6 +127,9 @@ def main() -> None:
     parser.add_argument("--offline", action="store_true", help="skip cases that clone repos")
     parser.add_argument("--only", help="comma-separated case ids")
     parser.add_argument("--report", type=Path, default=Path("guide-eval-report.json"))
+    parser.add_argument(
+        "--pause", type=float, default=20.0, help="seconds between cases (free-tier token rate)"
+    )
     args = parser.parse_args()
 
     cases = load_cases()
@@ -137,7 +141,7 @@ def main() -> None:
 
     model = GroqChat()
     started = time.monotonic()
-    verdicts = asyncio.run(evaluate(model, cases))
+    verdicts = asyncio.run(evaluate(model, cases, pause=args.pause))
     print(summary(verdicts))
     print(f"({time.monotonic() - started:.0f} s, model {model.model})")
     args.report.write_text(

@@ -108,3 +108,10 @@ def test_summaries_are_short_and_informative() -> None:
         summarize("score_customer", scored) == "90th percentile risk · lost cause · offer +0.8 pts"
     )
     assert summarize("open_page", ToolResult({"error": "nope"}, ok=False)) == "nope"
+
+
+async def test_invisible_characters_are_stripped_from_answers() -> None:
+    model = ScriptedModel(Turn(text="He knows causal inference [​S1]."))
+    answer, events = await run(model)
+    assert answer == "He knows causal inference [S1]."
+    assert "​" not in "".join(e["text"] for e in events if e["type"] == "token")

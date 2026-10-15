@@ -194,7 +194,7 @@ class Toolbox:
     async def search_portfolio(self, query: str) -> ToolResult:
         if not query.strip():
             raise ToolError("query is empty")
-        hits = self.index.search(query[:300], k=5)
+        hits = self.index.search(query[:300], k=4)
         if not hits:
             return ToolResult({"results": [], "note": "Nothing in the portfolio matches."})
         docs = [h.doc for h in hits]

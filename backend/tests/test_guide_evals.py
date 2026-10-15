@@ -65,3 +65,8 @@ async def test_evaluate_runs_cases_through_the_agent() -> None:
     [verdict] = await evaluate(model, [case], pause=0)
     assert verdict.passed, verdict.failures
     assert "facts         1/1" in summary([verdict])
+
+
+def test_grade_treats_curly_and_straight_apostrophes_alike() -> None:
+    case = {"id": "g", "group": "honesty", "contain_any": ["isn't listed"]}
+    assert grade(case, Transcript("His GPA isn’t listed here.")).passed

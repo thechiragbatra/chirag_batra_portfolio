@@ -76,6 +76,8 @@ function highlightSection(section: string) {
 
 // ---- Rendering answers ----
 
+const cites = (text: string, id: string) => new RegExp(`[[【]${id}(?!\\d)[^\\]】]*[\\]】]`).test(text)
+
 const TOOL_META: Record<string, { icon: typeof Search; label: (args: Record<string, unknown>) => string }> = {
   search_portfolio: { icon: Search, label: (a) => `Searching the portfolio for “${String(a.query ?? '')}”` },
   open_page: { icon: Compass, label: (a) => `Opening ${String(a.page ?? '')}${a.section ? ` · ${String(a.section)}` : ''}` },
@@ -114,12 +116,13 @@ function StepChip({ step }: { step: Step }) {
 
 /** Bold, citations and simple lists; everything else is plain text (never HTML). */
 function Inline({ text, sources, onCite }: { text: string; sources: Source[]; onCite: (s: Source) => void }) {
-  const parts = text.split(/(\*\*[^*]+\*\*|\[S\d+\])/g)
+  // Models sometimes write citations with full-width brackets: 【S1】 or 【S1†L3】.
+  const parts = text.replace(/\s*(?:【\s*】|\[\s*\])/g, '').split(/(\*\*[^*]+\*\*|[[【]S\d+[^\]】]*[\]】])/g)
   return (
     <>
       {parts.map((part, i) => {
         if (part.startsWith('**') && part.endsWith('**')) return <strong key={i}>{part.slice(2, -2)}</strong>
-        const cite = /^\[(S\d+)\]$/.exec(part)
+        const cite = /^[[【](S\d+)[^\]】]*[\]】]$/.exec(part)
         if (cite) {
           const source = sources.find((s) => s.id === cite[1])
           if (!source) return null // never show a citation that points nowhere
@@ -434,10 +437,10 @@ export function Guide() {
                     </p>
                   )}
                   {item.error && <p className="text-xs text-rose-600 dark:text-rose-400">{item.error}</p>}
-                  {!item.pending && item.sources.some((s) => item.content.includes(`[${s.id}]`)) && (
+                  {!item.pending && item.sources.some((s) => cites(item.content, s.id)) && (
                     <ul className="flex flex-wrap gap-1.5">
                       {item.sources
-                        .filter((s) => item.content.includes(`[${s.id}]`))
+                        .filter((s) => cites(item.content, s.id))
                         .map((s) => (
                           <li key={s.id}>
                             <button
