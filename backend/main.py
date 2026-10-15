@@ -25,6 +25,7 @@ from envfile import load_env_file
 from events import EventAdapter
 from graph import build_graph
 from guide_api import router as guide_router
+from guide_api import set_deployer as set_guide_deployer
 from runs import RunRegistry
 from validation import normalize_github_url
 
@@ -108,6 +109,16 @@ async def require_csrf_header(
 registry = RunRegistry(build_graph())
 app.include_router(apps_router)
 app.include_router(guide_router)
+
+
+async def _deploy_for_guide(repo_url: str) -> dict[str, str]:
+    """Smith's start_deployment tool: the same registry as POST /api/deployments."""
+    run = registry.create(repo_url)
+    mode = "sandbox engine (real build)" if engine_enabled_flag() else "simulated deploy step"
+    return {"id": run.id, "repo": run.repo_url, "mode": mode}
+
+
+set_guide_deployer(_deploy_for_guide)
 
 
 @app.get("/api/health")

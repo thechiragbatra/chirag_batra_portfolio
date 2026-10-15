@@ -18,6 +18,8 @@ def test_cases_are_well_formed() -> None:
         "tools",
         "no_tools",
         "network",
+        "page",
+        "view",
     }
     assert all(set(c) <= known for c in cases)
 

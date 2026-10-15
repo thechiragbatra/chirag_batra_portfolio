@@ -37,6 +37,57 @@ def stem(token: str) -> str:
     return token
 
 
+# How visitors ask versus how the portfolio is written: each query word also searches for
+# these terms. (A few dozen documents do not justify an embedding model; this closes the
+# common vocabulary gaps.)
+ALIASES: dict[str, str] = {
+    "ml": "machine learning",
+    "ai": "machine learning llm agents",
+    "genai": "llm rag agents",
+    "llm": "llms language model rag langgraph agents",
+    "llms": "llm language model rag langgraph agents",
+    "nlp": "language model transformers llm",
+    "dl": "deep learning pytorch",
+    "ds": "data science",
+    "mlops": "mlops monitoring retraining deployment serving",
+    "job": "intern internship experience",
+    "jobs": "intern internship experience",
+    "work": "intern internship experience projects",
+    "worked": "intern internship experience",
+    "experience": "intern internship",
+    "college": "education university",
+    "university": "education",
+    "degree": "education",
+    "study": "education",
+    "graduate": "education class",
+    "email": "contact",
+    "reach": "contact email linkedin",
+    "hire": "contact",
+    "phone": "contact",
+    "fraud": "radar",
+    "churn": "uplift retention",
+    "uplift": "churn causal",
+    "explainability": "shap",
+    "interpretability": "shap explainability",
+    "agent": "agents langgraph",
+    "deploy": "deployment deploysmith",
+    "deploying": "deployment deploysmith",
+    "docker": "sandbox containers",
+    "security": "hardened sandbox",
+    "cloud": "aws terraform",
+    "statistics": "statistical experimentation hypothesis",
+    "abtest": "a/b testing experimentation",
+    "certificate": "certifications",
+    "certificates": "certifications",
+}
+
+
+def expand(query: str) -> str:
+    """The query plus the aliases of its words."""
+    extra = [ALIASES[w] for w in re.findall(r"[a-z]+", query.lower()) if w in ALIASES]
+    return " ".join([query, *extra])
+
+
 def tokenize(text: str) -> list[str]:
     return [stem(t) for t in _TOKEN.findall(text.lower()) if t not in STOPWORDS]
 
@@ -64,7 +115,7 @@ class Index:
         self.idf = {t: math.log(1 + (n - f + 0.5) / (f + 0.5)) for t, f in df.items()}
 
     def search(self, query: str, k: int = 4) -> list[Hit]:
-        query_terms = set(tokenize(query))
+        query_terms = set(tokenize(expand(query)))
         hits: list[Hit] = []
         for doc, terms, length in zip(self.docs, self.terms, self.lengths, strict=True):
             score = 0.0

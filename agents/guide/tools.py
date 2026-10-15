@@ -144,7 +144,49 @@ SCHEMAS: list[dict[str, Any]] = [
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "describe_view",
+            "description": (
+                "What the visitor is looking at right now: the current page and its sections, "
+                "and on the Lab, the customer on screen with their churn risk, SHAP reasons and "
+                "offer decision. Call it when the visitor says 'this', 'here' or asks what they "
+                "are looking at."
+            ),
+            "parameters": {"type": "object", "properties": {}},
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "start_deployment",
+            "description": (
+                "Start a real DeploySmith run for a public GitHub repository (profile, plan, "
+                "deploy, health-check) and open the Deployer page to watch it live. Only call it "
+                "when the visitor explicitly asks to deploy a repo."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "repo_url": {"type": "string", "description": "https://github.com/owner/repo"}
+                },
+                "required": ["repo_url"],
+            },
+        },
+    },
 ]
+
+# What each page shows, for describe_view.
+PAGE_BLURBS: dict[str, str] = {
+    "/projects": "Home: hero with headline numbers, selected projects, and projects being built.",
+    "/lab": "Churn Uplift Lab: edit a customer and see churn risk, SHAP reasons and whether a "
+    "retention offer is worth sending, plus the models' evaluation.",
+    "/resume": "Résumé: experience, education, projects and skills, with a PDF download.",
+    "/deployer": "Deployer: paste a GitHub repo and watch four agents profile, plan, deploy "
+    "and health-check it live.",
+    "/apps": "Apps: deployments made by the local sandbox engine, with logs and rollback.",
+}
 
 
 class Toolbox:
@@ -155,8 +197,14 @@ class Toolbox:
         docs: tuple[Doc, ...] | None = None,
         lab: churn.Lab | None = None,
         profiler: Callable[[str], Awaitable[dict[str, Any]]] | None = None,
+        deployer: Callable[[str], Awaitable[dict[str, Any]]] | None = None,
+        page: str = "/projects",
+        view: dict[str, Any] | None = None,
     ) -> None:
         self.docs = docs if docs is not None else load_corpus()
+        self.deployer = deployer
+        self.page = page
+        self.view = view or {}
         self.index = Index(self.docs)
         self._lab = lab
         self.profiler = profiler or profile_github_repo
@@ -167,6 +215,10 @@ class Toolbox:
         if self._lab is None:
             self._lab = churn.load_lab()
         return self._lab
+
+    def cited_ids(self) -> set[str]:
+        """Documents that have been given a citation label in this conversation."""
+        return set(self._cited)
 
     def label(self, doc: Doc) -> str:
         """Citation label (S1, S2, ...) for a document, stable for the conversation."""
@@ -180,6 +232,8 @@ class Toolbox:
             "open_page": self.open_page,
             "score_customer": self.score_customer,
             "profile_repo": self.profile_repo,
+            "describe_view": self.describe_view,
+            "start_deployment": self.start_deployment,
         }
         handler = handlers.get(name)
         if handler is None:
@@ -243,6 +297,39 @@ class Toolbox:
         except Exception as exc:  # clone failures, private or missing repos
             raise ToolError(f"could not profile {url}: {exc}") from exc
         return ToolResult(summary)
+
+    async def describe_view(self) -> ToolResult:
+        page = self.page if self.page in PAGES else "/projects"
+        content: dict[str, Any] = {
+            "page": page,
+            "about": PAGE_BLURBS.get(page, ""),
+            "sections": list(PAGES[page]),
+        }
+        customer = self.view.get("customer") if page == "/lab" else None
+        if isinstance(customer, dict):
+            lab = self.lab
+            # Validate every attribute the browser sent before scoring it.
+            values = churn.apply_changes(lab, lab.presets["persuadable"], customer)
+            content["customer"] = values
+            content["model_output"] = churn.score(lab, values)
+        return ToolResult(content)
+
+    async def start_deployment(self, repo_url: str) -> ToolResult:
+        if self.deployer is None:
+            raise ToolError("deploying from the chat is not available here")
+        try:
+            url = normalize_github_url(repo_url)
+        except ValueError as exc:
+            raise ToolError(str(exc)) from exc
+        try:
+            run = await self.deployer(url)
+        except Exception as exc:  # limits, engine errors
+            raise ToolError(f"could not start the deployment: {exc}") from exc
+        path = f"/deployer?run={run['id']}"
+        return ToolResult(
+            {**run, "watch": "Opened the Deployer, where the run streams live."},
+            actions=[{"type": "navigate", "path": path, "section": None}],
+        )
 
 
 async def profile_github_repo(url: str) -> dict[str, Any]:

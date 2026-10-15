@@ -49,6 +49,8 @@ class Completion:
 
     text: str
     tool_calls: list[ToolCall] = field(default_factory=list)
+    model: str = ""  # which model answered (after any fallback)
+    usage: dict[str, int] = field(default_factory=dict)  # prompt/completion/total tokens
 
 
 Chunk = TextDelta | Completion
@@ -194,6 +196,7 @@ class GroqChat:
     ) -> AsyncIterator[Chunk]:
         text: list[str] = []
         calls: dict[int, dict[str, str]] = {}
+        usage: dict[str, int] = {}
         try:
             async with self._client.stream(
                 "POST", "/chat/completions", json=self._body(model, messages, tools)
@@ -219,6 +222,14 @@ class GroqChat:
                     event = json.loads(data)
                     if event.get("error"):
                         raise LLMError(str(event["error"]))
+                    # Groq reports usage on the last chunk (as x_groq.usage).
+                    reported = event.get("usage") or (event.get("x_groq") or {}).get("usage")
+                    if reported:
+                        usage = {
+                            k: int(reported[k])
+                            for k in ("prompt_tokens", "completion_tokens", "total_tokens")
+                            if isinstance(reported.get(k), int)
+                        }
                     for choice in event.get("choices", []):
                         delta = choice.get("delta") or {}
                         if delta.get("content"):
@@ -235,7 +246,7 @@ class GroqChat:
             for i, c in sorted(calls.items())
             if c["name"]
         ]
-        yield Completion(text="".join(text), tool_calls=tool_calls)
+        yield Completion(text="".join(text), tool_calls=tool_calls, model=model, usage=usage)
 
     async def aclose(self) -> None:
         await self._client.aclose()

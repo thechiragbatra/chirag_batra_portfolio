@@ -62,31 +62,35 @@ def grade(case: dict[str, Any], t: Transcript) -> Verdict:
         if re.search(pattern, t.answer, flags=re.IGNORECASE):
             failures.append(f"answer matches forbidden /{pattern}/")
     for tool in case.get("tools", []):
-        if tool not in t.tools:
+        # The site opening the cited page for a "show me" counts as showing it.
+        shown = tool == "open_page" and "auto_open" in t.tools
+        if tool not in t.tools and not shown:
             failures.append(f"did not call {tool} (called {t.tools or 'nothing'})")
-    if case.get("no_tools") and any(name != "search_portfolio" for name in t.tools):
+    if case.get("no_tools") and any(
+        n not in ("search_portfolio", "describe_view") for n in t.tools
+    ):
         failures.append(f"used tools on an off-topic request: {t.tools}")
     if not t.answer.strip():
         failures.append("empty answer")
     return Verdict(case["id"], case["group"], not failures, failures, t.answer, t.tools)
 
 
+async def fake_deployer(url: str) -> dict[str, Any]:
+    """Evals check that Smith starts deployments, without starting real ones."""
+    return {"id": "0" * 32, "repo": url, "mode": "eval (not deployed)"}
+
+
 async def run_case(model: ChatModel, case: dict[str, Any], graph: Any) -> Transcript:
-    labels: dict[str, str] = {}
-    tools: list[str] = []
-
-    async def emit(event: dict[str, Any]) -> None:
-        if event["type"] == "source":
-            labels[event["id"]] = event["doc"]
-        elif event["type"] == "step":
-            tools.append(event["tool"])
-
-    toolbox = Toolbox()
-    answer = await run_guide(
-        graph, [{"role": "user", "content": case["question"]}], "/projects", model, toolbox, emit
+    page = case.get("page", "/projects")
+    toolbox = Toolbox(page=page, view=case.get("view"), deployer=fake_deployer)
+    outcome = await run_guide(
+        graph, [{"role": "user", "content": case["question"]}], page, model, toolbox
     )
-    cited = {labels[m] for m in re.findall(r"[\[【](S\d+)[^\]】]*[\]】]", answer) if m in labels}
-    return Transcript(answer=answer, tools=tools, cited_docs=cited)
+    return Transcript(
+        answer=outcome.answer,
+        tools=outcome.tools,
+        cited_docs={d.id for d in outcome.cited},
+    )
 
 
 async def evaluate(

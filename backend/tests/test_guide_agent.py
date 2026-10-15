@@ -17,7 +17,7 @@ async def run(model: ScriptedModel, question: str = "Has he done causal inferenc
     async def emit(event: dict[str, Any]) -> None:
         events.append(event)
 
-    answer = await run_guide(
+    outcome = await run_guide(
         build_guide(),
         [{"role": "user", "content": question}],
         "/lab",
@@ -25,7 +25,7 @@ async def run(model: ScriptedModel, question: str = "Has he done causal inferenc
         Toolbox(profiler=no_profiler),
         emit,
     )
-    return answer, events
+    return outcome.answer, events
 
 
 async def test_search_then_answer_emits_steps_sources_and_tokens() -> None:
@@ -38,7 +38,7 @@ async def test_search_then_answer_emits_steps_sources_and_tokens() -> None:
     types = [e["type"] for e in events]
     assert types[0] == "step" and events[0]["tool"] == "search_portfolio"
     assert "source" in types and types.index("source") < types.index("step_done")
-    assert types[-1] == "token"
+    assert types[-1] == "suggestions" and types[-2] == "token"
     assert "".join(e["text"] for e in events if e["type"] == "token").strip() == answer
     # The tool result went back to the model as a tool message.
     second_call_messages = model.seen[1][0]
@@ -115,3 +115,38 @@ async def test_invisible_characters_are_stripped_from_answers() -> None:
     answer, events = await run(model)
     assert answer == "He knows causal inference [S1]."
     assert "​" not in "".join(e["text"] for e in events if e["type"] == "token")
+
+
+async def test_show_me_opens_the_cited_page_when_the_model_does_not() -> None:
+    model = ScriptedModel(
+        Turn(calls=[("search_portfolio", {"query": "fraud detection"})]),
+        Turn(text="RADAR detects fraud in real time [S1]."),
+    )
+    _, events = await run(model, question="Show me his fraud detection project")
+    actions = [e["action"] for e in events if e["type"] == "action"]
+    assert actions and actions[0]["type"] == "navigate"
+
+
+async def test_no_auto_open_without_show_intent_or_when_already_navigated() -> None:
+    model = ScriptedModel(
+        Turn(calls=[("search_portfolio", {"query": "fraud"})]),
+        Turn(text="RADAR detects fraud [S1]."),
+    )
+    _, events = await run(model, question="What does RADAR do?")
+    assert not [e for e in events if e["type"] == "action"]
+    model = ScriptedModel(
+        Turn(calls=[("open_page", {"page": "/resume", "section": "skills"})]),
+        Turn(text="Here are his skills."),
+    )
+    _, events = await run(model, question="Show me his skills")
+    assert len([e for e in events if e["type"] == "action"]) == 1
+
+
+async def test_answers_end_with_follow_up_suggestions() -> None:
+    model = ScriptedModel(
+        Turn(calls=[("search_portfolio", {"query": "churn uplift"})]),
+        Turn(text="He built a churn uplift model [S1][S2]."),
+    )
+    _, events = await run(model, question="Tell me about his churn project")
+    suggestions = events[-1]
+    assert suggestions["type"] == "suggestions" and 1 <= len(suggestions["items"]) <= 3

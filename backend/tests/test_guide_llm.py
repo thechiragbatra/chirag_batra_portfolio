@@ -54,7 +54,7 @@ async def test_streams_text_and_sends_the_right_request() -> None:
 
     chunks = await collect(chat(handler))
     assert [c.text for c in chunks if isinstance(c, TextDelta)] == ["Hello ", "there"]
-    assert chunks[-1] == Completion(text="Hello there", tool_calls=[])
+    assert chunks[-1] == Completion(text="Hello there", tool_calls=[], model="openai/gpt-oss-120b")
     assert seen["auth"] == "Bearer test-key"
     assert seen["body"]["stream"] is True and seen["body"]["tool_choice"] == "auto"
     assert seen["body"]["reasoning_effort"] == "low"

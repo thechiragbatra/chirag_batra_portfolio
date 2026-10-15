@@ -93,4 +93,43 @@ async def test_unknown_tools_and_bad_arguments_never_raise(box: Toolbox) -> None
 
 def test_every_schema_has_a_handler() -> None:
     names = {s["function"]["name"] for s in tools.SCHEMAS}
-    assert names == {"search_portfolio", "open_page", "score_customer", "profile_repo"}
+    assert names == {
+        "search_portfolio",
+        "open_page",
+        "score_customer",
+        "profile_repo",
+        "describe_view",
+        "start_deployment",
+    }
+
+
+async def test_describe_view_scores_the_customer_on_screen() -> None:
+    lab_box = Toolbox(
+        profiler=fake_profiler, page="/lab", view={"customer": {"Contract": "Two year"}}
+    )
+    result = await lab_box.call("describe_view", {})
+    assert result.ok and result.content["page"] == "/lab"
+    assert result.content["customer"]["Contract"] == "Two year"
+    assert "risk_percentile" in result.content["model_output"]
+    plain = await Toolbox(profiler=fake_profiler, page="/resume").call("describe_view", {})
+    assert plain.content["sections"] and "customer" not in plain.content
+    bad = Toolbox(profiler=fake_profiler, page="/lab", view={"customer": {"Contract": "Forever"}})
+    assert not (await bad.call("describe_view", {})).ok
+
+
+async def test_start_deployment_opens_the_deployer_on_the_new_run() -> None:
+    async def deployer(url: str) -> dict[str, Any]:
+        return {"id": "b" * 32, "repo": url, "mode": "test"}
+
+    box = Toolbox(profiler=fake_profiler, deployer=deployer)
+    result = await box.call("start_deployment", {"repo_url": "https://github.com/acme/shop"})
+    assert result.ok and result.actions == [
+        {"type": "navigate", "path": f"/deployer?run={'b' * 32}", "section": None}
+    ]
+    assert not (
+        await Toolbox(profiler=fake_profiler).call(
+            "start_deployment", {"repo_url": "https://github.com/a/b"}
+        )
+    ).ok
+    bad = await box.call("start_deployment", {"repo_url": "https://example.com/a/b"})
+    assert not bad.ok

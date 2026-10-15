@@ -44,3 +44,11 @@ def test_real_corpus_search_finds_the_obvious_answers() -> None:
     assert any(h.doc.id == "experience-1" for h in index.search("IBM internship"))
     assert index.search("planned fine-tuning text-to-SQL")[0].doc.id.startswith("planned-")
     assert index.search("docker sandbox hardened containers")[0].doc.id == "deploysmith-sandbox"
+
+
+def test_aliases_bridge_how_visitors_ask_and_how_the_site_is_written() -> None:
+    index = Index(load_corpus())
+    assert any(h.doc.id == "skills-machine-learning" for h in index.search("ML skills"))
+    assert any(h.doc.id.startswith("experience-") for h in index.search("has he had a job"))
+    assert index.search("how do I reach him")[0].doc.id == "contact"
+    assert any(h.doc.id in {"project-1", "resume-project-1"} for h in index.search("fraud"))
