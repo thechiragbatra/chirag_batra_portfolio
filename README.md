@@ -110,6 +110,8 @@ profiles and plans for real and simulates the deploy.
 
 ## Checks
 
+GitHub Actions runs these on every push and pull request ([.github/workflows/ci.yml](.github/workflows/ci.yml)), plus a build of both Cloud Run images.
+
 ```sh
 cd frontend && npm run lint && npm run build
 cd backend && uv run pytest              # offline; -m network for real clones/probes, -m docker for a real sandbox deploy
