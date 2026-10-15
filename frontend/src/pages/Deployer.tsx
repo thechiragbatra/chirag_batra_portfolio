@@ -1,5 +1,6 @@
 import { Rocket, Sparkles } from 'lucide-react'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { AgentStatusList } from '../components/AgentStatusList'
 import { DeploymentSummary } from '../components/DeploymentSummary'
 import { LogPanel } from '../components/LogPanel'
@@ -27,14 +28,34 @@ function useElapsed(busy: boolean, startedAt: number | null) {
   return startedAt === null ? 0 : Math.max(0, now - startedAt) / 1000
 }
 
-export default function Deployer() {
-  const [repoUrl, setRepoUrl] = useState('')
+const RUN_ID = /^[0-9a-f]{32}$/
+
+/**
+ * /deployer, or /deployer?run=<id>&repo=<url> to watch a run started elsewhere (the AI
+ * guide). Keyed by run, so a new run remounts the page with fresh state.
+ */
+export default function DeployerPage() {
+  const [params] = useSearchParams()
+  const run = params.get('run')
+  const valid = run && RUN_ID.test(run) ? run : null
+  const repo = params.get('repo')
+  return <Deployer key={valid ?? 'new'} run={valid} repo={repo && isGithubRepoUrl(repo) ? repo : null} />
+}
+
+function Deployer({ run, repo }: { run: string | null; repo: string | null }) {
+  const [repoUrl, setRepoUrl] = useState(repo ?? '')
   const [inputError, setInputError] = useState<string | null>(null)
-  const [startedAt, setStartedAt] = useState<number | null>(null)
+  const [startedAt, setStartedAt] = useState<number | null>(() => (run ? performance.now() : null))
   const stream = useDeploymentStream()
   const finished = stream.phase === 'succeeded' || stream.phase === 'failed'
   const elapsed = useElapsed(stream.isBusy, startedAt)
   const inputRef = useRef<HTMLInputElement>(null)
+  const { attach } = stream
+
+  // Opened on a run someone else started (the AI guide): follow its live stream.
+  useEffect(() => {
+    if (run) attach(run, repo ?? 'the requested repository')
+  }, [run, repo, attach])
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault()

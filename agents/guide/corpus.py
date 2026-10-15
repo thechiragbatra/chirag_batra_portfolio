@@ -52,6 +52,23 @@ SITE_DOCS: tuple[Doc, ...] = (
         ),
     ),
     Doc(
+        id="smith",
+        title="About Smith, the AI guide",
+        page="/smith",
+        section="architecture",
+        url="https://github.com/thechiragbatra/deploysmith/tree/main/agents/guide",
+        text=(
+            "Smith is the AI agent Chirag built for this site. It is a LangGraph tool-use loop "
+            "(model, then tools, at most four rounds) served by FastAPI, streaming each step over "
+            "server-sent events. It runs openai/gpt-oss-120b on Groq's free tier with two fallback "
+            "models, answers only from the site's own content with citations, and has six tools: "
+            "BM25 search, page navigation, reading the visitor's screen, the churn model, repo "
+            "profiling and starting deployments. It is graded on a golden set of questions for "
+            "citations, honesty, off-topic refusals and tool use, and supports voice through the "
+            "browser's speech APIs."
+        ),
+    ),
+    Doc(
         id="deploysmith-pipeline",
         title="How DeploySmith deploys a repository",
         page="/deployer",

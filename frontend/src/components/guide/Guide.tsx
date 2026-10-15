@@ -1,8 +1,38 @@
-import { ArrowUp, Check, Compass, FlaskConical, GitBranch, Loader2, RotateCcw, Search, Sparkles, Square, X } from 'lucide-react'
+import {
+  ArrowUp,
+  Check,
+  Compass,
+  Eye,
+  FlaskConical,
+  GitBranch,
+  Loader2,
+  Mic,
+  Rocket,
+  RotateCcw,
+  Search,
+  Sparkles,
+  Square,
+  ThumbsDown,
+  ThumbsUp,
+  Volume2,
+  VolumeX,
+  X,
+  Zap,
+} from 'lucide-react'
 import { type FormEvent, type KeyboardEvent, type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { prefersReducedMotion } from '../../hooks/useMediaQuery'
-import { askGuide, type ChatTurn, type GuideAction, type GuideEvent, guideStatus, sendCustomerToLab } from '../../lib/guide'
+import {
+  askGuide,
+  type ChatTurn,
+  type GuideAction,
+  type GuideEvent,
+  guideStatus,
+  guideViewFor,
+  sendCustomerToLab,
+  sendFeedback,
+} from '../../lib/guide'
+import { canListen, canSpeak, speak, stopSpeaking, useSpeechInput } from './voice'
 
 interface Step {
   id: string
@@ -23,15 +53,35 @@ interface Source {
 
 type Item =
   | { role: 'user'; content: string }
-  | { role: 'assistant'; content: string; steps: Step[]; sources: Source[]; pending: boolean; error?: string }
+  | {
+      role: 'assistant'
+      content: string
+      steps: Step[]
+      sources: Source[]
+      pending: boolean
+      error?: string
+      run?: string
+      cached?: boolean
+      rating?: 'up' | 'down'
+      suggestions?: string[]
+    }
 
 const STORAGE_KEY = 'smith-chat'
-const SUGGESTIONS = [
+const SPEAK_KEY = 'smith-speak'
+// Used until the server's per-page starters arrive.
+const DEFAULT_STARTERS = [
   'What has Chirag built with machine learning?',
   'Show me his causal inference work',
   'What if a lost-cause customer signed a two-year contract?',
-  'Could DeploySmith deploy github.com/thechiragbatra/proactive-academic-intervention-system?',
 ]
+
+function loadSpeak(): boolean {
+  try {
+    return localStorage.getItem(SPEAK_KEY) === '1'
+  } catch {
+    return false
+  }
+}
 
 function loadItems(): Item[] {
   try {
@@ -76,7 +126,9 @@ function highlightSection(section: string) {
 
 // ---- Rendering answers ----
 
-const cites = (text: string, id: string) => new RegExp(`[[【]${id}(?!\\d)[^\\]】]*[\\]】]`).test(text)
+// Citations as models write them: [S1], 【S1】, 【S1†L3】, [**S1**].
+const cites = (text: string, id: string) =>
+  new RegExp(`[[【]\\s*(?:\\*\\*)?\\s*${id}(?!\\d)[^\\]】]*[\\]】]`).test(text)
 
 const TOOL_META: Record<string, { icon: typeof Search; label: (args: Record<string, unknown>) => string }> = {
   search_portfolio: { icon: Search, label: (a) => `Searching the portfolio for “${String(a.query ?? '')}”` },
@@ -89,6 +141,11 @@ const TOOL_META: Record<string, { icon: typeof Search; label: (args: Record<stri
     },
   },
   profile_repo: { icon: GitBranch, label: (a) => `Profiling ${String(a.repo_url ?? 'the repo').replace('https://github.com/', '')}` },
+  describe_view: { icon: Eye, label: () => 'Looking at your screen' },
+  start_deployment: {
+    icon: Rocket,
+    label: (a) => `Deploying ${String(a.repo_url ?? 'the repo').replace('https://github.com/', '')}`,
+  },
 }
 
 function StepChip({ step }: { step: Step }) {
@@ -117,12 +174,12 @@ function StepChip({ step }: { step: Step }) {
 /** Bold, citations and simple lists; everything else is plain text (never HTML). */
 function Inline({ text, sources, onCite }: { text: string; sources: Source[]; onCite: (s: Source) => void }) {
   // Models sometimes write citations with full-width brackets: 【S1】 or 【S1†L3】.
-  const parts = text.replace(/\s*(?:【\s*】|\[\s*\])/g, '').split(/(\*\*[^*]+\*\*|[[【]S\d+[^\]】]*[\]】])/g)
+  const parts = text.replace(/\s*(?:【\s*】|\[\s*\])/g, '').split(/([[【]\s*(?:\*\*)?\s*S\d+[^\]】]*[\]】]|\*\*[^*]+\*\*)/g)
   return (
     <>
       {parts.map((part, i) => {
         if (part.startsWith('**') && part.endsWith('**')) return <strong key={i}>{part.slice(2, -2)}</strong>
-        const cite = /^[[【](S\d+)[^\]】]*[\]】]$/.exec(part)
+        const cite = /^[[【]\s*(?:\*\*)?\s*(S\d+)[^\]】]*[\]】]$/.exec(part)
         if (cite) {
           const source = sources.find((s) => s.id === cite[1])
           if (!source) return null // never show a citation that points nowhere
@@ -184,6 +241,18 @@ function Answer({ text, sources, onCite }: { text: string; sources: Source[]; on
 
 export function Guide() {
   const [enabled, setEnabled] = useState(false)
+  const [starters, setStarters] = useState<Record<string, string[]>>({})
+  const [speakAnswers, setSpeakAnswers] = useState(loadSpeak)
+  const speakRef = useRef(speakAnswers)
+  useEffect(() => {
+    speakRef.current = speakAnswers
+    try {
+      localStorage.setItem(SPEAK_KEY, speakAnswers ? '1' : '0')
+    } catch {
+      // preference only
+    }
+    if (!speakAnswers) stopSpeaking()
+  }, [speakAnswers])
   const [open, setOpen] = useState(false)
   const [items, setItems] = useState<Item[]>(loadItems)
   const [input, setInput] = useState('')
@@ -202,13 +271,22 @@ export function Guide() {
   useEffect(() => {
     const controller = new AbortController()
     guideStatus(controller.signal).then(
-      (s) => setEnabled(s.enabled),
+      (s) => {
+        setEnabled(s.enabled)
+        setStarters(s.starters ?? {})
+      },
       () => setEnabled(false),
     )
     return () => controller.abort()
   }, [])
 
   useEffect(() => saveItems(items.filter((i) => i.role === 'user' || !i.pending)), [items])
+
+  useEffect(() => {
+    const onOpen = () => setOpen(true)
+    window.addEventListener('smith:open', onOpen)
+    return () => window.removeEventListener('smith:open', onOpen)
+  }, [])
 
   // ⌘K / Ctrl+K toggles the guide anywhere on the site.
   useEffect(() => {
@@ -235,6 +313,7 @@ export function Guide() {
 
   const close = () => {
     setOpen(false)
+    stopSpeaking()
     launcherRef.current?.focus()
   }
 
@@ -269,15 +348,19 @@ export function Guide() {
     setItems((all) => [...all, { role: 'user', content: text }, { role: 'assistant', content: '', steps: [], sources: [], pending: true }])
     setInput('')
     setBusy(true)
+    stopSpeaking()
     const controller = new AbortController()
     abortRef.current = controller
 
+    let answerText = ''
     const onEvent = (event: GuideEvent) => {
       switch (event.type) {
         case 'token':
+          answerText += event.text
           updateLast((m) => ({ ...m, content: m.content + event.text }))
           break
         case 'reset_text':
+          answerText = ''
           updateLast((m) => ({ ...m, content: '' }))
           break
         case 'step':
@@ -295,17 +378,24 @@ export function Guide() {
         case 'action':
           act(event.action)
           break
+        case 'meta':
+          updateLast((m) => ({ ...m, run: event.run, cached: event.cached }))
+          break
+        case 'suggestions':
+          updateLast((m) => ({ ...m, suggestions: event.items }))
+          break
         case 'error':
           updateLast((m) => ({ ...m, pending: false, error: event.message }))
           break
         case 'done':
           updateLast((m) => ({ ...m, pending: false, content: m.content.trim() }))
+          if (speakRef.current && answerText.trim()) speak(answerText)
           break
       }
     }
 
     try {
-      await askGuide(history, pathRef.current, onEvent, controller.signal)
+      await askGuide(history, pathRef.current, onEvent, controller.signal, guideViewFor(pathRef.current))
       updateLast((m) => ({ ...m, pending: false }))
     } catch (error) {
       const stopped = error instanceof DOMException && error.name === 'AbortError'
@@ -331,6 +421,20 @@ export function Guide() {
       void send(input)
     }
   }
+
+  const voice = useSpeechInput(setInput, (text) => void send(text))
+  const listenSupported = canListen()
+  const speakSupported = canSpeak()
+
+  const rate = (index: number, run: string, rating: 'up' | 'down') => {
+    setItems((all) => all.map((item, i) => (i === index && item.role === 'assistant' ? { ...item, rating } : item)))
+    sendFeedback(run, rating).catch(() => {
+      // feedback is best effort
+    })
+  }
+
+  const pageStarters = starters[pathname] ?? starters['/projects'] ?? DEFAULT_STARTERS
+  const lastIndex = items.length - 1
 
   if (!enabled) return null
 
@@ -369,6 +473,18 @@ export function Guide() {
               <p className="font-display text-sm font-semibold">Smith</p>
               <p className="truncate text-xs text-zinc-500">AI guide · answers from this site, with sources</p>
             </div>
+            {speakSupported && (
+              <button
+                type="button"
+                onClick={() => setSpeakAnswers((on) => !on)}
+                aria-pressed={speakAnswers}
+                className="rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-zinc-900/5 hover:text-zinc-900 dark:hover:bg-white/10 dark:hover:text-white aria-pressed:text-emerald-600 dark:aria-pressed:text-emerald-400"
+                aria-label={speakAnswers ? 'Stop reading answers aloud' : 'Read answers aloud'}
+                title={speakAnswers ? 'Reading answers aloud' : 'Read answers aloud'}
+              >
+                {speakAnswers ? <Volume2 className="size-4" /> : <VolumeX className="size-4" />}
+              </button>
+            )}
             {items.length > 0 && (
               <button
                 type="button"
@@ -397,11 +513,12 @@ export function Guide() {
             {items.length === 0 && (
               <div className="animate-fade-up">
                 <p className="text-zinc-700 dark:text-zinc-300">
-                  Hi, I’m Smith. Ask me anything about Chirag’s work. I answer only from this site, cite my sources,
-                  and can open pages, run the churn model or profile a GitHub repo for you.
+                  Hi, I’m Smith. Ask me anything about Chirag’s work. I answer only from this site and cite my
+                  sources. I can also open pages, explain what is on your screen, run the churn model, and profile or
+                  deploy a GitHub repo.{listenSupported && ' Tap the mic to ask out loud.'}
                 </p>
                 <ul className="mt-4 space-y-2">
-                  {SUGGESTIONS.map((s) => (
+                  {pageStarters.map((s) => (
                     <li key={s}>
                       <button
                         type="button"
@@ -455,6 +572,55 @@ export function Guide() {
                         ))}
                     </ul>
                   )}
+                  {!item.pending && !item.error && item.content && (
+                    <div className="flex items-center gap-1 text-zinc-400">
+                      {item.run && (
+                        <>
+                          <button
+                            type="button"
+                            disabled={!!item.rating}
+                            onClick={() => item.run && rate(i, item.run, 'up')}
+                            aria-label="Helpful answer"
+                            aria-pressed={item.rating === 'up'}
+                            className="rounded-md p-1 transition-colors enabled:hover:bg-emerald-500/10 enabled:hover:text-emerald-600 aria-pressed:text-emerald-600 disabled:cursor-default dark:aria-pressed:text-emerald-400"
+                          >
+                            <ThumbsUp className="size-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={!!item.rating}
+                            onClick={() => item.run && rate(i, item.run, 'down')}
+                            aria-label="Unhelpful answer"
+                            aria-pressed={item.rating === 'down'}
+                            className="rounded-md p-1 transition-colors enabled:hover:bg-rose-500/10 enabled:hover:text-rose-600 aria-pressed:text-rose-600 disabled:cursor-default"
+                          >
+                            <ThumbsDown className="size-3.5" />
+                          </button>
+                          {item.rating && <span className="ml-1 text-[11px] text-zinc-500">Thanks for the feedback</span>}
+                        </>
+                      )}
+                      {item.cached && (
+                        <span className="ml-auto inline-flex items-center gap-1 text-[11px] text-zinc-500" title="A recent answer to the same question">
+                          <Zap className="size-3" aria-hidden /> instant
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  {i === lastIndex && !busy && item.suggestions && item.suggestions.length > 0 && (
+                    <ul className="flex flex-wrap gap-1.5" aria-label="Suggested follow-ups">
+                      {item.suggestions.map((s) => (
+                        <li key={s}>
+                          <button
+                            type="button"
+                            onClick={() => void send(s)}
+                            className="animate-fade-up rounded-full border border-emerald-500/30 bg-emerald-500/5 px-2.5 py-1 text-left text-xs text-emerald-800 transition-colors hover:bg-emerald-500/15 dark:text-emerald-200"
+                          >
+                            {s}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               ),
             )}
@@ -469,10 +635,25 @@ export function Guide() {
                 onKeyDown={onInputKey}
                 rows={1}
                 maxLength={1500}
-                placeholder="Ask about projects, skills, the models…"
+                placeholder={voice.listening ? 'Listening…' : 'Ask about projects, skills, the models…'}
                 aria-label="Ask Smith a question"
                 className="field-sizing-content max-h-28 min-h-9 flex-1 resize-none bg-transparent px-2 py-1.5 text-sm outline-none placeholder:text-zinc-400"
               />
+              {listenSupported && !busy && (
+                <button
+                  type="button"
+                  onClick={voice.listening ? voice.stop : voice.start}
+                  aria-pressed={voice.listening}
+                  aria-label={voice.listening ? 'Stop listening' : 'Ask by voice'}
+                  title={voice.listening ? 'Listening… click to stop' : 'Ask by voice'}
+                  className={`relative grid size-9 shrink-0 place-items-center rounded-lg transition-colors ${
+                    voice.listening ? 'bg-rose-500 text-white' : 'text-zinc-500 hover:bg-zinc-900/5 hover:text-zinc-900 dark:hover:bg-white/10 dark:hover:text-white'
+                  }`}
+                >
+                  {voice.listening && <span aria-hidden className="animate-ping-slow absolute inset-0 rounded-lg bg-rose-500/50" />}
+                  <Mic className="relative size-4" />
+                </button>
+              )}
               {busy ? (
                 <button
                   type="button"
@@ -493,7 +674,13 @@ export function Guide() {
                 </button>
               )}
             </div>
-            <p className="mt-2 px-1 text-[11px] text-zinc-500">Open model on Groq’s free tier. It can make mistakes; sources are linked.</p>
+            {voice.error && <p className="mt-2 px-1 text-[11px] text-rose-600 dark:text-rose-400">{voice.error}</p>}
+            <p className="mt-2 flex items-center justify-between gap-2 px-1 text-[11px] text-zinc-500">
+              <span>Open model on Groq’s free tier. It can make mistakes.</span>
+              <Link to="/smith" viewTransition className="shrink-0 font-medium text-emerald-700 hover:underline dark:text-emerald-400">
+                How Smith works →
+              </Link>
+            </p>
           </form>
         </section>
       )}

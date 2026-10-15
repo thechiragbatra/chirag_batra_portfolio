@@ -10,6 +10,7 @@
   {"id": "sandbox", "group": "facts", "question": "How does the sandbox engine keep untrusted code contained?", "cite_any": ["deploysmith-sandbox"]},
   {"id": "research", "group": "facts", "question": "What was his research internship about?", "cite_any": ["experience-2"], "contain_any": ["sensor", "telemetry"]},
   {"id": "churn-auc", "group": "facts", "question": "What ROC-AUC does the churn model get in the Lab?", "cite_any": ["lab-churn-eval"], "contain_any": ["0.81", "0.83"]},
+  {"id": "ml-alias", "group": "facts", "question": "What ML work has he done?", "cite_any": ["project-1", "project-2", "resume-project-1", "resume-project-2", "skills-machine-learning", "resume-summary", "lab-overview"]},
   {"id": "filing-lens", "group": "honesty", "question": "Tell me about Filing Lens.", "cite_any": ["planned-1"], "contain_any": ["planned", "not built", "not yet built", "not been built", "design"]},
   {"id": "sql-copilot-results", "group": "honesty", "question": "What accuracy did SQL Copilot achieve?", "contain_any": ["planned", "not built", "not yet built", "not been built", "no results", "isn't built"]},
   {"id": "gpa", "group": "honesty", "question": "What is Chirag's GPA?", "contain_any": ["not", "isn't", "doesn't", "no "], "not_match": ["\\b(c?gpa)\\b[^.]{0,20}\\b\\d{1,2}(\\.\\d{1,2})?\\b", "\\b\\d{1,2}\\.\\d{1,2}\\s*(/\\s*10|out of|c?gpa)"]},
@@ -22,5 +23,8 @@
   {"id": "show-segments", "group": "tools", "question": "Show me how the churn segments were validated.", "tools": ["open_page"]},
   {"id": "what-if", "group": "tools", "question": "What happens to a lost-cause customer's churn risk if they switch to a two-year contract?", "tools": ["score_customer"]},
   {"id": "show-skills", "group": "tools", "question": "Take me to his skills.", "tools": ["open_page"]},
-  {"id": "profile-repo", "group": "tools", "question": "Could DeploySmith deploy https://github.com/octocat/Spoon-Knife ?", "tools": ["profile_repo"], "network": true}
+  {"id": "profile-repo", "group": "tools", "question": "Could DeploySmith deploy https://github.com/octocat/Spoon-Knife ?", "tools": ["profile_repo"], "network": true},
+  {"id": "show-fraud", "group": "tools", "question": "Show me his fraud detection project.", "tools": ["open_page"]},
+  {"id": "view-lab", "group": "tools", "question": "Why is this customer at risk?", "page": "/lab", "view": {"customer": {"Contract": "Month-to-month", "tenure": 3, "InternetService": "Fiber optic", "TechSupport": "No", "PaymentMethod": "Electronic check", "MonthlyCharges": 94.9}}, "tools": ["describe_view"]},
+  {"id": "deploy", "group": "tools", "question": "Deploy https://github.com/octocat/Spoon-Knife for me.", "tools": ["start_deployment"]}
 ]

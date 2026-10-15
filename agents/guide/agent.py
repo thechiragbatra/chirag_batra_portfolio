@@ -39,8 +39,9 @@ Rules:
 1. Facts about Chirag come only from tool results in this conversation. Call search_portfolio \
 before stating any fact about him, his projects, skills or experience. If the results do not \
 cover the question, say you do not know and suggest contacting him directly.
-2. Cite every factual sentence with the source ids from search results, in plain square \
-brackets exactly like [S1] or [S1][S3].
+2. Cite every factual sentence with the source ids from tool results (search passages, and \
+the source_id of model outputs and the visitor's screen), in plain square brackets exactly \
+like [S1] or [S1][S3].
 3. Never invent or embellish experience, employers, dates, metrics or skills. Chirag is a B.Tech \
 student (class of 2027); his experience is the internships listed in his résumé, so never call \
 him a full-time employee. Projects marked PLANNED are designs that are not built yet: always say so.
@@ -230,7 +231,8 @@ _SHOW_INTENT = re.compile(
     r"\b(show|open|take me|bring me|navigate|go to|let me see|where can i see|display|point me)\b",
     re.IGNORECASE,
 )
-_CITE = re.compile(r"[\[【](S\d+)[^\]】]*[\]】]")
+# Citations as models actually write them: [S1], 【S1】, 【S1†L3】, [**S1**].
+_CITE = re.compile(r"[\[【]\s*(?:\*\*)?\s*(S\d+)[^\]】]*[\]】]")
 
 
 def wants_to_see(question: str) -> bool:
@@ -239,10 +241,9 @@ def wants_to_see(question: str) -> bool:
 
 def cited_docs(answer: str, toolbox: Toolbox) -> list[Doc]:
     """Documents the answer cites, in the order it first cites them."""
-    by_label = {toolbox.label(d): d for d in toolbox.docs if d.id in toolbox.cited_ids()}
     out: list[Doc] = []
     for label in _CITE.findall(answer):
-        doc = by_label.get(label)
+        doc = toolbox.doc_for(label)
         if doc is not None and doc not in out:
             out.append(doc)
     return out

@@ -4,7 +4,7 @@ import { DecisionMap, RiskGauge, RocCurve, ShapBars, TargetingChart } from '../c
 import { segmentColor, STRATEGIES } from '../components/lab/palette'
 import { Reveal } from '../components/fx/Reveal'
 import { PageHeader } from '../components/PageHeader'
-import { onLabCustomer, takeLabCustomer } from '../lib/guide'
+import { onLabCustomer, setGuideView, takeLabCustomer } from '../lib/guide'
 import {
   type Customer,
   FEATURE_LABELS,
@@ -372,6 +372,12 @@ function LabView({ lab }: { lab: LabBundle }) {
   const [budget, setBudget] = useState(0.2)
 
   const result = useMemo(() => score(lab, customer), [lab, customer])
+
+  // Tell the AI guide what is on screen, so "why is this customer at risk?" means this one.
+  useEffect(() => {
+    setGuideView('/lab', { customer })
+  }, [customer])
+  useEffect(() => () => setGuideView('/lab', null), [])
 
   // Customers sent by the AI guide ("what if this customer had a two-year contract?").
   useEffect(() => {

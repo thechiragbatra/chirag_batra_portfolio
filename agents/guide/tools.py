@@ -9,9 +9,11 @@ from __future__ import annotations
 
 import asyncio
 import json
+import re
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from typing import Any
+from urllib.parse import quote
 
 from agents.guide import churn
 from agents.guide.corpus import Doc, load_corpus
@@ -25,6 +27,7 @@ PAGES: dict[str, tuple[str, ...]] = {
     "/resume": ("experience", "education", "projects", "skills"),
     "/deployer": (),
     "/apps": (),
+    "/smith": ("architecture", "guardrails", "evaluation", "usage"),
 }
 PROFILE_TIMEOUT_S = 75.0
 
@@ -177,6 +180,39 @@ SCHEMAS: list[dict[str, Any]] = [
     },
 ]
 
+# Model outputs are citable too, so an answer about "this customer" cites the screen it came
+# from rather than an unrelated search passage.
+SCREEN_DOC = Doc(
+    id="screen-lab",
+    title="Your screen: the customer in the Lab",
+    text="",
+    page="/lab",
+    section="reasons",
+)
+MODEL_DOC = Doc(
+    id="lab-model-output",
+    title="Churn Lab model output",
+    text="",
+    page="/lab",
+    section="risk",
+)
+
+# A real deployment needs a real request ("deploy it", "can you deploy ..."), not a
+# hypothetical ("could DeploySmith deploy ...?"), which profile_repo answers instead.
+_DEPLOY_REQUEST = re.compile(
+    r"^\W*(?:please\s+)?(?:go ahead and\s+)?(?:deploy|ship|launch)\b"
+    r"|\b(?:can|could|would|will) you\s+(?:please\s+)?(?:deploy|ship|launch)\b"
+    r"|\b(?:deploy|ship|launch) (?:it|this|that|them)\b"
+    r"|\bdeploy\b.*\bfor me\b"
+    r"|\b(?:yes|yeah|sure|go ahead)\b",
+    re.IGNORECASE,
+)
+
+
+def asks_to_deploy(question: str) -> bool:
+    return bool(_DEPLOY_REQUEST.search(question))
+
+
 # What each page shows, for describe_view.
 PAGE_BLURBS: dict[str, str] = {
     "/projects": "Home: hero with headline numbers, selected projects, and projects being built.",
@@ -186,6 +222,7 @@ PAGE_BLURBS: dict[str, str] = {
     "/deployer": "Deployer: paste a GitHub repo and watch four agents profile, plan, deploy "
     "and health-check it live.",
     "/apps": "Apps: deployments made by the local sandbox engine, with logs and rollback.",
+    "/smith": "How Smith works: architecture, tools, guardrails, eval scores and live usage.",
 }
 
 
@@ -200,7 +237,9 @@ class Toolbox:
         deployer: Callable[[str], Awaitable[dict[str, Any]]] | None = None,
         page: str = "/projects",
         view: dict[str, Any] | None = None,
+        question: str = "",
     ) -> None:
+        self.question = question
         self.docs = docs if docs is not None else load_corpus()
         self.deployer = deployer
         self.page = page
@@ -209,6 +248,7 @@ class Toolbox:
         self._lab = lab
         self.profiler = profiler or profile_github_repo
         self._cited: dict[str, str] = {}  # doc id -> citation label, stable per conversation
+        self._labeled: dict[str, Doc] = {}  # citation label -> doc
 
     @property
     def lab(self) -> churn.Lab:
@@ -224,7 +264,11 @@ class Toolbox:
         """Citation label (S1, S2, ...) for a document, stable for the conversation."""
         if doc.id not in self._cited:
             self._cited[doc.id] = f"S{len(self._cited) + 1}"
+            self._labeled[self._cited[doc.id]] = doc
         return self._cited[doc.id]
+
+    def doc_for(self, label: str) -> Doc | None:
+        return self._labeled.get(label)
 
     async def call(self, name: str, args: dict[str, Any]) -> ToolResult:
         handlers = {
@@ -279,11 +323,12 @@ class Toolbox:
         result = churn.score(lab, customer)
         result["customer_changes"] = changes
         result["started_from"] = start_from
+        result["source_id"] = self.label(MODEL_DOC)
         actions: list[Action] = [
             {"type": "navigate", "path": "/lab", "section": "risk"},
             {"type": "set_customer", "values": customer},
         ]
-        return ToolResult(result, actions=actions)
+        return ToolResult(result, actions=actions, sources=[MODEL_DOC])
 
     async def profile_repo(self, repo_url: str) -> ToolResult:
         try:
@@ -312,11 +357,18 @@ class Toolbox:
             values = churn.apply_changes(lab, lab.presets["persuadable"], customer)
             content["customer"] = values
             content["model_output"] = churn.score(lab, values)
+            content["source_id"] = self.label(SCREEN_DOC)
+            return ToolResult(content, sources=[SCREEN_DOC])
         return ToolResult(content)
 
     async def start_deployment(self, repo_url: str) -> ToolResult:
         if self.deployer is None:
             raise ToolError("deploying from the chat is not available here")
+        if not asks_to_deploy(self.question):
+            raise ToolError(
+                "the visitor asked whether it could be deployed, not to deploy it: answer with "
+                "profile_repo instead, and offer to deploy if they want"
+            )
         try:
             url = normalize_github_url(repo_url)
         except ValueError as exc:
@@ -325,7 +377,7 @@ class Toolbox:
             run = await self.deployer(url)
         except Exception as exc:  # limits, engine errors
             raise ToolError(f"could not start the deployment: {exc}") from exc
-        path = f"/deployer?run={run['id']}"
+        path = f"/deployer?run={run['id']}&repo={quote(url, safe='')}"
         return ToolResult(
             {**run, "watch": "Opened the Deployer, where the run streams live."},
             actions=[{"type": "navigate", "path": path, "section": None}],

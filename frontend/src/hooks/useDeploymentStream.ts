@@ -122,25 +122,9 @@ export function useDeploymentStream() {
 
   useEffect(() => stop, [stop])
 
-  const start = useCallback(
-    async (repoUrl: string) => {
-      stop()
-      const abort = new AbortController()
-      abortRef.current = abort
-      dispatch({ type: 'start' })
-
-      let id: string
-      try {
-        const created = await createDeployment(repoUrl, abort.signal)
-        id = created.id
-        dispatch({ type: 'created', id, repoUrl: created.repo_url })
-      } catch (error) {
-        if (abort.signal.aborted) return
-        dispatch({ type: 'fail', message: error instanceof Error ? error.message : String(error) })
-        return
-      }
-      if (abort.signal.aborted) return
-
+  /** Follow a run's event stream (one this page created, or one started elsewhere). */
+  const follow = useCallback(
+    (id: string) => {
       const source = new EventSource(deploymentEventsUrl(id))
       sourceRef.current = source
       source.onmessage = (message: MessageEvent<string>) => {
@@ -159,6 +143,40 @@ export function useDeploymentStream() {
     [stop],
   )
 
+  /** Watch a run that was already started, e.g. by the AI guide. */
+  const attach = useCallback(
+    (id: string, repoUrl: string) => {
+      stop()
+      dispatch({ type: 'start' })
+      dispatch({ type: 'created', id, repoUrl })
+      follow(id)
+    },
+    [stop, follow],
+  )
+
+  const start = useCallback(
+    async (repoUrl: string) => {
+      stop()
+      const abort = new AbortController()
+      abortRef.current = abort
+      dispatch({ type: 'start' })
+
+      let id: string
+      try {
+        const created = await createDeployment(repoUrl, abort.signal)
+        id = created.id
+        dispatch({ type: 'created', id, repoUrl: created.repo_url })
+      } catch (error) {
+        if (abort.signal.aborted) return
+        dispatch({ type: 'fail', message: error instanceof Error ? error.message : String(error) })
+        return
+      }
+      if (abort.signal.aborted) return
+      follow(id)
+    },
+    [stop, follow],
+  )
+
   const isBusy = state.phase === 'starting' || state.phase === 'streaming'
-  return { ...state, isBusy, start }
+  return { ...state, isBusy, start, attach }
 }

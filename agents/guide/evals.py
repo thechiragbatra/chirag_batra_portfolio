@@ -15,6 +15,7 @@ import asyncio
 import json
 import re
 import time
+from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -31,6 +32,7 @@ class Transcript:
     answer: str
     tools: list[str] = field(default_factory=list)
     cited_docs: set[str] = field(default_factory=set)
+    models: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -41,6 +43,7 @@ class Verdict:
     failures: list[str]
     answer: str
     tools: list[str]
+    models: list[str] = field(default_factory=list)
 
 
 def load_cases(path: Path = CASES_PATH) -> list[dict[str, Any]]:
@@ -72,7 +75,7 @@ def grade(case: dict[str, Any], t: Transcript) -> Verdict:
         failures.append(f"used tools on an off-topic request: {t.tools}")
     if not t.answer.strip():
         failures.append("empty answer")
-    return Verdict(case["id"], case["group"], not failures, failures, t.answer, t.tools)
+    return Verdict(case["id"], case["group"], not failures, failures, t.answer, t.tools, t.models)
 
 
 async def fake_deployer(url: str) -> dict[str, Any]:
@@ -82,7 +85,9 @@ async def fake_deployer(url: str) -> dict[str, Any]:
 
 async def run_case(model: ChatModel, case: dict[str, Any], graph: Any) -> Transcript:
     page = case.get("page", "/projects")
-    toolbox = Toolbox(page=page, view=case.get("view"), deployer=fake_deployer)
+    toolbox = Toolbox(
+        page=page, view=case.get("view"), deployer=fake_deployer, question=case["question"]
+    )
     outcome = await run_guide(
         graph, [{"role": "user", "content": case["question"]}], page, model, toolbox
     )
@@ -90,6 +95,7 @@ async def run_case(model: ChatModel, case: dict[str, Any], graph: Any) -> Transc
         answer=outcome.answer,
         tools=outcome.tools,
         cited_docs={d.id for d in outcome.cited},
+        models=outcome.trace.models,
     )
 
 
@@ -124,6 +130,33 @@ def summary(verdicts: list[Verdict]) -> str:
     return "\n".join(lines)
 
 
+def published(verdicts: list[Verdict], cases: list[dict[str, Any]]) -> dict[str, Any]:
+    """The summary the site's "How Smith works" page shows: scores and questions, no answers."""
+    questions = {c["id"]: c["question"] for c in cases}
+    groups: dict[str, dict[str, int]] = {}
+    for v in verdicts:
+        g = groups.setdefault(v.group, {"passed": 0, "cases": 0})
+        g["cases"] += 1
+        g["passed"] += v.passed
+    models = Counter(m for v in verdicts for m in dict.fromkeys(v.models))
+    return {
+        "generated": time.strftime("%Y-%m-%d", time.gmtime()),
+        "models": dict(models.most_common()),
+        "passed": sum(v.passed for v in verdicts),
+        "cases": len(verdicts),
+        "groups": groups,
+        "results": [
+            {
+                "id": v.case,
+                "group": v.group,
+                "question": questions.get(v.case, ""),
+                "passed": v.passed,
+            }
+            for v in verdicts
+        ],
+    }
+
+
 def main() -> None:
     from agents.guide.llm import GroqChat
 
@@ -131,6 +164,11 @@ def main() -> None:
     parser.add_argument("--offline", action="store_true", help="skip cases that clone repos")
     parser.add_argument("--only", help="comma-separated case ids")
     parser.add_argument("--report", type=Path, default=Path("guide-eval-report.json"))
+    parser.add_argument(
+        "--publish",
+        type=Path,
+        help="also write the site's summary (frontend/src/data/guide-evals.json)",
+    )
     parser.add_argument(
         "--pause", type=float, default=20.0, help="seconds between cases (free-tier token rate)"
     )
@@ -152,6 +190,12 @@ def main() -> None:
         json.dumps([v.__dict__ for v in verdicts], indent=2, ensure_ascii=False), encoding="utf-8"
     )
     print(f"report: {args.report}")
+    if args.publish:
+        args.publish.write_text(
+            json.dumps(published(verdicts, cases), indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+        print(f"published: {args.publish}")
 
 
 if __name__ == "__main__":

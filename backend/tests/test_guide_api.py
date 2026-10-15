@@ -142,7 +142,7 @@ def test_sliding_window_expires_old_events() -> None:
 
 def test_history_drops_old_citations_and_keeps_recent_turns() -> None:
     messages = [ChatMessage(role="user", content=f"q{i}") for i in range(30)]
-    messages.append(ChatMessage(role="assistant", content="He built RADAR [S1][S2]."))
+    messages.append(ChatMessage(role="assistant", content="He built RADAR [S1][**S2**]."))
     messages.append(ChatMessage(role="user", content="More?"))
     history = model_history(messages)
     assert len(history) == guide_api.MAX_HISTORY

@@ -121,10 +121,14 @@ async def test_start_deployment_opens_the_deployer_on_the_new_run() -> None:
     async def deployer(url: str) -> dict[str, Any]:
         return {"id": "b" * 32, "repo": url, "mode": "test"}
 
-    box = Toolbox(profiler=fake_profiler, deployer=deployer)
+    box = Toolbox(profiler=fake_profiler, deployer=deployer, question="Deploy acme/shop please")
     result = await box.call("start_deployment", {"repo_url": "https://github.com/acme/shop"})
     assert result.ok and result.actions == [
-        {"type": "navigate", "path": f"/deployer?run={'b' * 32}", "section": None}
+        {
+            "type": "navigate",
+            "path": f"/deployer?run={'b' * 32}&repo=https%3A%2F%2Fgithub.com%2Facme%2Fshop",
+            "section": None,
+        }
     ]
     assert not (
         await Toolbox(profiler=fake_profiler).call(
@@ -133,3 +137,48 @@ async def test_start_deployment_opens_the_deployer_on_the_new_run() -> None:
     ).ok
     bad = await box.call("start_deployment", {"repo_url": "https://example.com/a/b"})
     assert not bad.ok
+
+
+async def test_start_deployment_refuses_hypothetical_questions() -> None:
+    started = []
+
+    async def deployer(url: str) -> dict[str, Any]:
+        started.append(url)
+        return {"id": "c" * 32, "repo": url, "mode": "test"}
+
+    box = Toolbox(
+        profiler=fake_profiler,
+        deployer=deployer,
+        question="Could DeploySmith deploy https://github.com/octocat/Spoon-Knife ?",
+    )
+    result = await box.call(
+        "start_deployment", {"repo_url": "https://github.com/octocat/Spoon-Knife"}
+    )
+    assert not result.ok and "profile_repo" in result.content["error"]
+    assert started == []
+
+
+@pytest.mark.parametrize(
+    "question, expected",
+    [
+        ("Deploy https://github.com/octocat/Spoon-Knife for me.", True),
+        ("Deploy it", True),
+        ("Can you deploy github.com/a/b?", True),
+        ("Yes, go ahead", True),
+        ("please ship this", True),
+        ("Could DeploySmith deploy https://github.com/a/b ?", False),
+        ("How would DeploySmith deploy a Next.js app?", False),
+        ("Is it deployable?", False),
+    ],
+)
+def test_asks_to_deploy(question: str, expected: bool) -> None:
+    assert tools.asks_to_deploy(question) is expected
+
+
+async def test_model_outputs_and_the_screen_are_citable() -> None:
+    box = Toolbox(profiler=fake_profiler, page="/lab", view={"customer": {"tenure": 3}})
+    viewed = await box.call("describe_view", {})
+    assert viewed.content["source_id"] == "S1" and viewed.sources[0].page == "/lab"
+    scored = await box.call("score_customer", {"changes": {"Contract": "Two year"}})
+    assert scored.content["source_id"] == "S2"
+    assert box.doc_for("S1").title.startswith("Your screen")

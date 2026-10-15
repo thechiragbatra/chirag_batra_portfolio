@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 MAX_MESSAGE_CHARS = 1500
 MAX_HISTORY = 16
-_CITATION = re.compile(r"\s*[\[【]S\d+[^\]】]*[\]】]")
+_CITATION = re.compile(r"\s*[\[【]\s*(?:\*\*)?\s*S\d+[^\]】]*[\]】]")
 
 
 def _env_int(name: str, default: int) -> int:
@@ -174,8 +174,11 @@ class GuideService:
 
         return deploy
 
-    def toolbox(self, visitor: str, page: str, view: dict[str, Any] | None) -> Toolbox:
+    def toolbox(
+        self, visitor: str, page: str, view: dict[str, Any] | None, question: str = ""
+    ) -> Toolbox:
         return Toolbox(
+            question=question,
             profiler=self.limited_profiler(visitor),
             deployer=self.limited_deployer(visitor),
             page=page,
@@ -316,7 +319,7 @@ async def guide_chat(body: ChatRequest, request: Request) -> StreamingResponse:
                     await queue.put(event)
                 record.answer = "".join(e["text"] for e in cached if e["type"] == "token")
             else:
-                toolbox = service.toolbox(visitor, body.page, body.view)
+                toolbox = service.toolbox(visitor, body.page, body.view, question)
                 outcome = await run_guide(
                     service.graph,
                     model_history(body.messages),

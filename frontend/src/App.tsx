@@ -6,6 +6,7 @@ import Lab from './pages/Lab'
 import NotFound from './pages/NotFound'
 import Projects from './pages/Projects'
 import Resume from './pages/Resume'
+import Smith from './pages/Smith'
 
 export const routes = (
   <Route element={<Layout />}>
@@ -15,6 +16,7 @@ export const routes = (
     <Route path="resume" element={<Resume />} />
     <Route path="deployer" element={<Deployer />} />
     <Route path="apps" element={<Apps />} />
+    <Route path="smith" element={<Smith />} />
     <Route path="*" element={<NotFound />} />
   </Route>
 )

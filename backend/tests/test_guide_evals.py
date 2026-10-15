@@ -72,3 +72,25 @@ async def test_evaluate_runs_cases_through_the_agent() -> None:
 def test_grade_treats_curly_and_straight_apostrophes_alike() -> None:
     case = {"id": "g", "group": "honesty", "contain_any": ["isn't listed"]}
     assert grade(case, Transcript("His GPA isn’t listed here.")).passed
+
+
+def test_published_summary_has_scores_but_no_answers() -> None:
+    from agents.guide.evals import Verdict, published
+
+    verdicts = [
+        Verdict("a", "facts", True, [], "secret answer", ["search_portfolio"], ["m1"]),
+        Verdict("b", "facts", False, ["x"], "another", [], ["m1", "m2"]),
+    ]
+    summary = published(
+        verdicts, [{"id": "a", "question": "Q a?"}, {"id": "b", "question": "Q b?"}]
+    )
+    assert summary["passed"] == 1 and summary["cases"] == 2
+    assert summary["groups"] == {"facts": {"passed": 1, "cases": 2}}
+    assert summary["models"] == {"m1": 2, "m2": 1}
+    assert summary["results"][0] == {
+        "id": "a",
+        "group": "facts",
+        "question": "Q a?",
+        "passed": True,
+    }
+    assert "secret" not in str(summary)

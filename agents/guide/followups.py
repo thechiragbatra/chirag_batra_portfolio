@@ -34,6 +34,11 @@ PAGE_STARTERS: dict[str, tuple[str, ...]] = {
         "How does rollback work?",
         "What can DeploySmith deploy?",
     ),
+    "/smith": (
+        "How do you avoid making things up?",
+        "Which tools can you use?",
+        "Show me how you are evaluated",
+    ),
 }
 MAX_SUGGESTIONS = 3
 

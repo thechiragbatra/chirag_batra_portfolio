@@ -150,3 +150,15 @@ async def test_answers_end_with_follow_up_suggestions() -> None:
     _, events = await run(model, question="Tell me about his churn project")
     suggestions = events[-1]
     assert suggestions["type"] == "suggestions" and 1 <= len(suggestions["items"]) <= 3
+
+
+def test_citations_are_found_in_every_style_models_write() -> None:
+    from agents.guide.agent import cited_docs
+    from agents.guide.tools import Toolbox as Box
+
+    box = Box(profiler=no_profiler)
+    docs = list(box.docs[:3])
+    for doc in docs:
+        box.label(doc)
+    found = cited_docs("A [**S1**]. B 【S2†L3】. C [S3]. Again [S1]. Unknown [S9].", box)
+    assert found == docs
