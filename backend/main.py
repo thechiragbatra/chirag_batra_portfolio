@@ -22,6 +22,7 @@ from apps import engine_enabled_flag
 from apps import router as apps_router
 from events import EventAdapter
 from graph import build_graph
+from guide_api import router as guide_router
 from runs import RunRegistry
 from validation import normalize_github_url
 
@@ -100,6 +101,7 @@ async def require_csrf_header(
 
 registry = RunRegistry(build_graph())
 app.include_router(apps_router)
+app.include_router(guide_router)
 
 
 @app.get("/api/health")

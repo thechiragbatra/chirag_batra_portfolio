@@ -28,6 +28,9 @@ RUN cd backend && uv sync --frozen --no-dev --no-install-project
 
 COPY agents agents
 COPY backend backend
+# The guide agent answers from the site's own content and runs the Churn Lab models.
+COPY frontend/src/data frontend/src/data
+COPY frontend/public/models frontend/public/models
 
 # Run unprivileged.
 RUN useradd --create-home --uid 10001 app
