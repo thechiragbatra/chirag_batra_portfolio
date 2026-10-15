@@ -111,7 +111,7 @@ def train_churn(X: np.ndarray, y: np.ndarray) -> tuple[XGBClassifier, dict[str, 
 
 def benchmark_uplift(
     df: pd.DataFrame, X: np.ndarray, y: np.ndarray
-) -> tuple[uplift.TLearner, dict[str, Any], np.ndarray, np.ndarray]:
+) -> tuple[uplift.TLearner, dict[str, Any], np.ndarray, np.ndarray, np.ndarray]:
     oracle = uplift.fit_oracle(df, y)
     p0 = oracle.predict_proba(df)[:, 1]
     tau = uplift.planted_effect(df, p0)
@@ -185,7 +185,7 @@ def benchmark_uplift(
         "segmentAccuracy": r((segments == truth).mean(), 3),
         "errorSd": r(np.std(lift - tau[te]), 3),
     }
-    return learner, report, te, segments
+    return learner, report, te, segments, truth
 
 
 def presets(
@@ -194,12 +194,14 @@ def presets(
     learner: uplift.TLearner,
     te: np.ndarray,
     segments: np.ndarray,
+    truth: np.ndarray,
 ) -> list[dict[str, Any]]:
-    """One typical holdout customer per segment: the median by uplift within it."""
+    """One typical holdout customer per segment: the median by uplift among customers the
+    model places correctly, so each example agrees with the planted rules it illustrates."""
     out: list[dict[str, Any]] = []
     lift = learner.uplift(X[te])
     for seg in ("persuadable", "sure_thing", "lost_cause", "sleeping_dog"):
-        rows = np.flatnonzero(segments == seg)
+        rows = np.flatnonzero((segments == seg) & (truth == seg))
         if len(rows) == 0:
             continue
         pick = rows[np.argsort(lift[rows])[len(rows) // 2]]
@@ -238,7 +240,7 @@ def main() -> None:
     X = enc.transform(df)
 
     churn_model, churn_metrics, X_te = train_churn(X, y)
-    learner, uplift_report, te, segments = benchmark_uplift(df, X, y)
+    learner, uplift_report, te, segments, truth = benchmark_uplift(df, X, y)
 
     payload = {
         "version": 1,
@@ -254,7 +256,7 @@ def main() -> None:
             "treatment": trees.export(learner.treatment.get_booster()),
             **uplift_report,
         },
-        "presets": presets(df, X, learner, te, segments),
+        "presets": presets(df, X, learner, te, segments, truth),
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(payload, separators=(",", ":")))

@@ -25,7 +25,8 @@
       "Streamlit"
     ],
     "githubUrl": "https://github.com/thechiragbatra/customer-churn-mlops",
-    "diagram": "/projects/customer-churn-mlops.jpg"
+    "diagram": "/projects/customer-churn-mlops.jpg",
+    "demo": "/lab"
   },
   {
     "title": "DeploySmith OS",

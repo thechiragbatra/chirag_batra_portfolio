@@ -8,6 +8,7 @@ import { ThemeToggle } from './ThemeToggle'
 
 const NAV = [
   { to: '/projects', label: 'Projects' },
+  { to: '/lab', label: 'Lab' },
   { to: '/resume', label: 'Resume' },
   { to: '/deployer', label: 'Deployer' },
   { to: '/apps', label: 'Apps' },
@@ -50,6 +51,11 @@ export function Layout() {
   const reduced = useReducedMotion()
   const scrolled = useScrolled()
   useNavDirection(pathname)
+  const navRef = useRef<HTMLElement>(null)
+  // Keep the active link visible when the nav is scrollable.
+  useEffect(() => {
+    navRef.current?.querySelector('[aria-current="page"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+  }, [pathname])
 
   return (
     <div className="relative flex min-h-dvh flex-col">
@@ -71,14 +77,19 @@ export function Layout() {
               Deploy<span className="text-aurora">Smith</span>
             </span>
           </NavLink>
-          <nav className="relative flex flex-1 gap-1 text-sm" aria-label="Main">
+          {/* Scrolls sideways on narrow phones instead of pushing the header off-screen. */}
+          <nav
+            ref={navRef}
+            className="relative flex min-w-0 flex-1 gap-1 overflow-x-auto text-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            aria-label="Main"
+          >
             {NAV.map(({ to, label }) => (
               <NavLink
                 key={to}
                 to={to}
                 viewTransition={!reduced}
                 className={({ isActive }) =>
-                  `relative isolate rounded-xl px-2.5 py-1.5 font-medium transition-colors sm:px-3.5 ${
+                  `relative isolate shrink-0 rounded-xl px-2.5 py-1.5 font-medium whitespace-nowrap transition-colors sm:px-3.5 ${
                     isActive
                       ? 'text-zinc-950 dark:text-white'
                       : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100'
@@ -101,7 +112,9 @@ export function Layout() {
               </NavLink>
             ))}
           </nav>
-          <ThemeToggle />
+          <div className="shrink-0">
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 

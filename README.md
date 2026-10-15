@@ -14,9 +14,10 @@ provisioner is a mock (nothing is deployed) and the real healer is opt-in via `R
 
 | Path | What |
 | --- | --- |
-| `frontend/` | React + Vite + TypeScript + Tailwind. Routes: `/projects`, `/resume`, `/deployer`, `/apps` |
+| `frontend/` | React + Vite + TypeScript + Tailwind. Routes: `/projects`, `/lab`, `/resume`, `/deployer`, `/apps` |
 | `backend/` | FastAPI app, LangGraph pipeline (`graph.py`), in-memory run registry, apps API (`apps.py`), tests |
 | `agents/` | `Agent` protocol (`base.py`), domain models (`models.py`), agents, `skills/` (clone, analyze, plan, probe, diagnose) and `sandbox/` (the local deployment engine) |
+| `ml/churn/` | Trains the Churn Lab's churn and uplift models and exports them for the browser (see below) |
 | `shared/` | JSON Schemas for state and events, the source of truth for both languages ([shared/README.md](shared/README.md)) |
 
 ## Running locally
@@ -96,6 +97,21 @@ production builds. Set `GITHUB_TOKEN` in `.env` if you hit GitHub's anonymous ra
 cd frontend && npm run resume:pdf     # needs Google Chrome; set CHROME=/path/to/chrome elsewhere
 ```
 
+### Churn Lab models
+
+`/lab` runs the churn project's XGBoost model and a T-learner uplift model in the browser:
+`frontend/src/lib/ml/trees.ts` evaluates the exported trees and computes exact TreeSHAP,
+and `npm test` checks both against XGBoost's own output. The models live in
+`frontend/public/models/churn-lab.json`; retrain and re-export with:
+
+```sh
+cd ml/churn && uv run python train.py   # downloads the dataset (sha256-pinned), ~10 s
+```
+
+The Telco data has no record of retention offers, so the uplift model is graded on a
+semi-synthetic benchmark: real customers, a planted offer effect (`uplift.planted_effect`)
+and a simulated randomized experiment, repeated over five seeds.
+
 ## Deploying to Google Cloud
 
 The site (frontend + API) deploys to Google Cloud Run with one script; see
@@ -113,7 +129,8 @@ profiles and plans for real and simulates the deploy.
 GitHub Actions runs these on every push and pull request ([.github/workflows/ci.yml](.github/workflows/ci.yml)), plus a build of both Cloud Run images.
 
 ```sh
-cd frontend && npm run lint && npm run build
+cd frontend && npm run lint && npm test && npm run build
+cd ml/churn && uv run pytest && uvx ruff check . && uvx ruff format --check .
 cd backend && uv run pytest              # offline; -m network for real clones/probes, -m docker for a real sandbox deploy
 cd backend && uvx ruff check . ../agents && uvx ruff format --check . ../agents
 ```

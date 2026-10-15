@@ -1,4 +1,5 @@
-import { ArrowUpRight, ExternalLink, FolderGit2 } from 'lucide-react'
+import { ArrowUpRight, ExternalLink, FlaskConical, FolderGit2 } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import type { Project } from '../types/content'
 import { TiltCard } from './fx/TiltCard'
 
@@ -65,6 +66,11 @@ export function ProjectCard({ project }: { project: Project }) {
             <a href={project.githubUrl} target="_blank" rel="noreferrer" className={linkClass}>
               <FolderGit2 className="size-4" /> Source
             </a>
+            {project.demo && (
+              <Link to={project.demo} viewTransition className={`${linkClass} text-emerald-700 dark:text-emerald-400`}>
+                <FlaskConical className="size-4" /> Try the model
+              </Link>
+            )}
             {project.liveUrl && (
               <a href={project.liveUrl} target="_blank" rel="noreferrer" className={linkClass}>
                 <ExternalLink className="size-4" /> Live
