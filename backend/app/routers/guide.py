@@ -30,7 +30,7 @@ from agents.guide.agent import GuideEvent, Outcome, build_guide, run_guide
 from agents.guide.followups import PAGE_STARTERS
 from agents.guide.llm import ChatModel, GroqChat, LLMError, configured_models, guide_enabled
 from agents.guide.tools import Toolbox, profile_github_repo
-from guide_store import AnswerCache, RunLog, RunRecord
+from app.services.guide_store import AnswerCache, RunLog, RunRecord
 
 router = APIRouter(prefix="/api/guide")
 logger = logging.getLogger(__name__)

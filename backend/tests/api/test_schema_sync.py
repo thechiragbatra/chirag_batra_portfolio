@@ -6,15 +6,15 @@ as titles, descriptions and defaults.
 """
 
 import json
-from pathlib import Path
 from typing import Any
 
 import pytest
 
 from agents.models import DeploymentState
-from events import EventAdapter
+from app.services.events import EventAdapter
+from app.settings import REPO_ROOT
 
-SCHEMAS = Path(__file__).resolve().parents[2] / "shared" / "schemas"
+SCHEMAS = REPO_ROOT / "shared" / "schemas"
 
 
 def load(name: str) -> dict[str, Any]:

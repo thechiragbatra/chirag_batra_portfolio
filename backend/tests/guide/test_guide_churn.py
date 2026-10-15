@@ -1,13 +1,13 @@
 """The Python port of the Churn Lab models must match XGBoost exactly, like the browser."""
 
 import json
-from pathlib import Path
 
 import pytest
 
 from agents.guide import churn
+from app.settings import REPO_ROOT
 
-FRONTEND = Path(__file__).resolve().parents[2] / "frontend"
+FRONTEND = REPO_ROOT / "frontend"
 FIXTURE = json.loads((FRONTEND / "tests" / "fixtures" / "churn-parity.json").read_text())
 
 

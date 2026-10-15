@@ -14,8 +14,8 @@ from agents.models import Component
 from agents.sandbox import engine as engine_mod
 from agents.sandbox.engine import Engine
 from agents.sandbox.store import AppRecord, Deployment, Store
-from apps import get_engine
-from main import app
+from app.main import app
+from app.routers.apps import get_engine
 
 
 def deployment(deploy_id: str, status: str = "ready") -> Deployment:
@@ -64,7 +64,7 @@ def engine(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Engine:
     async def not_running(_: str) -> bool:
         return False
 
-    monkeypatch.setattr("apps.container_running", not_running)
+    monkeypatch.setattr("app.routers.apps.container_running", not_running)
     return Engine(store)
 
 
@@ -138,7 +138,7 @@ async def test_rollback_to_unknown_or_malformed_deploy(client: httpx.AsyncClient
 async def test_log_endpoint_serves_only_the_tail(
     client: httpx.AsyncClient, engine: Engine, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setattr("apps.MAX_LOG_RESPONSE_BYTES", 10)
+    monkeypatch.setattr("app.routers.apps.MAX_LOG_RESPONSE_BYTES", 10)
     engine.store.log_path("shop", NEW).write_text("0123456789ABCDEFGHIJ")
     text = (await client.get(f"/api/apps/shop/deploys/{NEW}/log")).text
     assert text.endswith("ABCDEFGHIJ") and text.startswith("[showing the last")

@@ -2,7 +2,7 @@
 
 An agent reads the current DeploymentState, reports progress through `log`, and
 returns a partial state update. It never touches the event stream, its own
-status, or the repair counter: the graph wrapper in backend/graph.py owns those.
+status, or the repair counter: the graph wrapper in backend/app/services/graph.py owns those.
 Real implementations replace the mocks by satisfying the same Protocol.
 """
 

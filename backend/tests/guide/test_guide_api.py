@@ -4,10 +4,10 @@ import httpx
 import pytest
 from guide_fakes import ScriptedModel, Turn
 
-import guide_api
 from agents.guide.llm import LLMError
-from guide_api import ChatMessage, GuideService, SlidingWindow, model_history
-from main import app
+from app.main import app
+from app.routers import guide as guide_api
+from app.routers.guide import ChatMessage, GuideService, SlidingWindow, model_history
 
 HEADERS = {"X-DeploySmith": "1"}
 

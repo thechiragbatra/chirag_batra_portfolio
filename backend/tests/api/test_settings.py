@@ -1,6 +1,6 @@
 import os
 
-from envfile import load_env_file
+from app.settings import load_env_file
 
 
 def test_loads_values_without_overriding_real_env(tmp_path, monkeypatch) -> None:

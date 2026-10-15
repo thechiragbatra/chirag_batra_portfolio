@@ -5,8 +5,8 @@ import pytest
 from agents import MockHealer, MockProfiler, MockProvisioner, MockStrategist
 from agents.base import AgentUpdate, LogFn
 from agents.models import MAX_REPAIR_ATTEMPTS, AgentName, AgentStatus, DeploymentState, Platform
-from events import Event, LogEvent, StatusEvent
-from graph import build_graph, run_deployment
+from app.services.events import Event, LogEvent, StatusEvent
+from app.services.graph import build_graph, run_deployment
 
 REPO = "https://github.com/acme/shop"
 

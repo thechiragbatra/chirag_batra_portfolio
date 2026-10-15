@@ -43,4 +43,4 @@ ENV SANDBOX_ENGINE=0 \
     PORT=8080
 WORKDIR /app/backend
 EXPOSE 8080
-CMD ["sh", "-c", "exec uvicorn main:app --host 0.0.0.0 --port ${PORT} --proxy-headers --forwarded-allow-ips='*' --timeout-keep-alive 75"]
+CMD ["sh", "-c", "exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT} --proxy-headers --forwarded-allow-ips='*' --timeout-keep-alive 75"]

@@ -30,7 +30,7 @@ cp .env.example .env          # optional: every value has a sensible default; th
 # Backend → http://localhost:8000
 cd backend
 uv sync
-PYTHONPATH=.. uv run uvicorn main:app --reload --reload-dir . --reload-dir ../agents
+PYTHONPATH=.. uv run uvicorn app.main:app --reload --reload-dir . --reload-dir ../agents
 
 # Frontend → http://localhost:5173 (in a second terminal)
 cd frontend
@@ -46,7 +46,7 @@ Open http://localhost:5173/deployer and submit a public repo such as
 With Docker Desktop running, start the backend with `SANDBOX_ENGINE=1` instead:
 
 ```sh
-SANDBOX_ENGINE=1 PYTHONPATH=.. uv run uvicorn main:app --reload --reload-dir . --reload-dir ../agents
+SANDBOX_ENGINE=1 PYTHONPATH=.. uv run uvicorn app.main:app --reload --reload-dir . --reload-dir ../agents
 ```
 
 Now a deploy really builds the repo and serves it. Try `https://github.com/octocat/Spoon-Knife`
@@ -76,7 +76,7 @@ The backend reads its settings from the process environment (`MOCK_AGENTS`, `COR
 `MOCK_AGENT_DELAY`, `MOCK_HEALER_FAILURES`, `REAL_HEALER`, `SANDBOX_ENGINE`, `ALLOWED_HOSTS`
 and the `DEPLOYSMITH_*` engine settings; see `.env.example`). `MOCK_AGENTS=1` runs fully
 offline with mock agents. Export them in your shell, or
-prefix the uvicorn command, e.g. `MOCK_HEALER_FAILURES=4 PYTHONPATH=.. uv run uvicorn main:app`
+prefix the uvicorn command, e.g. `MOCK_HEALER_FAILURES=4 PYTHONPATH=.. uv run uvicorn app.main:app`
 to watch the healer exhaust its 3 repair attempts. Vite reads `VITE_API_URL` from the root `.env`.
 
 ### Adding portfolio projects

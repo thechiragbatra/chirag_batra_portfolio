@@ -4,7 +4,7 @@ from collections.abc import AsyncIterator
 import httpx
 import pytest
 
-from main import app
+from app.main import app
 
 
 @pytest.fixture

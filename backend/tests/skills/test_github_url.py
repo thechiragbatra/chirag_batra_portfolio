@@ -1,6 +1,6 @@
 import pytest
 
-from validation import normalize_github_url
+from agents.skills.github_url import normalize_github_url
 
 
 @pytest.mark.parametrize(

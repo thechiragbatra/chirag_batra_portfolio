@@ -1,6 +1,6 @@
 import time
 
-from guide_store import AnswerCache, RunLog, RunRecord, normalize_question
+from app.services.guide_store import AnswerCache, RunLog, RunRecord, normalize_question
 
 
 def record(i: int, **kw) -> RunRecord:

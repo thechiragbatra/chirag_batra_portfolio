@@ -17,7 +17,7 @@ from langgraph.graph.state import CompiledStateGraph
 
 from agents import Agent, default_agents
 from agents.models import MAX_REPAIR_ATTEMPTS, AgentName, AgentStatus, DeploymentState, LogLevel
-from events import Event, LogEvent, StatusEvent
+from app.services.events import Event, LogEvent, StatusEvent
 
 EmitFn = Callable[[Event], Awaitable[None]]
 NodeFn = Callable[[DeploymentState, RunnableConfig], Awaitable[dict[str, Any]]]
