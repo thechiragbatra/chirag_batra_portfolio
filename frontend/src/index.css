@@ -266,17 +266,6 @@ body {
   );
 }
 
-/* Flowing energy along an active pipeline connector. */
-.connector-flow {
-  background-image: repeating-linear-gradient(
-    90deg,
-    var(--glow-a) 0 10px,
-    transparent 10px 24px
-  );
-  background-size: 48px 100%;
-  animation: var(--animate-flow);
-}
-
 .repair-path {
   stroke-dasharray: 6 4;
   animation: dash 0.9s linear infinite;
@@ -316,19 +305,22 @@ body {
 
 /* ---- Page transitions (View Transitions API) ----------------------------------------
    Only the page wrapper slides; header, footer and the background stay put. Direction
-   follows the nav order (html[data-nav-dir], set by Layout before the new page paints). */
-html[data-vt='route'] main > [data-page] {
+   follows the nav order (html[data-nav-dir], set by Layout before the new page paints).
+   Names apply only while a transition runs: a named element is a backdrop root, so
+   naming the header or page permanently would stop every glass panel inside it from
+   blurring what is behind it. */
+html[data-vt='route']:active-view-transition main > [data-page] {
   view-transition-name: page;
 }
-html[data-vt='route'] header {
+html[data-vt='route']:active-view-transition header {
   view-transition-name: site-header;
 }
-html[data-vt='route'] footer {
+html[data-vt='route']:active-view-transition footer {
   view-transition-name: site-footer;
 }
 /* The nav pill is its own group, so during a page change it glides (position and width
    morph) instead of cross-fading inside the header snapshot. */
-html[data-vt='route'] .nav-pill {
+html[data-vt='route']:active-view-transition .nav-pill {
   view-transition-name: nav-pill;
 }
 ::view-transition-group(nav-pill) {
@@ -450,6 +442,16 @@ html[data-vt='theme']::view-transition-new(root) {
   0% { transform: translateX(0); opacity: 0; }
   12%, 88% { opacity: 1; }
   100% { transform: translateX(100%); opacity: 0; }
+}
+/* A short dash running along an SVG path (stays round even in a stretched viewBox). */
+.arc-packet {
+  stroke-dasharray: 1.5 98.5;
+  filter: drop-shadow(0 0 3px #e879f9);
+  animation: arc-packet 1.6s linear infinite;
+}
+@keyframes arc-packet {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -100; }
 }
 .node-lock {
   animation: node-thunk var(--dur-spring-bouncy) var(--spring-bouncy) both;

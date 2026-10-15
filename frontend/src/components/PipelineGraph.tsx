@@ -1,4 +1,4 @@
-import { Check, ChevronLeft, X } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 import { Fragment } from 'react'
 import type { Phase } from '../hooks/useDeploymentStream'
 import { AGENT_NAMES, MAX_REPAIR_ATTEMPTS, type AgentName, type AgentStatus } from '../types/events'
@@ -15,8 +15,14 @@ function Node({ name, status }: { name: AgentName; status: AgentStatus }) {
   return (
     <div className="flex flex-col items-center gap-2">
       <div
-        className={`relative grid size-14 place-items-center sm:size-20 ${status === 'failed' ? 'animate-shake' : ''}`}
+        key={status === 'done' || status === 'failed' ? status : 'live'}
+        className={`relative grid size-14 place-items-center sm:size-20 ${
+          status === 'failed' ? 'animate-shake' : status === 'done' ? 'node-lock' : ''
+        }`}
       >
+        {status === 'done' && (
+          <span aria-hidden className="ripple-once absolute inset-0 rounded-2xl ring-2 ring-emerald-400/70" />
+        )}
         {status === 'running' && (
           <>
             <span className="animate-ping-slow absolute inset-0 rounded-2xl bg-cyan-400/30" />
@@ -42,12 +48,18 @@ function Node({ name, status }: { name: AgentName; status: AgentStatus }) {
           />
           {status === 'done' && (
             <span className="animate-pop absolute -top-1.5 -right-1.5 grid size-5 place-items-center rounded-full bg-emerald-500 text-white shadow-lg ring-2 ring-white dark:ring-zinc-950">
-              <Check className="size-3" strokeWidth={3} aria-hidden />
+              {/* The checkmark draws itself after the badge pops in (LOCK). */}
+              <svg viewBox="0 0 24 24" className="size-3" fill="none" stroke="currentColor" strokeWidth={4} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path className="draw-stroke" d="M5 12.5l4.5 4.5L19 7.5" />
+              </svg>
             </span>
           )}
           {status === 'failed' && (
             <span className="animate-pop absolute -top-1.5 -right-1.5 grid size-5 place-items-center rounded-full bg-red-500 text-white shadow-lg ring-2 ring-white dark:ring-zinc-950">
-              <X className="size-3" strokeWidth={3} aria-hidden />
+              <svg viewBox="0 0 24 24" className="size-3" fill="none" stroke="currentColor" strokeWidth={4} strokeLinecap="round" aria-hidden>
+                <path className="draw-stroke" d="M6 6l12 12" />
+                <path className="draw-stroke [animation-delay:0.34s]" d="M18 6L6 18" />
+              </svg>
             </span>
           )}
         </div>
@@ -70,12 +82,17 @@ function Connector({ from, to }: { from: AgentStatus; to: AgentStatus }) {
   const flowing = from === 'done' && to === 'running'
   const filled = from === 'done' && (to === 'done' || to === 'failed')
   return (
-    <div className="relative mb-10 h-[3px] min-w-3 overflow-hidden rounded-full bg-zinc-900/10 sm:mb-12 dark:bg-white/10">
+    <div className="packet-track relative mb-10 h-[3px] min-w-3 rounded-full bg-zinc-900/10 sm:mb-12 dark:bg-white/10">
       <div
-        className={`absolute inset-0 origin-left rounded-full transition-transform duration-700 ease-out ${
-          filled ? 'scale-x-100 bg-gradient-to-r from-emerald-400 to-cyan-400' : flowing ? 'connector-flow scale-x-100' : 'scale-x-0'
+        className={`absolute inset-0 origin-left rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400 transition-transform duration-700 ease-out ${
+          filled ? 'scale-x-100' : 'scale-x-0'
         }`}
       />
+      {/* PACKET: data in transit while the next agent works on it. */}
+      {flowing &&
+        [0, 1, 2].map((i) => (
+          <span key={i} aria-hidden className="packet" style={{ animationDelay: `${(-i * 1.4) / 3}s` }} />
+        ))}
     </div>
   )
 }
@@ -90,13 +107,33 @@ export function PipelineGraph({ agents, repairAttempts, phase }: Props) {
 
   return (
     <section aria-label="Pipeline" className="glass relative overflow-hidden rounded-3xl p-4 sm:p-6">
-      <div className="mb-6 h-1.5 overflow-hidden rounded-full bg-zinc-900/[0.07] dark:bg-white/10">
-        <div
-          className={`relative h-full rounded-full transition-all duration-700 ease-out ${
-            phase === 'failed' ? 'bg-red-500' : 'bg-gradient-to-r from-emerald-400 via-cyan-400 to-violet-400'
-          } ${phase === 'streaming' || phase === 'starting' ? 'shine' : ''}`}
-          style={{ width: `${phase === 'starting' ? 4 : progress}%` }}
-        />
+      <div className="relative mb-6 h-1.5 rounded-full bg-zinc-900/[0.07] dark:bg-white/10" role="progressbar" aria-label="Pipeline progress" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100}>
+        {phase === 'starting' ? (
+          // Indeterminate: a scanner sweeps until the first agent reports.
+          <div className="absolute inset-0 overflow-hidden rounded-full">
+            <div className="progress-scanner h-full w-1/5 rounded-full bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
+          </div>
+        ) : (
+          <>
+            <div
+              className={`absolute inset-0 origin-left rounded-full ${
+                phase === 'failed' ? 'bg-red-500' : 'bg-gradient-to-r from-emerald-400 via-cyan-400 to-violet-400'
+              }`}
+              style={{
+                transform: `scaleX(${progress / 100})`,
+                transition: 'transform var(--dur-spring-settle) var(--spring-settle)',
+              }}
+            />
+            {/* A glowing head rides the leading edge while work continues. */}
+            {phase === 'streaming' && (
+              <span
+                aria-hidden
+                className="absolute top-1/2 size-2.5 -translate-x-1/2 -translate-y-1/2 animate-pulse rounded-full bg-white shadow-[0_0_14px_4px_var(--glow-b)]"
+                style={{ left: `${progress}%`, transition: 'left var(--dur-spring-settle) var(--spring-settle)' }}
+              />
+            )}
+          </>
+        )}
       </div>
 
       <div className="grid grid-cols-[auto_1fr_auto_1fr_auto_1fr_auto] items-center gap-x-1.5 sm:gap-x-3">
@@ -117,6 +154,22 @@ export function PipelineGraph({ agents, repairAttempts, phase }: Props) {
               className={looping ? 'repair-path' : ''}
               strokeDasharray={repairing ? undefined : '3 4'}
             />
+            {/* PACKET: the healer's diagnosis travelling back to the provisioner. */}
+            {looping &&
+              [0, -0.8].map((delay) => (
+                <path
+                  key={delay}
+                  d="M100 30 C100 0, 0 0, 0 30"
+                  pathLength={100}
+                  fill="none"
+                  stroke="#f5d0fe"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                  vectorEffect="non-scaling-stroke"
+                  className="arc-packet"
+                  style={{ animationDelay: `${delay}s` }}
+                />
+              ))}
             <defs>
               <linearGradient id="repair-gradient" x1="1" x2="0">
                 <stop offset="0%" stopColor="#f472b6" />

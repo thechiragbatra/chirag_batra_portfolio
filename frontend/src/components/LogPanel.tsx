@@ -64,7 +64,8 @@ export function LogPanel({ logs, active, elapsed }: Props) {
           </span>
         )}
       </div>
-      <div className="relative">
+      {/* Powers on like a CRT the first time a run starts (the class is added once). */}
+      <div className={`relative overflow-hidden ${logs.length > 0 ? 'crt-on' : ''}`}>
         <div
           ref={scrollRef}
           role="log"
@@ -76,17 +77,21 @@ export function LogPanel({ logs, active, elapsed }: Props) {
               $ waiting for a repository<span className="animate-blink">_</span>
             </p>
           ) : (
-            logs.map((line) => (
+            logs.map((line, i) => (
               <div key={line.id} className="animate-line-in flex gap-3 whitespace-pre-wrap break-words">
                 <span className="hidden shrink-0 text-zinc-600 sm:inline">{time(line.timestamp)}</span>
                 <span className={`w-[11ch] shrink-0 ${AGENT_CLASS[line.agent ?? 'system']}`}>{line.agent ?? 'system'}</span>
-                <span className={`min-w-0 ${LEVEL_CLASS[line.level]}`}>{line.message}</span>
+                {/* Only the newest lines type in, so a burst of events stays cheap. */}
+                <span className={`min-w-0 ${LEVEL_CLASS[line.level]} ${i >= logs.length - 3 ? 'type-in' : ''}`}>
+                  {line.message}
+                </span>
               </div>
             ))
           )}
           {active && <span className="animate-blink inline-block h-4 w-2 bg-emerald-400 align-middle shadow-[0_0_8px_#34d399]" />}
         </div>
         <div aria-hidden className="scanlines pointer-events-none absolute inset-0" />
+        {active && <div aria-hidden className="scan-band pointer-events-none absolute inset-x-0 top-0" />}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
