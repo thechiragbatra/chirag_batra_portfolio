@@ -17,6 +17,7 @@ import asyncio
 import dataclasses
 import logging
 import os
+import re
 import shutil
 import tempfile
 from datetime import UTC, datetime
@@ -59,6 +60,8 @@ MAX_LOG_BYTES = 10 * 1024 * 1024  # per deploy, on disk
 LOG_LINES_PER_STEP = 150  # streamed to the UI; the full log is on disk
 MAX_LINE = 300
 INTERRUPTED = "interrupted: the backend stopped or restarted during the deploy"
+# Colour and cursor escape codes from tools that ignore NO_COLOR.
+_ANSI = re.compile(r"\x1b\[[0-9;?]*[ -/]*[@-~]|\x1b\][^\x07]*\x07")
 
 
 def ready_timeout() -> float:
@@ -272,8 +275,9 @@ class Engine:
         )
         shown = 0
 
-        async def on_line(line: str) -> None:
+        async def on_line(raw: str) -> None:
             nonlocal shown
+            line = _ANSI.sub("", raw)
             build_log.write(line)
             if line.strip() and shown < LOG_LINES_PER_STEP:
                 shown += 1

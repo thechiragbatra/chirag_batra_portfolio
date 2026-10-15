@@ -116,6 +116,8 @@ def run_args(spec: Container) -> list[str]:
         "--workdir", spec.workdir,
         "--env", "HOME=/tmp",
         "--env", "CI=1",
+        "--env", "NO_COLOR=1",
+        "--env", "FORCE_COLOR=0",
     ]  # fmt: skip
     for key, value in sorted(spec.env.items()):
         args += ["--env", f"{key}={value}"]

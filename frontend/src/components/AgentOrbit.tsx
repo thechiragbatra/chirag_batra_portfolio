@@ -32,7 +32,11 @@ export function AgentOrbit() {
               style={{ left: `${50 + 50 * Math.cos(angle)}%`, top: `${50 + 50 * Math.sin(angle)}%` }}
             >
               <div className="animate-orbit-reverse">
-                <div className="glass flex flex-col items-center gap-1 rounded-2xl px-3 py-2 shadow-xl shadow-black/5 dark:shadow-black/50">
+                {/* Flat glass: blurring the backdrop of something that orbits costs every frame. */}
+                <div
+                  className="glass-flat wake flex flex-col items-center gap-1 rounded-2xl px-3 py-2 shadow-xl shadow-black/5 dark:shadow-black/50"
+                  style={{ animationDelay: `${350 + i * 110}ms` }}
+                >
                   <Icon className={`size-5 ${color}`} />
                   <span className="font-mono text-[10px] text-zinc-600 dark:text-zinc-300">{label}</span>
                 </div>

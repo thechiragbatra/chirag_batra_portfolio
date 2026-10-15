@@ -45,14 +45,16 @@ function DeployRow({
   busy: boolean
   onActivate: (deployId: string) => void
 }) {
+  // The text stays after closing so the drawer can slide shut with its content.
   const [log, setLog] = useState<string | null>(null)
+  const [open, setOpen] = useState(false)
   const [loadingLog, setLoadingLog] = useState(false)
   const logId = useId()
   const live = app.current === deploy.id
 
   const toggleLog = async () => {
-    if (log !== null) {
-      setLog(null)
+    if (open) {
+      setOpen(false)
       return
     }
     setLoadingLog(true)
@@ -62,6 +64,7 @@ function DeployRow({
       setLog(error instanceof Error ? error.message : 'Could not load the log')
     } finally {
       setLoadingLog(false)
+      setOpen(true)
     }
   }
 
@@ -84,11 +87,11 @@ function DeployRow({
             type="button"
             onClick={toggleLog}
             disabled={loadingLog}
-            aria-expanded={log !== null}
+            aria-expanded={open}
             aria-controls={logId}
             className={`${buttonClass} text-zinc-700 hover:bg-zinc-900/5 dark:text-zinc-300 dark:hover:bg-white/10`}
           >
-            <FileTerminal className="size-3.5" aria-hidden /> {log === null ? 'Log' : 'Hide log'}
+            <FileTerminal className={`size-3.5 ${loadingLog ? 'animate-pulse' : ''}`} aria-hidden /> {open ? 'Hide log' : 'Log'}
           </button>
           {deploy.status === 'ready' && !live && (
             <button
@@ -111,16 +114,19 @@ function DeployRow({
         </span>
       </div>
       {deploy.error && <p className="mt-1 text-xs break-words text-red-700 dark:text-red-300">{deploy.error}</p>}
-      {log !== null && (
-        <pre
-          id={logId}
-          tabIndex={0}
-          aria-label={`Build log for ${deploy.id}`}
-          className="animate-fade-up mt-2 max-h-72 overflow-auto rounded-xl bg-zinc-950 p-3 font-mono text-[11px] leading-relaxed text-zinc-200 focus-visible:outline-2 focus-visible:outline-emerald-500"
-        >
-          {log || '(empty: nothing ran in the sandbox for this deploy)'}
-        </pre>
-      )}
+      {/* Slides open and shut (grid-template-rows 0fr → 1fr) instead of popping. */}
+      <div className="drawer" data-open={open || undefined} inert={!open}>
+        <div>
+          <pre
+            id={logId}
+            tabIndex={open ? 0 : -1}
+            aria-label={`Build log for ${deploy.id}`}
+            className="mt-2 max-h-72 overflow-auto rounded-xl bg-zinc-950 p-3 font-mono text-[11px] leading-relaxed text-zinc-200 focus-visible:outline-2 focus-visible:outline-emerald-500"
+          >
+            {log || '(empty: nothing ran in the sandbox for this deploy)'}
+          </pre>
+        </div>
+      </div>
     </li>
   )
 }
@@ -175,6 +181,7 @@ function AppCard({
               rel="noreferrer"
               className="mt-2 inline-flex items-center gap-1.5 font-mono text-sm break-all text-emerald-700 hover:underline dark:text-emerald-300"
             >
+              <span aria-hidden className="led size-2 shrink-0 rounded-full bg-emerald-500 shadow-[0_0_8px_2px_rgba(16,185,129,0.6)]" />
               {app.url} <ExternalLink className="size-3.5 shrink-0" aria-hidden />
             </a>
           ) : (
@@ -356,7 +363,7 @@ export default function Apps() {
       {apps === null && !error && (
         <div aria-busy className="grid gap-5" aria-label="Loading apps">
           {[0, 1].map((i) => (
-            <div key={i} className="glass h-40 animate-pulse rounded-2xl" />
+            <div key={i} className="glass skeleton h-40 rounded-2xl" />
           ))}
         </div>
       )}

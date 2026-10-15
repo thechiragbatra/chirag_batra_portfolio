@@ -18,7 +18,7 @@ function Timeline({ children }: { children: ReactNode }) {
     <ol className="relative space-y-10 pl-8">
       <span
         aria-hidden
-        className="animate-draw absolute top-2 bottom-2 left-[7px] w-px origin-top bg-gradient-to-b from-emerald-400 via-cyan-400 to-violet-400"
+        className="animate-draw timeline-line absolute top-2 bottom-2 left-[7px] w-px origin-top bg-gradient-to-b from-emerald-400 via-cyan-400 to-violet-400"
       />
       {children}
     </ol>

@@ -78,7 +78,7 @@ function Hero() {
 
       <dl className="grid grid-cols-2 gap-3 lg:col-span-2 lg:grid-cols-4">
         {highlights.map((h, i) => (
-          <Reveal key={h.label} delay={i * 100} className="glass-strong glow-border rounded-2xl p-4">
+          <Reveal key={h.label} delay={i * 110} variant="scan" className="glass-strong glow-border rounded-2xl p-4">
             <dd className="font-display text-3xl font-bold sm:text-4xl">
               <span className="text-aurora">
                 <CountUp value={h.value} decimals={h.decimals} prefix={h.prefix} suffix={h.suffix} />
@@ -121,7 +121,7 @@ export default function Projects() {
         {import.meta.env.DEV && adding && <AddProjectPanel onClose={() => setAdding(false)} />}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {projects.map((project, i) => (
-            <Reveal key={project.githubUrl} delay={(i % 3) * 120}>
+            <Reveal key={project.githubUrl} delay={(i % 3) * 110} variant="scan">
               <ProjectCard project={project} />
             </Reveal>
           ))}
@@ -144,7 +144,7 @@ export default function Projects() {
           </Reveal>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {planned.map((project, i) => (
-              <Reveal key={project.title} delay={(i % 3) * 120}>
+              <Reveal key={project.title} delay={(i % 3) * 110} variant="scan">
                 <PlannedCard project={project} />
               </Reveal>
             ))}

@@ -3,7 +3,7 @@ import { PageHeader } from '../components/PageHeader'
 
 export default function NotFound() {
   return (
-    <PageHeader eyebrow="404" title={<span className="text-aurora">Lost in the pipeline</span>}>
+    <PageHeader eyebrow="404" title={<span className="glitch inline-block"><span className="glitch-late text-aurora inline-block">Lost in the pipeline</span></span>}>
       Nothing lives here.{' '}
       <Link to="/projects" viewTransition className="font-medium text-emerald-700 hover:underline dark:text-emerald-400">
         Back to projects

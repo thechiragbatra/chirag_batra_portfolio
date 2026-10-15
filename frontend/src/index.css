@@ -386,10 +386,6 @@ html[data-vt='theme']::view-transition-new(root) {
 .reveal-scan {
   position: relative;
   clip-path: inset(0 0 100% 0);
-  transform: translateY(18px);
-  transition:
-    clip-path 0.8s var(--ease-out-quart),
-    transform 0.8s var(--ease-out-quart);
 }
 .reveal-scan::after {
   content: '';
@@ -403,13 +399,20 @@ html[data-vt='theme']::view-transition-new(root) {
   opacity: 0;
   pointer-events: none;
 }
+/* Ends with clip-path: none, because any clip-path makes the element a backdrop root and
+   would stop the glass inside it from blurring the page behind. */
 .reveal-scan[data-visible] {
-  clip-path: inset(-40px -40px -40px -40px);
-  transform: none;
+  animation: scan-reveal 0.8s var(--ease-out-quart) both;
+  animation-delay: inherit;
 }
 .reveal-scan[data-visible]::after {
   animation: scan-line 0.8s var(--ease-out-quart) both;
   animation-delay: inherit;
+}
+@keyframes scan-reveal {
+  0% { clip-path: inset(0 0 100% 0); transform: translateY(18px); }
+  99.9% { clip-path: inset(-48px); transform: none; }
+  100% { clip-path: none; transform: none; }
 }
 @keyframes scan-line {
   0% { top: 0; opacity: 1; }

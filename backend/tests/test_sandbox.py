@@ -756,3 +756,9 @@ def test_node_package_caches_live_on_disk_not_tmpfs() -> None:
     assert env["YARN_CACHE_FOLDER"].startswith("/app/.deploysmith/cache")
     assert env["npm_config_cache"].startswith("/app/.deploysmith/cache")
     assert not any(v.startswith("/tmp") for k, v in env.items() if "cache" in k.lower())
+
+
+def test_ansi_codes_are_stripped_from_build_output() -> None:
+    from agents.sandbox.engine import _ANSI
+
+    assert _ANSI.sub("", "\x1b[36mvite v8\x1b[39m \x1b[2Kbuilding") == "vite v8 building"

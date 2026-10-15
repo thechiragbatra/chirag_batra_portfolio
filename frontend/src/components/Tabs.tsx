@@ -9,6 +9,8 @@ export interface TabItem {
 /** Accessible tabs (WAI-ARIA pattern) with a sliding gradient indicator. */
 export function Tabs({ items, label }: { items: TabItem[]; label: string }) {
   const [active, setActive] = useState(0)
+  // Which way the panel should slide in: the direction the tabs moved.
+  const [direction, setDirection] = useState<'left' | 'right' | null>(null)
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([])
   const [indicator, setIndicator] = useState<{ left: number; width: number } | null>(null)
   const baseId = useId()
@@ -24,9 +26,15 @@ export function Tabs({ items, label }: { items: TabItem[]; label: string }) {
     return () => window.removeEventListener('resize', measure)
   }, [active])
 
+  const select = (next: number) => {
+    if (next === active) return
+    setDirection(next > active ? 'right' : 'left')
+    setActive(next)
+  }
+
   const focusTab = (index: number) => {
     const next = (index + items.length) % items.length
-    setActive(next)
+    select(next)
     tabRefs.current[next]?.focus()
   }
 
@@ -55,8 +63,13 @@ export function Tabs({ items, label }: { items: TabItem[]; label: string }) {
           {indicator && (
             <span
               aria-hidden
-              className="absolute inset-y-1 rounded-xl bg-zinc-950 shadow-lg shadow-emerald-500/20 transition-all duration-500 ease-[cubic-bezier(0.2,0.9,0.2,1.15)] dark:bg-white"
-              style={{ left: indicator.left, width: indicator.width }}
+              className="absolute inset-y-1 rounded-xl bg-zinc-950 shadow-lg shadow-emerald-500/20 dark:bg-white"
+              style={{
+                left: indicator.left,
+                width: indicator.width,
+                transition:
+                  'left var(--dur-spring-snappy) var(--spring-snappy), width var(--dur-spring-snappy) var(--spring-snappy)',
+              }}
             />
           )}
           {items.map((item, index) => {
@@ -73,7 +86,7 @@ export function Tabs({ items, label }: { items: TabItem[]; label: string }) {
                 aria-selected={selected}
                 aria-controls={`${baseId}-panel-${item.id}`}
                 tabIndex={selected ? 0 : -1}
-                onClick={() => setActive(index)}
+                onClick={() => select(index)}
                 className={`relative shrink-0 rounded-xl px-4 py-2 text-sm font-medium transition-colors duration-300 ${
                   selected
                     ? 'text-white dark:text-zinc-950'
@@ -97,7 +110,15 @@ export function Tabs({ items, label }: { items: TabItem[]; label: string }) {
           className="pt-8 focus-visible:outline-none"
         >
           {/* Remount on activation so the panel's entrance animations replay. */}
-          {index === active && <div className="animate-blur-in">{item.content}</div>}
+          {index === active && (
+            <div
+              className={
+                direction === 'right' ? 'slide-from-right' : direction === 'left' ? 'slide-from-left' : 'animate-blur-in'
+              }
+            >
+              {item.content}
+            </div>
+          )}
         </div>
       ))}
     </div>
