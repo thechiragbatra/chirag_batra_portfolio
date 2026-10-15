@@ -1,13 +1,16 @@
-import type { ReactNode } from 'react'
+import type { ReactNode, Ref } from 'react'
 
 export function PageHeader({
   eyebrow,
   title,
   children,
+  titleRef,
 }: {
   eyebrow?: string
   title: ReactNode
   children?: ReactNode
+  /** Lets a page move focus to its heading (e.g. after deleting the focused item). */
+  titleRef?: Ref<HTMLHeadingElement>
 }) {
   return (
     <div className="mb-10">
@@ -16,7 +19,9 @@ export function PageHeader({
           {eyebrow}
         </p>
       )}
-      <h1 className="font-display text-4xl font-bold sm:text-5xl">{title}</h1>
+      <h1 ref={titleRef} tabIndex={titleRef ? -1 : undefined} className="font-display text-4xl font-bold outline-none sm:text-5xl">
+        {title}
+      </h1>
       {children && (
         <p className="mt-3 max-w-2xl text-base leading-relaxed text-zinc-600 dark:text-zinc-400">
           {children}

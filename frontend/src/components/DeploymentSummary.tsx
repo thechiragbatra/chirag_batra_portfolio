@@ -8,6 +8,7 @@ export function DeploymentSummary({ result, error }: { result: DeploymentState |
   const ref = useRef<HTMLElement>(null)
   const healthy = result !== null && result.health_report?.healthy === true && result.errors.length === 0
   const sandbox = result?.deployment_results.some((r) => r.platform === 'sandbox') ?? false
+  const sandboxLive = result?.deployment_results.some((r) => r.platform === 'sandbox' && r.status === 'live') ?? false
 
   useEffect(() => {
     if (!healthy || !ref.current) return
@@ -60,6 +61,11 @@ export function DeploymentSummary({ result, error }: { result: DeploymentState |
             >
               <span className="font-medium">{r.component}</span>
               <span className="rounded bg-zinc-900/5 px-1.5 font-mono text-[10px] text-zinc-500 dark:bg-white/10">{r.platform}</span>
+              {r.status === 'failed' && (
+                <span className="rounded bg-red-500/15 px-1.5 font-mono text-[10px] font-semibold text-red-700 uppercase dark:text-red-300">
+                  not deployed
+                </span>
+              )}
               {r.platform === 'sandbox' && r.url ? (
                 <a
                   href={r.url}
@@ -76,6 +82,11 @@ export function DeploymentSummary({ result, error }: { result: DeploymentState |
           ))}
         </ul>
       )}
+      {!healthy && result.health_report?.diagnosis && (
+        <p className="mt-3 text-red-800 dark:text-red-300">
+          <span className="font-medium">Diagnosis:</span> {result.health_report.diagnosis}
+        </p>
+      )}
       {result.errors.length > 0 && (
         <ul className="mt-3 list-inside list-disc text-red-800 dark:text-red-300">
           {result.errors.map((e) => (
@@ -84,7 +95,9 @@ export function DeploymentSummary({ result, error }: { result: DeploymentState |
         </ul>
       )}
       <p className="mt-3 text-xs text-zinc-500">
-        {sandbox ? (
+        {sandbox && !sandboxLive ? (
+          'Nothing was built: the reason is in the log above.'
+        ) : sandbox ? (
           <>
             Built and served in Docker on this machine. Manage deploys and rollbacks on the{' '}
             <Link to="/apps" className="font-medium text-emerald-700 hover:underline dark:text-emerald-300">

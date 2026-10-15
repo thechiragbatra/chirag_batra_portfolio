@@ -27,5 +27,9 @@ export interface App {
 
 export interface AppsResponse {
   router_port: number
+  /** SANDBOX_ENGINE is set on the backend (otherwise the Deployer only simulates). */
+  engine_enabled: boolean
+  /** The nginx router container is up, so *.localhost links can open. */
+  router_running: boolean
   apps: App[]
 }

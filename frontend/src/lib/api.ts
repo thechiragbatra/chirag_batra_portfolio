@@ -3,6 +3,9 @@ import type { CreateDeploymentResponse } from '../types/events'
 
 export const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:8000').replace(/\/+$/, '')
 
+/** Required by the backend on every write (it blocks cross-site requests without it). */
+const CSRF = { 'X-DeploySmith': '1' }
+
 interface ValidationIssue {
   msg: string
 }
@@ -28,7 +31,7 @@ export async function createDeployment(
   try {
     response = await fetch(`${API_URL}/api/deployments`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...CSRF },
       body: JSON.stringify({ repo_url: repoUrl }),
       signal,
     })
@@ -47,7 +50,9 @@ export function deploymentEventsUrl(id: string): string {
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response
   try {
-    response = await fetch(`${API_URL}${path}`, init)
+    const method = init?.method ?? 'GET'
+    const headers = method === 'GET' ? init?.headers : { ...CSRF, ...init?.headers }
+    response = await fetch(`${API_URL}${path}`, { ...init, headers })
   } catch (error) {
     throw new Error(`Cannot reach the API at ${API_URL}. Is the backend running?`, { cause: error })
   }
