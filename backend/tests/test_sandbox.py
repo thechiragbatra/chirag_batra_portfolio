@@ -749,3 +749,10 @@ async def test_run_streaming_survives_very_long_lines() -> None:
         [_sys.executable, "-c", "print('x' * 200000); print('done')"], keep, timeout=20
     )
     assert code == 0 and lines[-1] == "done" and sum(len(x) for x in lines[:-1]) == 200000
+
+
+def test_node_package_caches_live_on_disk_not_tmpfs() -> None:
+    env = recipe_for(component(build_command="yarn run build")).env
+    assert env["YARN_CACHE_FOLDER"].startswith("/app/.deploysmith/cache")
+    assert env["npm_config_cache"].startswith("/app/.deploysmith/cache")
+    assert not any(v.startswith("/tmp") for k, v in env.items() if "cache" in k.lower())

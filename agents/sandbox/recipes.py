@@ -98,8 +98,15 @@ def _node_install(command: str | None, has_lockfile: bool) -> str:
     return "npm ci --no-audit --no-fund" if has_lockfile else "npm install --no-audit --no-fund"
 
 
+# Package caches live on disk inside the build copy, not in the container's small
+# in-memory /tmp (Next.js alone downloads >1 GB of platform binaries). The engine
+# deletes this directory after the install step so it is never kept in a deploy.
+CACHE_DIR = ".deploysmith/cache"
+
 _NODE_ENV = {
-    "npm_config_cache": "/tmp/.npm",
+    "npm_config_cache": f"{WORKDIR}/{CACHE_DIR}/npm",
+    "YARN_CACHE_FOLDER": f"{WORKDIR}/{CACHE_DIR}/yarn",
+    "npm_config_store_dir": f"{WORKDIR}/{CACHE_DIR}/pnpm",
     "npm_config_update_notifier": "false",
     "COREPACK_HOME": f"{WORKDIR}/.deploysmith/corepack",
     "COREPACK_ENABLE_DOWNLOAD_PROMPT": "0",

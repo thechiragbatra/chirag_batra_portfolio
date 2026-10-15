@@ -28,6 +28,7 @@ from agents.models import Component, LogLevel
 from agents.sandbox import docker as dk
 from agents.sandbox.recipes import (
     APP_PORT,
+    CACHE_DIR,
     GENERATED_REQUIREMENTS,
     OUTPUT_DIRS,
     PYTHON_SERVERS,
@@ -218,6 +219,7 @@ class Engine:
                 await self._step(
                     recipe, source, command, network, name, record.name, build_log, log, timeout
                 )
+                await asyncio.to_thread(shutil.rmtree, source / CACHE_DIR, True)
                 size = await asyncio.to_thread(tree_size, source)
                 if size > MAX_BUILD_TREE_BYTES:
                     raise DeployError(
