@@ -1,17 +1,18 @@
 {
   "generated": "2026-10-15",
   "models": {
-    "openai/gpt-oss-120b": 28
+    "openai/gpt-oss-120b": 27,
+    "openai/gpt-oss-20b": 1
   },
-  "passed": 26,
+  "passed": 27,
   "cases": 28,
   "groups": {
     "facts": {
-      "passed": 11,
+      "passed": 12,
       "cases": 12
     },
     "honesty": {
-      "passed": 6,
+      "passed": 5,
       "cases": 6
     },
     "off-topic": {
@@ -19,7 +20,7 @@
       "cases": 3
     },
     "tools": {
-      "passed": 6,
+      "passed": 7,
       "cases": 7
     }
   },
@@ -46,7 +47,7 @@
       "id": "causal",
       "group": "facts",
       "question": "Has he worked with causal inference?",
-      "passed": false
+      "passed": true
     },
     {
       "id": "llm-skills",
@@ -112,7 +113,7 @@
       "id": "gpa",
       "group": "honesty",
       "question": "What is Chirag's GPA?",
-      "passed": true
+      "passed": false
     },
     {
       "id": "years-experience",
@@ -172,7 +173,7 @@
       "id": "profile-repo",
       "group": "tools",
       "question": "Could DeploySmith deploy https://github.com/octocat/Spoon-Knife ?",
-      "passed": false
+      "passed": true
     },
     {
       "id": "show-fraud",
