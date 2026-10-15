@@ -100,7 +100,7 @@ export function DeploymentSummary({ result, error }: { result: DeploymentState |
         ) : sandbox ? (
           <>
             Built and served in Docker on this machine. Manage deploys and rollbacks on the{' '}
-            <Link to="/apps" className="font-medium text-emerald-700 hover:underline dark:text-emerald-300">
+            <Link to="/apps" viewTransition className="font-medium text-emerald-700 hover:underline dark:text-emerald-300">
               Apps page
             </Link>
             .

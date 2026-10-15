@@ -1,5 +1,6 @@
-import { useLayoutEffect, useRef, useState } from 'react'
-import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { NavLink, Outlet, ScrollRestoration, useLocation } from 'react-router-dom'
+import { useReducedMotion } from '../hooks/useMediaQuery'
 import { Background } from './fx/Background'
 import { CursorGlow } from './fx/CursorGlow'
 import { Logo } from './Logo'
@@ -12,29 +13,43 @@ const NAV = [
   { to: '/apps', label: 'Apps' },
 ]
 
-/** Pill that slides under the active nav link. */
-function useNavIndicator(pathname: string) {
-  const links = useRef<Record<string, HTMLAnchorElement | null>>({})
-  const [style, setStyle] = useState<{ left: number; width: number } | null>(null)
+/** Order of the main routes, so page transitions slide the way the nav reads. */
+function navIndex(pathname: string): number {
+  return NAV.findIndex((item) => pathname.startsWith(item.to))
+}
 
+/**
+ * Before the new page paints (this runs inside the view transition's update), tell the
+ * CSS which way to slide: forward/back along the nav, or a plain fade for other routes.
+ */
+function useNavDirection(pathname: string) {
+  const previous = useRef(pathname)
   useLayoutEffect(() => {
-    const measure = () => {
-      const active = NAV.find((item) => pathname.startsWith(item.to))
-      const el = active ? links.current[active.to] : null
-      setStyle(el ? { left: el.offsetLeft, width: el.offsetWidth } : null)
-    }
-    measure()
-    window.addEventListener('resize', measure)
-    document.fonts?.ready.then(measure).catch(() => {})
-    return () => window.removeEventListener('resize', measure)
+    const from = navIndex(previous.current)
+    const to = navIndex(pathname)
+    const dir = to < 0 || from < 0 ? (to < 0 ? 'none' : 'back') : to >= from ? 'forward' : 'back'
+    document.documentElement.dataset.navDir = dir
+    previous.current = pathname
   }, [pathname])
+}
 
-  return { links, style }
+/** True once the page has scrolled a little; the header condenses. */
+function useScrolled(threshold = 24) {
+  const [scrolled, setScrolled] = useState(false)
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > threshold)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [threshold])
+  return scrolled
 }
 
 export function Layout() {
   const { pathname } = useLocation()
-  const { links, style } = useNavIndicator(pathname)
+  const reduced = useReducedMotion()
+  const scrolled = useScrolled()
+  useNavDirection(pathname)
 
   return (
     <div className="relative flex min-h-dvh flex-col">
@@ -47,38 +62,42 @@ export function Layout() {
         Skip to content
       </a>
 
-      <header className="sticky top-0 z-40 px-3 pt-3 sm:px-4">
+      <ScrollRestoration />
+      <header data-scrolled={scrolled || undefined} className="sticky top-0 z-40 px-3 pt-3 sm:px-4">
         <div className="glass mx-auto flex max-w-5xl items-center gap-2 rounded-2xl px-3 py-2 shadow-lg shadow-black/[0.03] sm:gap-6 sm:px-4 dark:shadow-black/40">
-          <NavLink to="/projects" className="group flex items-center gap-2.5 font-display font-semibold">
+          <NavLink to="/projects" viewTransition={!reduced} className="group flex items-center gap-2.5 font-display font-semibold">
             <Logo className="size-8 transition-transform duration-500 group-hover:rotate-[360deg]" />
             <span className="hidden tracking-tight sm:inline">
               Deploy<span className="text-aurora">Smith</span>
             </span>
           </NavLink>
           <nav className="relative flex flex-1 gap-1 text-sm" aria-label="Main">
-            {style && (
-              <span
-                aria-hidden
-                className="absolute inset-y-0 rounded-xl bg-zinc-900/[0.06] ring-1 ring-zinc-900/5 transition-all duration-500 ease-[cubic-bezier(0.2,0.9,0.2,1.15)] dark:bg-white/[0.08] dark:ring-white/10"
-                style={{ left: style.left, width: style.width }}
-              />
-            )}
             {NAV.map(({ to, label }) => (
               <NavLink
                 key={to}
                 to={to}
-                ref={(el) => {
-                  links.current[to] = el
-                }}
+                viewTransition={!reduced}
                 className={({ isActive }) =>
-                  `relative rounded-xl px-2.5 py-1.5 font-medium transition-colors sm:px-3.5 ${
+                  `relative isolate rounded-xl px-2.5 py-1.5 font-medium transition-colors sm:px-3.5 ${
                     isActive
                       ? 'text-zinc-950 dark:text-white'
                       : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100'
                   }`
                 }
               >
-                {label}
+                {({ isActive }) => (
+                  <>
+                    {/* Lives inside the active link; the page transition morphs it from
+                        the old link to the new one (a shared element). */}
+                    {isActive && (
+                      <span
+                        aria-hidden
+                        className="nav-pill absolute inset-0 -z-10 rounded-xl bg-zinc-900/[0.06] ring-1 ring-zinc-900/5 dark:bg-white/[0.08] dark:ring-white/10"
+                      />
+                    )}
+                    {label}
+                  </>
+                )}
               </NavLink>
             ))}
           </nav>
@@ -87,8 +106,9 @@ export function Layout() {
       </header>
 
       <main id="main" className="mx-auto w-full max-w-5xl flex-1 px-4 py-10 sm:py-14">
-        {/* Keyed by route so every navigation replays the entrance animation. */}
-        <div key={pathname} className="animate-blur-in">
+        {/* Keyed by route so every navigation replays the entrance animation (the blur-in
+            is the fallback where the View Transitions API is unavailable). */}
+        <div key={pathname} data-page className="animate-blur-in">
           <Outlet />
         </div>
       </main>

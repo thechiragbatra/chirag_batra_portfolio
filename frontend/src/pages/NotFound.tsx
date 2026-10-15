@@ -5,7 +5,7 @@ export default function NotFound() {
   return (
     <PageHeader eyebrow="404" title={<span className="text-aurora">Lost in the pipeline</span>}>
       Nothing lives here.{' '}
-      <Link to="/projects" className="font-medium text-emerald-700 hover:underline dark:text-emerald-400">
+      <Link to="/projects" viewTransition className="font-medium text-emerald-700 hover:underline dark:text-emerald-400">
         Back to projects
       </Link>
     </PageHeader>

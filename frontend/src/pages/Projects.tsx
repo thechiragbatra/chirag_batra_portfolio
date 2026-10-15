@@ -54,7 +54,8 @@ function Hero() {
           <Magnetic>
             <Link
               to="/deployer"
-              className="shine group inline-flex items-center gap-2 rounded-xl bg-zinc-950 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition-shadow hover:shadow-emerald-500/40 dark:bg-white dark:text-zinc-950"
+              viewTransition
+              className="shine-hover pressable group inline-flex items-center gap-2 rounded-xl bg-zinc-950 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition-shadow hover:shadow-emerald-500/40 dark:bg-white dark:text-zinc-950"
             >
               Launch the deployer
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden />
@@ -63,6 +64,7 @@ function Hero() {
           <Magnetic>
             <Link
               to="/resume"
+              viewTransition
               className="glass inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-colors hover:bg-white/80 dark:hover:bg-white/10"
             >
               <FileText className="size-4" aria-hidden /> Read résumé

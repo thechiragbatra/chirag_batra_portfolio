@@ -215,7 +215,7 @@ export default function Resume() {
             <a
               href="/resume.pdf"
               download
-              className="shine inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-zinc-950 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-shadow hover:shadow-emerald-500/50 dark:bg-white dark:text-zinc-950"
+              className="shine-hover pressable inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-zinc-950 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-shadow hover:shadow-emerald-500/50 dark:bg-white dark:text-zinc-950"
             >
               <Download className="size-4" /> Download PDF
             </a>

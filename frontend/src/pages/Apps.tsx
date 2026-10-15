@@ -370,7 +370,7 @@ export default function Apps() {
               ? 'Deploy a repository and it will show up here with a live *.localhost URL.'
               : 'Turn on the sandbox engine (see above) and deploy a repository; it will show up here with a live *.localhost URL.'}
           </p>
-          <Link to="/deployer" className="text-sm font-semibold text-emerald-700 hover:underline dark:text-emerald-300">
+          <Link to="/deployer" viewTransition className="text-sm font-semibold text-emerald-700 hover:underline dark:text-emerald-300">
             Open the deployer →
           </Link>
         </div>

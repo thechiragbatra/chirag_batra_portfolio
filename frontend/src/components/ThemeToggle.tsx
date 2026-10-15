@@ -1,5 +1,5 @@
 import { Moon, Sun } from 'lucide-react'
-import { useState } from 'react'
+import { useState, type MouseEvent } from 'react'
 
 function readTheme(): boolean {
   return document.documentElement.classList.contains('dark')
@@ -8,16 +8,25 @@ function readTheme(): boolean {
 export function ThemeToggle() {
   const [dark, setDark] = useState(readTheme)
 
-  const toggle = () => {
+  const toggle = (event: MouseEvent<HTMLButtonElement>) => {
     const next = !dark
+    const root = document.documentElement
     const apply = () => {
-      document.documentElement.classList.toggle('dark', next)
+      root.classList.toggle('dark', next)
       setDark(next)
     }
-    // Cross-fade the whole page where the View Transitions API exists.
-    const doc = document as Document & { startViewTransition?: (cb: () => void) => unknown }
+    // The new theme irises out from the button where the View Transitions API exists.
+    const doc = document as Document & {
+      startViewTransition?: (cb: () => void) => { finished: Promise<void> }
+    }
     if (doc.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      doc.startViewTransition(apply)
+      const rect = event.currentTarget.getBoundingClientRect()
+      root.style.setProperty('--vt-x', `${rect.left + rect.width / 2}px`)
+      root.style.setProperty('--vt-y', `${rect.top + rect.height / 2}px`)
+      root.dataset.vt = 'theme'
+      doc.startViewTransition(apply).finished.finally(() => {
+        root.dataset.vt = 'route'
+      })
     } else {
       apply()
     }

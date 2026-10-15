@@ -110,6 +110,31 @@
   --glow-c: #8b5cf6;
 }
 
+/* ---- Motion tokens ("Signal Path"): every animation is one of four verbs --------------
+   PACKET (data in transit), CHARGE (work accumulating), LOCK (state committed) and
+   SCAN (the system reading something). Springs are linear() curves sampled from damped
+   springs; always pair a --spring-* with its --dur-spring-*. */
+:root {
+  --dur-xs: 120ms;
+  --dur-sm: 200ms;
+  --dur-md: 320ms;
+  --dur-lg: 480ms;
+  --dur-xl: 800ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in-quart: cubic-bezier(0.5, 0, 0.75, 0);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --dur-spring-snappy: 560ms;
+  --spring-snappy: linear(0, 0.005 1%, 0.028 2.5%, 0.066 4%, 0.115 5.5%, 0.215 8%, 0.459 13.5%, 0.585 16.5%, 0.696 19.5%, 0.776 22%, 0.843 24.5%, 0.907 27.5%, 0.948 30%, 0.985 33%, 1.006 35.5%, 1.023 38.5%, 1.032 41.5%, 1.036 45%, 1.033 50%, 1.003 73%, 0.999);
+  --dur-spring-bouncy: 760ms;
+  --spring-bouncy: linear(0, 0.012 1%, 0.044 2%, 0.095 3%, 0.159 4%, 0.236 5%, 0.32 6%, 0.684 10%, 0.812 11.5%, 0.926 13%, 1.024 14.5%, 1.104 16%, 1.164 17.5%, 1.206 19%, 1.23 20.5%, 1.238 21.5%, 1.239 22.5%, 1.234 23.5%, 1.219 25%, 1.176 27.5%, 1.058 33%, 1.004 36%, 0.967 39%, 0.945 42.5%, 0.943 44.5%, 0.947 47%, 0.998 58%, 1.012 64%, 1.013 69%, 0.997 85%, 0.999);
+  --dur-spring-settle: 580ms;
+  --spring-settle: linear(0, 0.003 1%, 0.02 2.5%, 0.047 4%, 0.083 5.5%, 0.168 8.5%, 0.374 15%, 0.464 18%, 0.559 21.5%, 0.642 25%, 0.703 28%, 0.763 31.5%, 0.813 35%, 0.858 39%, 0.897 43.5%, 0.929 48.5%, 0.953 54%, 0.971 60%, 0.983 67%, 0.992 75.5%, 0.999);
+  --packet-dur: 1.4s;
+  --vt-dur: 420ms;
+  --vt-dur-out: 180ms;
+}
+
 :root.dark {
   color-scheme: dark;
   --bg: #05060a;
@@ -188,7 +213,7 @@ body {
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
-    animation: spin-angle 4s linear infinite;
+    animation: spin-angle 4s linear infinite paused;
     opacity: 0;
     transition: opacity 0.5s;
     pointer-events: none;
@@ -197,6 +222,7 @@ body {
   &:hover::before,
   &[data-glow]::before {
     opacity: 1;
+    animation-play-state: running;
   }
 }
 
@@ -256,6 +282,329 @@ body {
   animation: dash 0.9s linear infinite;
 }
 
+/* Light sweep that runs only while hovered (idle heroes stay calm). */
+@utility shine-hover {
+  position: relative;
+  overflow: hidden;
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    width: 40%;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.45), transparent);
+    transform: translateX(-120%) skewX(-20deg);
+    pointer-events: none;
+  }
+  &:hover::after {
+    animation: shine 1.1s var(--ease-out) 1;
+  }
+}
+
+/* Glass without backdrop-filter, for things that move (re-blurring every frame is costly). */
+@utility glass-flat {
+  background: var(--glass-strong);
+  border: 1px solid var(--glass-border);
+}
+
+/* Press feedback for buttons and links. */
+@utility pressable {
+  transition: transform var(--dur-xs) var(--ease-out);
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+/* ---- Page transitions (View Transitions API) ----------------------------------------
+   Only the page wrapper slides; header, footer and the background stay put. Direction
+   follows the nav order (html[data-nav-dir], set by Layout before the new page paints). */
+html[data-vt='route'] main > [data-page] {
+  view-transition-name: page;
+}
+html[data-vt='route'] header {
+  view-transition-name: site-header;
+}
+html[data-vt='route'] footer {
+  view-transition-name: site-footer;
+}
+/* The nav pill is its own group, so during a page change it glides (position and width
+   morph) instead of cross-fading inside the header snapshot. */
+html[data-vt='route'] .nav-pill {
+  view-transition-name: nav-pill;
+}
+::view-transition-group(nav-pill) {
+  animation-duration: var(--dur-spring-snappy);
+  animation-timing-function: var(--spring-snappy);
+}
+::view-transition-old(nav-pill),
+::view-transition-new(nav-pill) {
+  animation: none;
+  height: 100%;
+}
+::view-transition-old(page) {
+  animation: vt-out var(--vt-dur-out) var(--ease-in-quart) both;
+}
+::view-transition-new(page) {
+  animation: vt-in var(--vt-dur) var(--ease-emphasized) both;
+}
+html[data-nav-dir='back']::view-transition-old(page) {
+  animation-name: vt-out-back;
+}
+html[data-nav-dir='back']::view-transition-new(page) {
+  animation-name: vt-in-back;
+}
+html[data-nav-dir='none']::view-transition-old(page),
+html[data-nav-dir='none']::view-transition-new(page) {
+  animation-name: vt-fade;
+}
+@keyframes vt-out {
+  to { opacity: 0; transform: translateX(-24px); filter: blur(4px); }
+}
+@keyframes vt-in {
+  from { opacity: 0; transform: translateX(24px); filter: blur(4px); }
+}
+@keyframes vt-out-back {
+  to { opacity: 0; transform: translateX(24px); filter: blur(4px); }
+}
+@keyframes vt-in-back {
+  from { opacity: 0; transform: translateX(-24px); filter: blur(4px); }
+}
+@keyframes vt-fade {
+  from { opacity: 0; }
+}
+/* With View Transitions the slide is the entrance; the blur-in is the fallback. */
+@supports (view-transition-name: page) {
+  main > [data-page] {
+    animation: none;
+  }
+}
+
+/* Theme switch: the new theme irises out from the toggle (--vt-x/--vt-y set by it). */
+html[data-vt='theme']::view-transition-old(root) {
+  animation: none;
+}
+html[data-vt='theme']::view-transition-new(root) {
+  animation: vt-iris 560ms var(--ease-out-quart);
+}
+@keyframes vt-iris {
+  from { clip-path: circle(0 at var(--vt-x, 50%) var(--vt-y, 0%)); }
+  to { clip-path: circle(150% at var(--vt-x, 50%) var(--vt-y, 0%)); }
+}
+
+/* ---- Scan reveal (SCAN): a clip wipe with a bright leading line ---------------------- */
+.reveal-scan {
+  position: relative;
+  clip-path: inset(0 0 100% 0);
+  transform: translateY(18px);
+  transition:
+    clip-path 0.8s var(--ease-out-quart),
+    transform 0.8s var(--ease-out-quart);
+}
+.reveal-scan::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--glow-b), transparent);
+  box-shadow: 0 0 14px 2px color-mix(in oklab, var(--glow-b) 60%, transparent);
+  opacity: 0;
+  pointer-events: none;
+}
+.reveal-scan[data-visible] {
+  clip-path: inset(-40px -40px -40px -40px);
+  transform: none;
+}
+.reveal-scan[data-visible]::after {
+  animation: scan-line 0.8s var(--ease-out-quart) both;
+  animation-delay: inherit;
+}
+@keyframes scan-line {
+  0% { top: 0; opacity: 1; }
+  85% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* ---- Pipeline (PACKET / CHARGE / LOCK) ------------------------------------------------ */
+.packet-track {
+  clip-path: inset(-12px 0);
+}
+.packet {
+  position: absolute;
+  inset: 0;
+  animation: packet-line var(--packet-dur) linear infinite;
+}
+.packet::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 9999px;
+  background: var(--glow-b);
+  box-shadow: 0 0 10px 3px color-mix(in oklab, var(--glow-b) 70%, transparent);
+}
+@keyframes packet-line {
+  0% { transform: translateX(0); opacity: 0; }
+  12%, 88% { opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+.node-lock {
+  animation: node-thunk var(--dur-spring-bouncy) var(--spring-bouncy) both;
+}
+@keyframes node-thunk {
+  0% { transform: scale(1); }
+  30% { transform: scale(0.92); }
+  100% { transform: scale(1); }
+}
+.ripple-once {
+  animation: ripple-once 0.9s var(--ease-out) both;
+}
+@keyframes ripple-once {
+  from { transform: scale(1); opacity: 0.7; }
+  to { transform: scale(1.9); opacity: 0; }
+}
+.draw-stroke {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  animation: draw-stroke 0.32s var(--ease-out-quart) 0.18s forwards;
+}
+@keyframes draw-stroke {
+  to { stroke-dashoffset: 0; }
+}
+.progress-scanner {
+  animation: progress-scan 1.2s var(--ease-out) infinite alternate;
+}
+@keyframes progress-scan {
+  from { transform: translateX(-10%); }
+  to { transform: translateX(410%); }
+}
+.breathe {
+  animation: breathe 3s ease-in-out infinite;
+}
+@keyframes breathe {
+  50% { opacity: 0.75; }
+}
+
+/* ---- Terminal (CRT power-on, typed lines, live scanline) ---------------------------- */
+.crt-on {
+  animation: crt-on 420ms var(--ease-out-quart) both;
+  transform-origin: center;
+}
+@keyframes crt-on {
+  0% { transform: scaleY(0.004) scaleX(0.6); filter: brightness(3); }
+  45% { transform: scaleY(0.004) scaleX(1); filter: brightness(3); }
+  100% { transform: none; filter: none; }
+}
+.type-in {
+  animation: type-in 260ms steps(24, end) both;
+}
+@keyframes type-in {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+.scan-band {
+  background: linear-gradient(to bottom, transparent, rgb(255 255 255 / 0.05), transparent);
+  height: 120px;
+  animation: scan-band 7s linear infinite;
+}
+@keyframes scan-band {
+  from { transform: translateY(-120px); }
+  to { transform: translateY(32rem); }
+}
+
+/* ---- Misc micro-interactions ---------------------------------------------------------- */
+.wake {
+  animation: wake var(--dur-spring-bouncy) var(--spring-bouncy) both;
+}
+@keyframes wake {
+  from { opacity: 0; transform: scale(0.6); }
+  to { opacity: 1; transform: none; }
+}
+.led {
+  animation: heartbeat 2.4s ease-in-out infinite;
+}
+@keyframes heartbeat {
+  0%, 40%, 100% { transform: scale(1); opacity: 1; }
+  10% { transform: scale(1.5); opacity: 0.7; }
+  20% { transform: scale(1); opacity: 1; }
+  30% { transform: scale(1.35); opacity: 0.8; }
+}
+.skeleton {
+  position: relative;
+  overflow: hidden;
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.12), transparent);
+  animation: skeleton 1.6s ease-in-out infinite;
+}
+@keyframes skeleton {
+  to { transform: translateX(100%); }
+}
+.glitch {
+  animation: glitch 180ms steps(2, end) 2;
+}
+.glitch-late {
+  animation: glitch 180ms steps(2, end) 1.4s 2;
+}
+@keyframes glitch {
+  0% { text-shadow: -2px 0 #f0f, 2px 0 #0ff; transform: translateX(1px); }
+  50% { text-shadow: 2px 0 #f0f, -2px 0 #0ff; transform: translateX(-1px) skewX(-4deg); }
+  100% { text-shadow: none; transform: none; }
+}
+.drawer {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--dur-md) var(--ease-out-quart);
+}
+.drawer[data-open] {
+  grid-template-rows: 1fr;
+}
+.drawer > * {
+  overflow: hidden;
+  min-height: 0;
+}
+.slide-from-right {
+  animation: slide-from-right var(--vt-dur) var(--ease-emphasized) both;
+}
+.slide-from-left {
+  animation: slide-from-left var(--vt-dur) var(--ease-emphasized) both;
+}
+@keyframes slide-from-right {
+  from { opacity: 0; transform: translateX(16px); filter: blur(3px); }
+}
+@keyframes slide-from-left {
+  from { opacity: 0; transform: translateX(-16px); filter: blur(3px); }
+}
+
+/* Header condenses once the page scrolls (data-scrolled set by Layout). */
+header[data-scrolled] > div {
+  box-shadow: 0 12px 40px -12px rgb(0 0 0 / 0.25);
+  border-color: color-mix(in oklab, var(--glow-a) 25%, var(--glass-border));
+}
+header > div {
+  transition:
+    box-shadow var(--dur-md) var(--ease-out),
+    border-color var(--dur-md) var(--ease-out);
+}
+
+/* Scroll-linked timeline line (draws as you scroll through it), where supported. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .timeline-line {
+      animation: draw linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 55%;
+    }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   ::before,
@@ -271,5 +620,14 @@ body {
     opacity: 1;
     transform: none;
     filter: none;
+  }
+  .reveal-scan {
+    clip-path: none;
+    transform: none;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }
