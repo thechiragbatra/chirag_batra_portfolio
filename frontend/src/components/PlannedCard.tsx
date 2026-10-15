@@ -1,4 +1,4 @@
-import { Hammer } from 'lucide-react'
+import { FileText, Hammer } from 'lucide-react'
 import type { PlannedProject } from '../types/content'
 
 /** A project that exists as a design doc only. Clearly labelled so nobody mistakes it for shipped work. */
@@ -29,9 +29,21 @@ export function PlannedCard({ project }: { project: PlannedProject }) {
           </li>
         ))}
       </ul>
-      <p className="flex items-center gap-1.5 pt-1 text-xs text-zinc-500">
-        <Hammer className="size-3.5" aria-hidden /> Design doc written · code in progress
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+        <p className="flex items-center gap-1.5 text-xs text-zinc-500">
+          <Hammer className="size-3.5" aria-hidden /> Code in progress
+        </p>
+        {project.designDocUrl && (
+          <a
+            href={project.designDocUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-medium text-zinc-700 transition-colors hover:bg-violet-500/10 hover:text-violet-700 dark:text-zinc-300 dark:hover:text-violet-300"
+          >
+            <FileText className="size-4" aria-hidden /> Design doc
+          </a>
+        )}
+      </div>
     </article>
   )
 }

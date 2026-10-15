@@ -66,6 +66,8 @@ export interface PlannedProject {
   /** One-phrase skill area it demonstrates, e.g. "LLM integration". */
   focus: string
   tags: string[]
+  /** Repo holding the design doc (README only until code lands). */
+  designDocUrl?: string
 }
 
 /** Headline numbers on the home hero (src/data/highlights.json). */

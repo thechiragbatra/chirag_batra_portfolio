@@ -10,7 +10,8 @@
       "pgvector",
       "vLLM",
       "Langfuse"
-    ]
+    ],
+    "designDocUrl": "https://github.com/thechiragbatra/filing-lens"
   },
   {
     "title": "SQL Copilot",
@@ -23,7 +24,8 @@
       "TRL",
       "vLLM",
       "W&B"
-    ]
+    ],
+    "designDocUrl": "https://github.com/thechiragbatra/sql-copilot"
   },
   {
     "title": "Two-Stage Recommender",
@@ -36,6 +38,7 @@
       "Polars",
       "MLflow",
       "FastAPI"
-    ]
+    ],
+    "designDocUrl": "https://github.com/thechiragbatra/two-stage-recommender"
   }
 ]
