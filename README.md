@@ -52,12 +52,28 @@ Now a deploy really builds the repo and serves it. Try `https://github.com/octoc
 (static) or a small Vite, Express, FastAPI, Flask, Streamlit or Gradio app. Static output is
 served from an immutable per-deploy directory; servers run as containers behind the router.
 Manage everything on http://localhost:5173/apps. Engine state lives in `.deploysmith/` (ignored
-by git); `docker ps --filter label=dev.deploysmith.engine=1` shows what is running, and
-`docker rm -f $(docker ps -aq --filter label=dev.deploysmith.engine=1)` tears it all down.
+by git); `docker ps --filter label=dev.deploysmith.engine=1` shows what is running.
+
+Things to know:
+
+- The first deploy pulls about 500 MB of base images (`node:22-alpine`, `python:3.12-slim`,
+  `nginx:1.27-alpine`), so its install step looks slow.
+- Run **one sandbox backend per machine**: the router container and the apps network are
+  shared. `pytest -m docker` also restarts the router, so live apps go dark until the next
+  deploy, rollback or backend restart.
+- On restart the backend reconciles: deploys interrupted mid-build are marked failed, and
+  live server containers that are down are started again.
+- To tear everything down:
+
+  ```sh
+  docker rm -f $(docker ps -aq --filter label=dev.deploysmith.engine=1)
+  docker network rm deploysmith-apps
+  rm -rf .deploysmith
+  ```
 
 The backend reads its settings from the process environment (`MOCK_AGENTS`, `CORS_ORIGINS`,
-`MOCK_AGENT_DELAY`, `MOCK_HEALER_FAILURES`, `REAL_HEALER`, `SANDBOX_ENGINE`,
-`DEPLOYSMITH_ENGINE_DIR`, `DEPLOYSMITH_ROUTER_PORT`; see `.env.example`). `MOCK_AGENTS=1` runs fully
+`MOCK_AGENT_DELAY`, `MOCK_HEALER_FAILURES`, `REAL_HEALER`, `SANDBOX_ENGINE`, `ALLOWED_HOSTS`
+and the `DEPLOYSMITH_*` engine settings; see `.env.example`). `MOCK_AGENTS=1` runs fully
 offline with mock agents. Export them in your shell, or
 prefix the uvicorn command, e.g. `MOCK_HEALER_FAILURES=4 PYTHONPATH=.. uv run uvicorn main:app`
 to watch the healer exhaust its 3 repair attempts. Vite reads `VITE_API_URL` from the root `.env`.
@@ -95,10 +111,14 @@ cd backend && uvx ruff check . ../agents && uvx ruff format --check . ../agents
 | `POST` | `/api/deployments` | Body `{"repo_url": "https://github.com/<owner>/<repo>"}` → `201 {"id", "repo_url"}`; `422` if not a GitHub repo URL |
 | `GET` | `/api/deployments/{id}/events` | SSE stream of `status`, `log`, then a final `done` or `error` event. Supports `Last-Event-ID` replay |
 | `GET` | `/api/health` | Liveness |
-| `GET` | `/api/apps` | Sandbox apps with their deploy history (newest first) and live URL |
-| `GET` | `/api/apps/{name}/deploys/{id}/log` | Full build log of one deploy (text) |
-| `POST` | `/api/apps/{name}/rollback` | Body `{"deploy_id"}`: make an earlier successful deploy live again |
-| `POST` | `/api/apps/{name}/stop` | Stop serving the app (deploys are kept); `DELETE /api/apps/{name}` removes it |
+
+Every `POST`/`DELETE` must send the header `X-DeploySmith: 1` (otherwise `403`), and requests
+with a `Host` outside `ALLOWED_HOSTS` get `400`. Browsers cannot add that header cross-origin
+without a CORS preflight, so other web pages cannot drive the API.
+| `GET` | `/api/apps` | Sandbox apps with their deploy history (newest first) and live URL, plus `engine_enabled` and `router_running` |
+| `GET` | `/api/apps/{name}/deploys/{id}/log` | Build log of one deploy (text, last 2 MB) |
+| `POST` | `/api/apps/{name}/rollback` | Body `{"deploy_id"}`: make an earlier successful deploy live again. `404` unknown deploy, `409` not rollback-able or another operation is running, `422` malformed id |
+| `POST` | `/api/apps/{name}/stop` | Stop serving the app (deploys are kept); `DELETE /api/apps/{name}` removes it. `503` when Docker is not running (nothing is changed) |
 
 Event and state shapes: [shared/schemas](shared/schemas).
 
@@ -133,8 +153,10 @@ profiler → strategist → provisioner → healer ─┐
   unprivileged nginx on `127.0.0.1:8080` (static files or a proxy to the app container), and
   `engine.py` runs the deploy: a failed build never replaces the live deploy, a server must
   answer HTTP before traffic switches, and rollback just re-points the router. On a repair
-  only the unhealthy components are redeployed, and a component whose build failed is not
-  rebuilt (the source has not changed).
+  only components a redeploy can fix (no response, gateway errors, no live deploy) are
+  redeployed; a failed build or an app answering with its own error ends the run with a
+  clear message, since the source has not changed. Retention keeps the newest successful
+  deploys as rollback targets; failed ones never push them out.
 - Each agent implements `Agent.run(state, log) -> partial update` (`agents/base.py`). The graph
   wrapper owns status events, the repair counter and error handling, so the real agents can
   replace the mocks without changing the graph.

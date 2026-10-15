@@ -13,8 +13,9 @@ Personal developer portfolio that doubles as a multi-agent deployment platform.
 - NEVER execute code from a target repo on the host. Clone shallow and analyze statically.
   The only exception is the sandbox engine (agents/sandbox/): repo code (install, build,
   run) may execute solely inside its hardened Docker containers (non-root, all caps
-  dropped, no-new-privileges, resource limits, no host mounts except a per-deploy copy,
-  no network during build, internal-only network at runtime). Never weaken those flags.
+  dropped, no-new-privileges, resource limits, no host mounts except a per-deploy copy;
+  install on the default bridge because it needs package registries, build with no
+  network, internal-only network at runtime). Never weaken those flags.
 - No secrets in code or git. Use .env + .env.example. All API keys are read from env.
 - Verify before declaring done: run linters, tests, and the dev servers. Show me the output.
 - Keep changes small and commit per logical step. Ask before adding dependencies not listed here.
