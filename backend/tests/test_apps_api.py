@@ -59,6 +59,12 @@ def engine(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Engine:
         return []
 
     monkeypatch.setattr(engine_mod.dk, "app_containers", no_containers)
+    monkeypatch.setattr(engine_mod.dk, "ensure_docker", nothing)
+
+    async def not_running(_: str) -> bool:
+        return False
+
+    monkeypatch.setattr("apps.container_running", not_running)
     return Engine(store)
 
 
@@ -66,7 +72,9 @@ def engine(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Engine:
 async def client(engine: Engine) -> AsyncIterator[httpx.AsyncClient]:
     app.dependency_overrides[get_engine] = lambda: engine
     transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://test") as c:
+    async with httpx.AsyncClient(
+        transport=transport, base_url="http://test", headers={"X-DeploySmith": "1"}
+    ) as c:
         yield c
     app.dependency_overrides.clear()
 
@@ -76,6 +84,7 @@ async def test_list_apps_newest_deploy_first(client: httpx.AsyncClient) -> None:
     assert response.status_code == 200
     body = response.json()
     assert body["router_port"] == 8080
+    assert body["engine_enabled"] is False and body["router_running"] is False
     (shop,) = body["apps"]
     assert shop["url"] == "http://shop.localhost:8080" and shop["current"] == NEW
     assert [d["id"] for d in shop["deployments"]] == [BAD, NEW, OLD]
@@ -115,3 +124,21 @@ async def test_stop_and_delete(client: httpx.AsyncClient, engine: Engine) -> Non
     assert (await client.delete("/api/apps/shop")).status_code == 204
     assert engine.store.load("shop") is None
     assert (await client.delete("/api/apps/shop")).status_code == 404
+
+
+async def test_rollback_to_unknown_or_malformed_deploy(client: httpx.AsyncClient) -> None:
+    unknown = await client.post(
+        "/api/apps/shop/rollback", json={"deploy_id": "d20990101000000ffff"}
+    )
+    assert unknown.status_code == 404
+    malformed = await client.post("/api/apps/shop/rollback", json={"deploy_id": "../etc"})
+    assert malformed.status_code == 422
+
+
+async def test_log_endpoint_serves_only_the_tail(
+    client: httpx.AsyncClient, engine: Engine, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("apps.MAX_LOG_RESPONSE_BYTES", 10)
+    engine.store.log_path("shop", NEW).write_text("0123456789ABCDEFGHIJ")
+    text = (await client.get(f"/api/apps/shop/deploys/{NEW}/log")).text
+    assert text.endswith("ABCDEFGHIJ") and text.startswith("[showing the last")

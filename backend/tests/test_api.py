@@ -10,7 +10,9 @@ from main import app
 @pytest.fixture
 async def client() -> AsyncIterator[httpx.AsyncClient]:
     transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://test") as c:
+    async with httpx.AsyncClient(
+        transport=transport, base_url="http://test", headers={"X-DeploySmith": "1"}
+    ) as c:
         yield c
 
 
@@ -70,3 +72,17 @@ async def test_cors_allows_vite_dev_server(client: httpx.AsyncClient) -> None:
     )
     assert response.status_code == 200
     assert response.headers["access-control-allow-origin"] == "http://localhost:5173"
+
+
+async def test_writes_without_csrf_header_are_rejected() -> None:
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as bare:
+        response = await bare.post("/api/deployments", json={"repo_url": "https://github.com/a/b"})
+        assert response.status_code == 403
+        assert (await bare.get("/api/health")).status_code == 200  # reads stay open
+
+
+async def test_unknown_host_header_is_rejected() -> None:
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://attacker.example") as c:
+        assert (await c.get("/api/health")).status_code == 400
