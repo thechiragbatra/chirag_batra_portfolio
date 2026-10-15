@@ -3,7 +3,7 @@
     "name": "Chirag Batra",
     "title": "B.Tech CS (Data Science) · Class of 2027",
     "location": "Dehradun, India",
-    "summary": "Final-year Computer Science (Data Science) student graduating in 2027, targeting ML engineering and data science roles. I build ML systems end to end and measure them honestly: a real-time fraud detection system on AWS (XGBoost, 89.6% recall at a 1% false-positive rate, 0.4 ms median scoring, Bedrock investigation agent, Terraform), causal uplift modeling that cut simulated retention spend by 56%, and a multi-agent LLM deployment platform built with LangGraph and Docker. Two data internships, including IBM.",
+    "summary": "Final-year Computer Science (Data Science) student, class of 2027, targeting ML engineering and data science roles. I build ML systems end to end and measure them honestly: real-time fraud detection on AWS, causal uplift modeling and a multi-agent LLM deployment platform. Two data internships, including IBM.",
     "links": [
       {
         "label": "Email",

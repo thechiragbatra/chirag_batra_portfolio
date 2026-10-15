@@ -71,6 +71,15 @@ The editor is a Vite dev-server plugin (`frontend/plugins/projectEditor.ts`), so
 production builds. Set `GITHUB_TOKEN` in `.env` if you hit GitHub's anonymous rate limit
 (60 requests/hour).
 
+### Résumé PDF
+
+`frontend/public/resume.pdf` (the site's Download PDF button) is generated from
+`frontend/src/data/resume.json`, so edit the JSON and regenerate rather than editing the PDF:
+
+```sh
+cd frontend && npm run resume:pdf     # needs Google Chrome; set CHROME=/path/to/chrome elsewhere
+```
+
 ## Checks
 
 ```sh
