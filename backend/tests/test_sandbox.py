@@ -46,7 +46,7 @@ def test_run_args_apply_full_hardening(tmp_path: Path) -> None:
     joined = " ".join(args)
     for flag in (
         "--rm",
-        "--user 1000:1000",
+        f"--user {dk.SANDBOX_UID}",
         "--cap-drop ALL",
         "--security-opt no-new-privileges",
         "--read-only",
@@ -57,6 +57,7 @@ def test_run_args_apply_full_hardening(tmp_path: Path) -> None:
     ):
         assert flag in joined, flag
     assert args[-4:] == ["node:22-alpine", "sh", "-c", "npm ci"]
+    assert not dk.SANDBOX_UID.startswith("0:")  # never root
     # The per-deploy copy is the only mount; never the docker socket or a host dir.
     mounts = [args[i + 1] for i, a in enumerate(args) if a == "--volume"]
     assert mounts == [f"{tmp_path}:/app:rw"]
@@ -778,3 +779,17 @@ def test_python_image_follows_requires_python(spec: str, image: str | None) -> N
     from agents.sandbox.recipes import python_image_for
 
     assert python_image_for(f"[project]\nname = 'x'\n{spec}\n") == image
+
+
+def test_sandbox_uid_uses_host_user_on_linux_but_never_root(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(dk.sys, "platform", "linux")
+    monkeypatch.setattr(dk.os, "getuid", lambda: 1001)
+    monkeypatch.setattr(dk.os, "getgid", lambda: 121)
+    assert dk.sandbox_uid() == "1001:121"
+    monkeypatch.setattr(dk.os, "getuid", lambda: 0)
+    assert dk.sandbox_uid() == "1000:1000"
+    monkeypatch.setattr(dk.sys, "platform", "darwin")
+    monkeypatch.setattr(dk.os, "getuid", lambda: 501)
+    assert dk.sandbox_uid() == "1000:1000"
