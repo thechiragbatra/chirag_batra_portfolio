@@ -6,12 +6,12 @@ JSON Schemas (draft 2020-12) for the data that crosses the Python/TypeScript bou
 | Schema | Describes | Python | TypeScript |
 | --- | --- | --- | --- |
 | `schemas/state.schema.json` | `DeploymentState` and its parts | `agents/models.py` | `frontend/src/types/events.ts` |
-| `schemas/event.schema.json` | SSE events from `GET /api/deployments/{id}/events` | `backend/events.py` | `frontend/src/types/events.ts` |
+| `schemas/event.schema.json` | SSE events from `GET /api/deployments/{id}/events` | `backend/app/services/events.py` | `frontend/src/types/events.ts` |
 
 ## How the types stay in sync
 
 1. **Change the schema first.** Edit the JSON in `schemas/`.
-2. **Update the pydantic models** to match. `backend/tests/test_schema_sync.py` compares the
+2. **Update the pydantic models** to match. `backend/tests/api/test_schema_sync.py` compares the
    models' generated schema (serialization mode) against these files: property names,
    required fields, types, enums, consts and numeric bounds. Any drift fails `pytest`.
 3. **Update `frontend/src/types/events.ts`** by hand. Nothing checks this side

@@ -1,7 +1,7 @@
 """Domain models shared by the agents and the backend.
 
 These mirror shared/schemas/state.schema.json, which is the source of truth.
-backend/tests/test_schema_sync.py fails if the two drift apart.
+backend/tests/api/test_schema_sync.py fails if the two drift apart.
 """
 
 from __future__ import annotations

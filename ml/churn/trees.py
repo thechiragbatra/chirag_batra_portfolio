@@ -1,6 +1,6 @@
 """Export an XGBoost binary classifier as compact arrays the browser can evaluate.
 
-The site's TypeScript evaluator (frontend/src/lib/ml/trees.ts) walks these arrays and
+The site's TypeScript evaluator (frontend/src/features/lab/trees.ts) walks these arrays and
 computes exact TreeSHAP; ``predict_margin`` here is the Python reference for the tests.
 
 Format, one object per tree (node i):

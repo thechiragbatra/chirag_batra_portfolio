@@ -1,6 +1,6 @@
 """The Churn Lab models, server side, so the guide can answer what-if questions.
 
-A port of frontend/src/lib/ml/trees.ts and churnLab.ts (tree walk + exact TreeSHAP over
+A port of frontend/src/features/lab/trees.ts and churnLab.ts (tree walk + exact TreeSHAP over
 the compact format ml/churn/trees.py exports). Pure Python: the backend needs no numpy.
 Checked against XGBoost's own margins and SHAP values by backend/tests/test_guide_churn.py.
 """
