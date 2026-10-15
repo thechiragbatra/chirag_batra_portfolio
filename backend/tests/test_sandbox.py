@@ -762,3 +762,19 @@ def test_ansi_codes_are_stripped_from_build_output() -> None:
     from agents.sandbox.engine import _ANSI
 
     assert _ANSI.sub("", "\x1b[36mvite v8\x1b[39m \x1b[2Kbuilding") == "vite v8 building"
+
+
+@pytest.mark.parametrize(
+    "spec, image",
+    [
+        ('requires-python = ">=3.14,<4.0"', "python:3.14-slim"),
+        ('requires-python = ">=3.13"', "python:3.13-slim"),
+        ('requires-python = ">=3.10"', None),  # the default 3.12 fits
+        ('requires-python = ">=3.9,<3.12"', "python:3.11-slim"),
+        ("", None),
+    ],
+)
+def test_python_image_follows_requires_python(spec: str, image: str | None) -> None:
+    from agents.sandbox.recipes import python_image_for
+
+    assert python_image_for(f"[project]\nname = 'x'\n{spec}\n") == image

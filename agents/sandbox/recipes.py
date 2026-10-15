@@ -89,6 +89,29 @@ def python_requirements(pyproject: str) -> list[str] | None:
     return lines or None
 
 
+PYTHON_MINORS = (11, 12, 13, 14)  # python:3.x-slim images the engine may pick
+_LOWER = re.compile(r">=\s*3\.(\d+)")
+_UPPER = re.compile(r"<\s*3\.(\d+)")
+
+
+def python_image_for(pyproject: str) -> str | None:
+    """The python:3.x-slim image satisfying [project].requires-python, or None to keep
+    the default. Prefers the default minor when allowed, else the lowest that fits."""
+    try:
+        spec = str(tomllib.loads(pyproject).get("project", {}).get("requires-python", ""))
+    except tomllib.TOMLDecodeError:
+        return None
+    if not spec:
+        return None
+    lower = max((int(m) for m in _LOWER.findall(spec)), default=0)
+    upper = min((int(m) for m in _UPPER.findall(spec)), default=99)
+    allowed = [m for m in PYTHON_MINORS if lower <= m < upper]
+    default_minor = int(PYTHON_IMAGE.split(":")[1].split(".")[1].split("-")[0])
+    if not allowed or default_minor in allowed:
+        return None
+    return f"python:3.{allowed[0]}-slim"
+
+
 def _node_install(command: str | None, has_lockfile: bool) -> str:
     runner = (command or "npm").split(" ", 1)[0]
     if runner == "pnpm":

@@ -34,6 +34,7 @@ from agents.sandbox.recipes import (
     OUTPUT_DIRS,
     PYTHON_SERVERS,
     Recipe,
+    python_image_for,
     python_requirements,
     recipe_for,
 )
@@ -131,7 +132,11 @@ class Engine:
         log: LogFn,
     ) -> tuple[str, str]:
         """Build and publish one component. Returns (app name, URL)."""
-        recipe = recipe_for(component, has_lockfile=_has_lockfile(checkout, component.path))
+        recipe = _with_python_version(
+            recipe_for(component, has_lockfile=_has_lockfile(checkout, component.path)),
+            component,
+            checkout,
+        )
         name = self._resolve_name(repo_url, repo_name, component.name, single)
         await dk.ensure_docker()
         # Fail fast on router problems (port taken, Docker issue) before minutes of building.
@@ -234,8 +239,8 @@ class Engine:
                 output = find_output_dir(workdir, built=bool(recipe.build), before=existing_outputs)
                 if output is None:
                     raise DeployError(
-                        "no new index.html in dist/, build/ or out/ after the build; "
-                        "set the build output directory"
+                        "no new index.html in dist/, build/ or out/ after the build; set the "
+                        "build output directory (output written outside the app is not published)"
                     )
                 size = await asyncio.to_thread(
                     copy_tree_without_links, output, deploy_dir / "site", MAX_SITE_BYTES, source
@@ -479,6 +484,19 @@ def _recipe_of(deploy: Deployment) -> Recipe:
     """The recipe a deploy was built with, on the image it was built with."""
     recipe = recipe_for(deploy.component)
     return dataclasses.replace(recipe, image=deploy.image) if deploy.image else recipe
+
+
+def _with_python_version(recipe: Recipe, component: Component, checkout: Path) -> Recipe:
+    """Run a Python app on the interpreter its pyproject.toml requires."""
+    pyproject = checkout / component.path / "pyproject.toml"
+    if (
+        component.framework not in PYTHON_SERVERS
+        or pyproject.is_symlink()
+        or not pyproject.is_file()
+    ):
+        return recipe
+    image = python_image_for(pyproject.read_text(encoding="utf-8", errors="replace"))
+    return dataclasses.replace(recipe, image=image) if image else recipe
 
 
 def _has_lockfile(checkout: Path, path: str) -> bool:
