@@ -25,7 +25,7 @@ provisioner is a mock (nothing is deployed) and the real healer is opt-in via `R
 Requires Node 20+, Python 3.11+, [uv](https://docs.astral.sh/uv/) and `git`.
 
 ```sh
-cp .env.example .env          # optional: every value has a sensible default
+cp .env.example .env          # optional: every value has a sensible default; the backend loads it
 
 # Backend → http://localhost:8000
 cd backend

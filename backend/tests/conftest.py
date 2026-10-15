@@ -1,5 +1,8 @@
 import os
 
+# Never read the developer's .env (it may hold real API keys) during tests.
+os.environ["DEPLOYSMITH_NO_DOTENV"] = "1"
+
 # Mock agents sleep between steps; tests run them instantly.
 os.environ["MOCK_AGENT_DELAY"] = "0"
 # The API tests use default_agents(); keep them offline. Real agents are tested directly.

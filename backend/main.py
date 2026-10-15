@@ -10,6 +10,7 @@ import logging
 import os
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,6 +21,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 from agents.sandbox.engine import default_engine
 from apps import engine_enabled_flag
 from apps import router as apps_router
+from envfile import load_env_file
 from events import EventAdapter
 from graph import build_graph
 from guide_api import router as guide_router
@@ -27,6 +29,10 @@ from runs import RunRegistry
 from validation import normalize_github_url
 
 logger = logging.getLogger(__name__)
+
+# The repo's .env (API keys, limits), read before the app reads any settings below.
+# Variables already set in the shell take precedence.
+load_env_file(Path(__file__).resolve().parents[1] / ".env")
 
 # Every state-changing request must carry this header. Browsers cannot attach a custom
 # header cross-origin without a CORS preflight, which the allowlist below rejects, so a
