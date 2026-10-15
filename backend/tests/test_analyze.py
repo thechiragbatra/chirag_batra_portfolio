@@ -57,6 +57,7 @@ def test_next_app_at_root(tmp_path: Path) -> None:
     (component,) = analyze_repo(tmp_path, "acme/site").components
     assert (component.name, component.kind, component.framework) == ("web", "frontend", "next")
     assert component.build_command == "pnpm run build"
+    assert component.start_command == "pnpm start"  # Next.js runs as a server
 
 
 def test_express_backend_with_mongo(tmp_path: Path) -> None:

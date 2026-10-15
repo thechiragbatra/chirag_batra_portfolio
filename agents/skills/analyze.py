@@ -273,7 +273,9 @@ def analyze_node(root: Path, directory: PurePosixPath) -> _Found | None:
         start = f"{runner} start" if "start" in scripts else None
         return _Found(path, "backend", backend, build, start, 3000, deps)
     if frontend:
-        return _Found(path, "frontend", frontend, build, None, None, deps)
+        # Next.js runs as a server (`next start`), so keep its start script too.
+        start = f"{runner} start" if frontend == "next" and "start" in scripts else None
+        return _Found(path, "frontend", frontend, build, start, None, deps)
     return None
 
 

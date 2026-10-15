@@ -14,7 +14,9 @@ it can only affect the container.
 from __future__ import annotations
 
 import asyncio
+import os
 import re
+import sys
 from collections.abc import Awaitable, Callable, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -26,8 +28,23 @@ ROUTER_IMAGE = "nginx:1.27-alpine"
 APPS_NETWORK = "deploysmith-apps"
 LABEL = "dev.deploysmith.engine=1"
 APP_LABEL = "dev.deploysmith.app"
-SANDBOX_UID = "1000:1000"
 WORKDIR = "/app"
+MAX_LINE_BYTES = 64 * 1024  # longer lines are split, never fatal
+
+
+def sandbox_uid() -> str:
+    """The non-root uid:gid containers run as.
+
+    On Linux the bind mount keeps host ownership, so use the backend's own ids (any
+    non-root user can then write the copy and clean it up). Docker Desktop maps ownership
+    itself, and root is never passed through: both use 1000:1000.
+    """
+    if sys.platform.startswith("linux") and os.getuid() != 0:
+        return f"{os.getuid()}:{os.getgid()}"
+    return "1000:1000"
+
+
+SANDBOX_UID = sandbox_uid()
 
 LineFn = Callable[[str], Awaitable[None]]
 _NAME = re.compile(r"^[a-z0-9][a-z0-9_.-]{0,127}$")
@@ -46,7 +63,9 @@ class Limits:
 
 
 BUILD_LIMITS = Limits()
-RUN_LIMITS = Limits(memory="512m", cpus="1", pids=256, tmp_size="256m")
+RUN_LIMITS = Limits(
+    memory=os.getenv("DEPLOYSMITH_APP_MEMORY", "512m"), cpus="1", pids=256, tmp_size="256m"
+)
 
 
 @dataclass(frozen=True)
@@ -75,7 +94,8 @@ def run_args(spec: Container) -> list[str]:
         raise SandboxError("workdir must not contain '..'")
 
     args = ["docker", "run"]
-    args += ["--detach", "--restart", "on-failure:3"] if spec.detach else ["--rm"]
+    # unless-stopped: running apps come back after a Docker Desktop or machine restart.
+    args += ["--detach", "--restart", "unless-stopped"] if spec.detach else ["--rm"]
     if spec.name:
         args += ["--name", spec.name]
     args += [
@@ -123,9 +143,20 @@ async def run_streaming(
     assert process.stdout is not None
 
     async def pump() -> None:
+        # Read in chunks rather than readline(): a single line over the stream limit
+        # (minified output, a progress bar) would otherwise raise and abort the step.
         assert process.stdout is not None
-        while line := await process.stdout.readline():
-            await on_line(line.decode(errors="replace").rstrip())
+        pending = b""
+        while chunk := await process.stdout.read(MAX_LINE_BYTES):
+            pending += chunk
+            *lines, pending = pending.split(b"\n")
+            if len(pending) > MAX_LINE_BYTES:
+                lines.append(pending)
+                pending = b""
+            for line in lines:
+                await on_line(line.decode(errors="replace").rstrip())
+        if pending:
+            await on_line(pending.decode(errors="replace").rstrip())
 
     try:
         await asyncio.wait_for(asyncio.gather(pump(), process.wait()), timeout=timeout)
@@ -133,6 +164,11 @@ async def run_streaming(
         process.kill()
         await process.wait()
         raise SandboxError(f"step timed out after {timeout:.0f}s") from None
+    except BaseException:
+        if process.returncode is None:
+            process.kill()
+            await process.wait()
+        raise
     return process.returncode if process.returncode is not None else -1
 
 
@@ -168,11 +204,28 @@ async def remove_container(name: str) -> None:
 
 
 async def app_containers(app: str) -> list[str]:
-    """Names of every container (running or not) the engine started for `app`."""
+    """Names of every container (running or not) the engine started for `app`.
+
+    Raises rather than returning [] when Docker cannot be asked, so callers never delete
+    records while containers are still running.
+    """
     code, output = await docker(
         "ps", "--all", "--filter", f"label={APP_LABEL}={app}", "--format", "{{.Names}}"
     )
-    return [line for line in output.splitlines() if line.strip()] if code == 0 else []
+    if code != 0:
+        raise SandboxError(f"could not list containers for {app}: {output[-300:]}")
+    return [line for line in output.splitlines() if line.strip()]
+
+
+async def start_container(name: str) -> bool:
+    """Start an existing (stopped) container. True on success."""
+    code, _ = await docker("start", name)
+    return code == 0
+
+
+async def container_exists(name: str) -> bool:
+    code, _ = await docker("inspect", "--format", "{{.Id}}", name)
+    return code == 0
 
 
 async def container_running(name: str) -> bool:

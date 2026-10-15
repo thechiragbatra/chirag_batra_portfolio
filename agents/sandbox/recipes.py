@@ -8,6 +8,7 @@ and they only ever run inside a sandbox container (agents/sandbox/docker.py).
 from __future__ import annotations
 
 import re
+import tomllib
 from dataclasses import dataclass, field
 from typing import Literal
 
@@ -28,6 +29,11 @@ SUPPORTED = STATIC_BUILDS | NODE_SERVERS | PYTHON_SERVERS | {"static"}
 _PYTHON_SERVER_PACKAGE = {"fastapi": "uvicorn", "flask": "gunicorn", "django": "gunicorn"}
 OUTPUT_DIRS = ("dist", "build", "out", "public")
 _SAFE_PATH = re.compile(r"^[A-Za-z0-9_.-]+(/[A-Za-z0-9_.-]+)*$")
+
+
+# Written by the engine into the app directory when the repo declares its dependencies
+# only in pyproject.toml without a build backend, so `pip install .` would fail.
+GENERATED_REQUIREMENTS = ".deploysmith-requirements.txt"
 
 
 class UnsupportedComponent(ValueError):
@@ -64,6 +70,25 @@ def _node_runner(command: str) -> str:
     return command
 
 
+def python_requirements(pyproject: str) -> list[str] | None:
+    """Requirement lines for a pyproject with dependencies but no [build-system].
+
+    None when `pip install .` is the right call (a build backend exists) or nothing is
+    declared. Lines that look like pip options are dropped: they are data from the repo.
+    """
+    try:
+        data = tomllib.loads(pyproject)
+    except tomllib.TOMLDecodeError:
+        return None
+    if "build-system" in data:
+        return None
+    deps = [str(d) for d in data.get("project", {}).get("dependencies", [])]
+    poetry = data.get("tool", {}).get("poetry", {}).get("dependencies", {})
+    deps += [name for name in poetry if name.lower() != "python"]  # versions use ^/~ syntax
+    lines = [d.strip() for d in deps if d.strip() and not d.strip().startswith("-")]
+    return lines or None
+
+
 def _node_install(command: str | None, has_lockfile: bool) -> str:
     runner = (command or "npm").split(" ", 1)[0]
     if runner == "pnpm":
@@ -96,7 +121,8 @@ def recipe_for(component: Component, has_lockfile: bool = False) -> Recipe:
         return Recipe(mode="static", image=NODE_IMAGE, workdir=workdir)
 
     if framework in STATIC_BUILDS or framework in NODE_SERVERS:
-        install = _node_install(component.build_command, has_lockfile)
+        # The package manager shows in whichever script exists (a server may have no build).
+        install = _node_install(component.build_command or component.start_command, has_lockfile)
         build = _node_runner(component.build_command) if component.build_command else None
         if framework in STATIC_BUILDS:
             if build is None:
@@ -117,6 +143,8 @@ def recipe_for(component: Component, has_lockfile: bool = False) -> Recipe:
     install = (
         "python -m venv .venv && "
         "if [ -f requirements.txt ]; then .venv/bin/pip install -r requirements.txt; "
+        f"elif [ -f {GENERATED_REQUIREMENTS} ]; then "
+        f".venv/bin/pip install -r {GENERATED_REQUIREMENTS}; "
         "else .venv/bin/pip install .; fi"
     )
     if extra:

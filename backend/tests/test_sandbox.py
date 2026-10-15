@@ -319,7 +319,7 @@ async def test_static_deploy_publishes_output_and_switches(
     record = engine.store.load("shop")
     assert record and record.current and record.deployments[0].status == "ready"
     site = engine.store.deploy_dir("shop", record.current) / "site" / "index.html"
-    assert site.read_text().startswith("build") and fake.routes == 1
+    assert site.read_text().startswith("build") and fake.routes == 2  # fail-fast + switch
     assert engine.store.log_path("shop", record.current).read_text().count("running") == 2
 
 
@@ -350,7 +350,7 @@ async def test_static_rollback(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
     await engine.deploy(repo, "u", "acme/shop", component(), True, quiet)
     first, second = engine.store.load("shop").deployments  # type: ignore[union-attr]
     record = await engine.rollback("shop", first.id, quiet)
-    assert record.current == first.id and fake.routes == 3
+    assert record.current == first.id and fake.routes == 5
     with pytest.raises(DeployError, match="not a successful deploy"):
         await engine.rollback("shop", "d20990101000000ffff", quiet)
 
@@ -507,3 +507,245 @@ def test_node_server_install_keeps_dev_dependencies() -> None:
     recipe = recipe_for(comp)
     assert "NODE_ENV" not in recipe.env
     assert recipe.run_env["NODE_ENV"] == "production"
+
+
+def test_pnpm_server_without_build_installs_with_pnpm() -> None:
+    comp = component(
+        kind="backend", framework="express", build_command=None, start_command="pnpm start"
+    )
+    recipe = recipe_for(comp)
+    assert recipe.install == "corepack pnpm install --frozen-lockfile"
+    assert recipe.start == "corepack pnpm start"
+
+
+def test_python_requirements_only_without_build_backend() -> None:
+    from agents.sandbox.recipes import python_requirements
+
+    uv_style = '[project]\nname="x"\ndependencies=["fastapi>=0.110", "sqlmodel", "--index-url=http://evil"]\n'
+    assert python_requirements(uv_style) == ["fastapi>=0.110", "sqlmodel"]
+    with_backend = uv_style + '[build-system]\nrequires=["hatchling"]\n'
+    assert python_requirements(with_backend) is None
+    assert python_requirements("not = [toml") is None
+
+
+def test_copy_keeps_executable_bit(tmp_path: Path) -> None:
+    src = tmp_path / "src"
+    src.mkdir()
+    script = src / "build.sh"
+    script.write_text("#!/bin/sh\necho hi\n")
+    script.chmod(0o4755)  # setuid must not survive
+    copy_tree_without_links(src, tmp_path / "out", 10_000)
+    mode = (tmp_path / "out" / "build.sh").stat().st_mode & 0o7777
+    assert mode == 0o755
+
+
+# --- review fixes, round 2 ------------------------------------------------------------
+
+
+def _dep(i: int, status: str, mode: str = "static") -> Deployment:
+    return Deployment(
+        id=f"d2026010100000{i}abcd",
+        created_at="2026-01-01T00:00:00Z",
+        status=status,
+        mode=mode,
+        component=component(),
+    )  # type: ignore[arg-type]
+
+
+def test_prune_never_evicts_successful_deploys_for_failed_ones(tmp_path: Path) -> None:
+    store = Store(tmp_path)
+    deploys = [
+        _dep(0, "ready"),
+        _dep(1, "ready"),
+        _dep(2, "ready"),
+        _dep(3, "failed"),
+        _dep(4, "failed"),
+        _dep(5, "failed"),
+        _dep(6, "failed"),
+        _dep(7, "ready"),
+    ]
+    record = AppRecord(
+        name="shop",
+        repo_url="u",
+        component="web",
+        mode="static",
+        current=deploys[7].id,
+        deployments=deploys,
+    )
+    for d in deploys:
+        store.deploy_dir("shop", d.id).mkdir(parents=True)
+    store.prune(record, keep=3)
+    kept = [d.id[-5] for d in sorted(record.deployments, key=lambda d: d.id)]
+    assert kept == ["1", "2", "4", "5", "6", "7"]  # 3 newest ready + 3 newest failed
+
+
+def test_corrupt_record_is_skipped_by_list_and_named_by_load(tmp_path: Path) -> None:
+    from agents.sandbox.store import CorruptRecord
+
+    store = Store(tmp_path)
+    store.save(_record(1, current=0))
+    bad = tmp_path / "apps" / "broken"
+    bad.mkdir(parents=True)
+    (bad / "app.json").write_text("{not json")
+    assert [r.name for r in store.list()] == ["shop"]
+    with pytest.raises(CorruptRecord, match="broken"):
+        store.load("broken")
+
+
+def test_built_app_ignores_public_and_committed_dist(tmp_path: Path) -> None:
+    from agents.sandbox.engine import _output_snapshot
+
+    (tmp_path / "public").mkdir()
+    (tmp_path / "public" / "index.html").write_text("vite input")
+    (tmp_path / "dist").mkdir()
+    (tmp_path / "dist" / "index.html").write_text("stale, committed")
+    (tmp_path / "index.html").write_text("vite root")
+    before = _output_snapshot(tmp_path)
+    assert find_output_dir(tmp_path, built=True, before=before) is None
+    # The build rewrites dist/: now it counts.
+    import os as _os
+    import time as _time
+
+    index = tmp_path / "dist" / "index.html"
+    index.write_text("fresh")
+    _os.utime(index, (_time.time() + 5, _time.time() + 5))
+    assert find_output_dir(tmp_path, built=True, before=before) == tmp_path / "dist"
+    # A plain static site (no build) is served from its root.
+    assert find_output_dir(tmp_path / "public") == tmp_path / "public"
+
+
+def test_router_serves_live_deploy_mode_not_record_mode() -> None:
+    live = _dep(0, "ready", mode="static")
+    record = AppRecord(
+        name="blog",
+        repo_url="u",
+        component="web",
+        mode="server",
+        current=live.id,
+        deployments=[live, _dep(1, "failed", mode="server")],
+    )
+    config = sites_config([record])
+    assert "root /srv/apps/blog/" in config and "proxy_pass" not in config
+    assert "proxy_set_header Host $http_host;" in sites_config(
+        [
+            AppRecord(
+                name="api",
+                repo_url="u",
+                component="api",
+                mode="server",
+                current=_dep(2, "ready", "server").id,
+                deployments=[_dep(2, "ready", "server")],
+            )
+        ]
+    )
+
+
+async def test_router_failure_after_build_keeps_previous_live(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    FakeDocker(monkeypatch)
+    engine = Engine(Store(tmp_path / "engine"))
+    repo = checkout(tmp_path)
+    await engine.deploy(repo, "u", "acme/shop", component(), True, quiet)
+    live = engine.store.load("shop").current  # type: ignore[union-attr]
+    calls = {"n": 0}
+
+    async def flaky_reload(_: Store) -> None:
+        calls["n"] += 1
+        if calls["n"] == 2:  # fail-fast check passes, the post-build switch fails
+            raise dk.SandboxError("could not start the router: port is already allocated")
+
+    monkeypatch.setattr(engine_mod, "reload_router", flaky_reload)
+    with pytest.raises(DeployError, match="DEPLOYSMITH_ROUTER_PORT"):
+        await engine.deploy(repo, "u", "acme/shop", component(), True, quiet)
+    record = engine.store.load("shop")
+    assert record and record.current == live and record.deployments[-1].status == "failed"
+
+
+async def test_same_repo_name_from_another_owner_gets_its_own_app(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    FakeDocker(monkeypatch)
+    engine = Engine(Store(tmp_path / "engine"))
+    repo = checkout(tmp_path)
+    a, _ = await engine.deploy(
+        repo, "https://github.com/acme/shop", "acme/shop", component(), True, quiet
+    )
+    b, _ = await engine.deploy(
+        repo, "https://github.com/evil/shop", "evil/shop", component(), True, quiet
+    )
+    assert (a, b) == ("shop", "evil-shop")
+    assert engine.store.load("shop").repo_url == "https://github.com/acme/shop"  # type: ignore[union-attr]
+
+
+async def test_stop_and_rollback_refuse_while_a_deploy_runs(tmp_path: Path) -> None:
+    engine = Engine(Store(tmp_path))
+    async with engine._lock("shop"):
+        with pytest.raises(DeployError, match="in progress"):
+            await engine.stop("shop")
+        with pytest.raises(DeployError, match="in progress"):
+            await engine.rollback("shop", "d20260101000000abcd", quiet)
+
+
+async def test_stop_changes_nothing_when_docker_is_down(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    store = Store(tmp_path)
+    store.save(_record(1, current=0))
+
+    async def down() -> None:
+        raise dk.SandboxError("Docker is not running; start Docker Desktop and retry")
+
+    monkeypatch.setattr(dk, "ensure_docker", down)
+    with pytest.raises(dk.SandboxError):
+        await Engine(store).stop("shop", delete=True)
+    assert store.load("shop") is not None
+
+
+async def test_reconcile_marks_interrupted_builds_failed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    store = Store(tmp_path)
+    record = _record(1, current=0)
+    record.deployments.append(_dep(9, "building"))
+    store.save(record)
+
+    async def down() -> None:
+        raise dk.SandboxError("down")
+
+    monkeypatch.setattr(dk, "ensure_docker", down)
+    actions = await Engine(store).reconcile()
+    assert actions and store.load("shop").deployments[-1].status == "failed"  # type: ignore[union-attr]
+    assert "interrupted" in (store.load("shop").deployments[-1].error or "")  # type: ignore[union-attr]
+
+
+async def test_failed_step_still_removes_its_container(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    FakeDocker(monkeypatch, fail_on="npm run build")
+    removed: list[str] = []
+
+    async def record_rm(name: str) -> None:
+        removed.append(name)
+
+    monkeypatch.setattr(dk, "remove_container", record_rm)
+    engine = Engine(Store(tmp_path / "engine"))
+    with pytest.raises(DeployError):
+        await engine.deploy(checkout(tmp_path), "u", "acme/shop", component(), True, quiet)
+    assert any(n.endswith("-install") for n in removed) and any(
+        n.endswith("-build") for n in removed
+    )
+
+
+async def test_run_streaming_survives_very_long_lines() -> None:
+    import sys as _sys
+
+    lines: list[str] = []
+
+    async def keep(line: str) -> None:
+        lines.append(line)
+
+    code = await dk.run_streaming(
+        [_sys.executable, "-c", "print('x' * 200000); print('done')"], keep, timeout=20
+    )
+    assert code == 0 and lines[-1] == "done" and sum(len(x) for x in lines[:-1]) == 200000

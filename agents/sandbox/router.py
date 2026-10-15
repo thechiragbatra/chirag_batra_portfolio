@@ -89,7 +89,9 @@ server {{
         set $upstream {upstream};
         proxy_pass $upstream;
         proxy_http_version 1.1;
-        proxy_set_header Host $host;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Forwarded-Host $http_host;
+        proxy_set_header X-Forwarded-Port $server_port;
         proxy_set_header X-Forwarded-For $remote_addr;
         proxy_set_header X-Forwarded-Proto http;
         proxy_set_header Upgrade $http_upgrade;
@@ -110,7 +112,11 @@ def sites_config(records: list[AppRecord]) -> str:
     for record in sorted(records, key=lambda r: r.name):
         if record.current is None:
             continue
-        render = _static_server if record.mode == "static" else _proxy_server
+        # The live deploy's own mode decides, not the record's: a failed deploy of a
+        # different kind must not change how the live one is served.
+        live = record.deployment(record.current)
+        mode = live.mode if live else record.mode
+        render = _static_server if mode == "static" else _proxy_server
         parts.append(render(record, record.current))
     return "".join(parts)
 
