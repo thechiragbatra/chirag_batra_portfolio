@@ -13,3 +13,5 @@ planned-projects
 **/dist
 **/*.tsbuildinfo
 .DS_Store
+.guide
+ml/churn/data

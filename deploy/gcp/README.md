@@ -25,7 +25,8 @@ GCP_PROJECT=your-project-id ./deploy/gcp/deploy.sh
 # optional: GCP_REGION=asia-south1 (default us-central1)
 ```
 
-The script enables the APIs, creates the `deploysmith` Artifact Registry repository, builds
+The script enables the APIs, stores Smith's Groq key (from `GROQ_API_KEY` or the repo's
+`.env`) in Secret Manager for the API to read at startup, creates the `deploysmith` Artifact Registry repository, builds
 and deploys the API, builds the frontend against the API's URL, deploys it, and finally sets
 the API's `CORS_ORIGINS` (the frontend's URLs) and `ALLOWED_HOSTS` (the API's own hostnames).
 It prints the site URL at the end. Re-run it to ship a new version; images are tagged with
@@ -39,6 +40,8 @@ the git commit.
 - **`--min-instances 0`:** both services scale to zero when idle, so an unvisited portfolio
   costs nothing; the first visit after a quiet period takes a second or two longer.
 - **API `--timeout 900`:** SSE streams stay open for the length of a run.
+- **Groq key in Secret Manager:** never in the image, the build upload (`.gcloudignore`
+  excludes `.env`) or the service's plain environment. Without a key, Smith stays hidden.
 - **API `--memory 1Gi`:** Cloud Run's filesystem is in memory, and the profiler clones repos
   of up to 200 MB into it.
 

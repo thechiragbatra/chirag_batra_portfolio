@@ -39,6 +39,7 @@ USER app
 ENV SANDBOX_ENGINE=0 \
     MOCK_AGENTS=0 \
     REAL_HEALER=0 \
+    GUIDE_FEEDBACK_FILE=/tmp/guide-feedback.jsonl \
     PORT=8080
 WORKDIR /app/backend
 EXPOSE 8080

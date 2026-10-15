@@ -20,8 +20,33 @@ REGISTRY="${REGION}-docker.pkg.dev/${PROJECT}/${REPO}"
 cd "$(dirname "$0")/../.."
 gcloud config set project "$PROJECT" >/dev/null
 
-echo "==> Enabling Cloud Run, Cloud Build and Artifact Registry"
-gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com
+echo "==> Enabling Cloud Run, Cloud Build, Artifact Registry and Secret Manager"
+gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com \
+  secretmanager.googleapis.com
+
+# Smith's Groq key: from the environment, or the repo's .env. It goes into Secret Manager
+# (free tier: 6 secret versions, 10,000 reads a month) and is never printed or baked in.
+GROQ_KEY="${GROQ_API_KEY:-}"
+if [[ -z "$GROQ_KEY" && -f .env ]]; then
+  # Last GROQ_API_KEY= line, with any quotes and spaces removed.
+  GROQ_KEY=$(sed -n 's/^GROQ_API_KEY=//p' .env | tail -1 | tr -d "\"' ")
+fi
+SECRET_FLAGS=()
+if [[ -n "$GROQ_KEY" ]]; then
+  echo "==> Storing the Groq key in Secret Manager (groq-api-key)"
+  if ! gcloud secrets describe groq-api-key >/dev/null 2>&1; then
+    gcloud secrets create groq-api-key --replication-policy automatic >/dev/null
+  fi
+  printf '%s' "$GROQ_KEY" | gcloud secrets versions add groq-api-key --data-file=- >/dev/null
+  NUMBER=$(gcloud projects describe "$PROJECT" --format 'value(projectNumber)')
+  gcloud secrets add-iam-policy-binding groq-api-key \
+    --member "serviceAccount:${NUMBER}-compute@developer.gserviceaccount.com" \
+    --role roles/secretmanager.secretAccessor >/dev/null
+  SECRET_FLAGS=(--set-secrets "GROQ_API_KEY=groq-api-key:latest")
+else
+  echo "==> No GROQ_API_KEY found: deploying without Smith (its button stays hidden)"
+fi
+unset GROQ_KEY
 
 if ! gcloud artifacts repositories describe "$REPO" --location "$REGION" >/dev/null 2>&1; then
   echo "==> Creating Artifact Registry repository $REPO"
@@ -47,7 +72,7 @@ build deploy/gcp/api.Dockerfile "$REGISTRY/$API:$TAG"
 gcloud run deploy "$API" --image "$REGISTRY/$API:$TAG" --region "$REGION" \
   --allow-unauthenticated --port 8080 --cpu 1 --memory 1Gi \
   --min-instances 0 --max-instances 1 --concurrency 40 --timeout 900 \
-  --session-affinity --cpu-boost
+  --session-affinity --cpu-boost "${SECRET_FLAGS[@]}"
 API_URLS=$(service_urls "$API")
 API_URL=$(gcloud run services describe "$API" --region "$REGION" --format 'value(status.url)')
 

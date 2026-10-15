@@ -1,0 +1,16 @@
+# What `gcloud builds submit` must never upload. Secrets above all: the key lives in .env
+# and reaches Cloud Run through Secret Manager, never through the build context.
+.gcloudignore
+.git
+.env
+.env.*
+!.env.example
+#!include:.gitignore
+.deploysmith
+.guide
+planned-projects
+ml/churn/data
+**/node_modules
+**/dist
+**/.venv
+**/__pycache__
