@@ -11,7 +11,11 @@
       "FastAPI"
     ],
     "githubUrl": "https://github.com/thechiragbatra/RADAR-Real-time-Agentic-Detection-and-Reporting",
-    "diagram": "/diagrams/radar.svg"
+    "diagram": "/diagrams/radar.svg",
+    "metric": {
+      "value": "89.6%",
+      "label": "fraud recall at a 1% false-positive rate"
+    }
   },
   {
     "title": "Customer Churn MLOps",
@@ -26,7 +30,11 @@
     ],
     "githubUrl": "https://github.com/thechiragbatra/customer-churn-mlops",
     "diagram": "/projects/customer-churn-mlops.jpg",
-    "demo": "/lab"
+    "demo": "/lab",
+    "metric": {
+      "value": "56%",
+      "label": "lower simulated retention spend with uplift targeting"
+    }
   },
   {
     "title": "DeploySmith OS",
@@ -40,7 +48,12 @@
       "SSE"
     ],
     "githubUrl": "https://github.com/thechiragbatra/deploysmith",
-    "diagram": "/diagrams/deploysmith.svg"
+    "diagram": "/diagrams/deploysmith.svg",
+    "metric": {
+      "value": "4",
+      "label": "LangGraph agents, streaming live"
+    },
+    "demo": "/deployer"
   },
   {
     "title": "Proactive Academic Intervention System",
@@ -54,6 +67,10 @@
     ],
     "githubUrl": "https://github.com/thechiragbatra/proactive-academic-intervention-system",
     "liveUrl": "https://thechiragbatra.github.io/proactive-academic-intervention-system/",
-    "diagram": "/projects/pais.jpg"
+    "diagram": "/projects/pais.jpg",
+    "metric": {
+      "value": "0.887",
+      "label": "ROC-AUC flagging at-risk students"
+    }
   }
 ]

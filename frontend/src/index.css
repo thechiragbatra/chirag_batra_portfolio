@@ -4,10 +4,14 @@
 
 @theme {
   --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-display: 'Space Grotesk', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Syne', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Instrument Serif', ui-serif, Georgia, serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 
-  --color-ink: #05060a;
+  --color-ink: #030308;
+  --color-neon-cyan: #38e1ff;
+  --color-neon-violet: #8b5cf6;
+  --color-neon-magenta: #ff4fd2;
 
   --animate-aurora: aurora 22s ease-in-out infinite alternate;
   --animate-gradient: gradient-pan 8s ease infinite;
@@ -99,15 +103,16 @@
   to { stroke-dashoffset: -40; }
 }
 
+/* Cinematic dark: one theme. Near-black with a blue cast, neon cyan, violet and magenta. */
 :root {
-  color-scheme: light;
-  --bg: #f7f8fb;
-  --glass: rgb(255 255 255 / 0.62);
-  --glass-strong: rgb(255 255 255 / 0.86);
-  --glass-border: rgb(15 23 42 / 0.08);
-  --glow-a: #10b981;
-  --glow-b: #06b6d4;
-  --glow-c: #8b5cf6;
+  color-scheme: dark;
+  --bg: #030308;
+  --glass: rgb(12 12 24 / 0.5);
+  --glass-strong: rgb(9 9 18 / 0.78);
+  --glass-border: rgb(255 255 255 / 0.08);
+  --glow-a: #38e1ff;
+  --glow-b: #8b5cf6;
+  --glow-c: #ff4fd2;
 }
 
 /* ---- Motion tokens ("Signal Path"): every animation is one of four verbs --------------
@@ -135,23 +140,14 @@
   --vt-dur-out: 180ms;
 }
 
-:root.dark {
-  color-scheme: dark;
-  --bg: #05060a;
-  --glass: rgb(17 19 28 / 0.6);
-  --glass-strong: rgb(13 15 22 / 0.88);
-  --glass-border: rgb(255 255 255 / 0.08);
-  --glow-a: #34d399;
-  --glow-b: #22d3ee;
-  --glow-c: #a78bfa;
-}
+
 
 html {
   scroll-behavior: smooth;
 }
 
 body {
-  @apply text-zinc-900 antialiased dark:text-zinc-100;
+  @apply text-zinc-100 antialiased;
   background: var(--bg);
   font-feature-settings: 'cv11', 'ss01';
 }
@@ -162,15 +158,33 @@ body {
 
 @utility font-display {
   font-family: var(--font-display);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.035em;
+}
+
+/* Elegant italic serif for one or two accent words in a bold headline. */
+@utility font-serif {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+/* Small uppercase label above headings. */
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--glow-a);
 }
 
 /* Frosted panel used across the site. */
 @utility glass {
   background: var(--glass);
   border: 1px solid var(--glass-border);
-  backdrop-filter: blur(18px) saturate(160%);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.05);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
 }
 
 /* Denser glass for cards carrying body text, so the particle field never sits on the copy.
@@ -178,8 +192,11 @@ body {
 @utility glass-strong {
   background: var(--glass-strong);
   border: 1px solid var(--glass-border);
-  backdrop-filter: blur(18px) saturate(160%);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.06),
+    0 24px 60px -30px rgb(0 0 0 / 0.8);
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
 }
 
 /* Animated tri-color gradient text. */
@@ -657,4 +674,68 @@ header > div {
   ::view-transition-new(*) {
     animation: none !important;
   }
+}
+
+
+/* ---- Cinematic layer -------------------------------------------------------------------- */
+
+/* The shader canvas fades in once WebGL is running; until then (or without WebGL) a static
+   gradient in the same palette stands in. */
+.shader-canvas {
+  opacity: 0;
+  transition: opacity 1.2s var(--ease-out);
+}
+.shader-canvas[data-ready] {
+  opacity: 1;
+}
+.shader-fallback {
+  background:
+    radial-gradient(60% 50% at 75% 20%, color-mix(in oklab, var(--glow-b) 28%, transparent), transparent 70%),
+    radial-gradient(50% 40% at 15% 70%, color-mix(in oklab, var(--glow-a) 18%, transparent), transparent 70%),
+    radial-gradient(40% 35% at 85% 85%, color-mix(in oklab, var(--glow-c) 14%, transparent), transparent 70%);
+}
+
+/* Headline letters rise into place one by one (see components/fx/KineticText.tsx). */
+.kinetic-char {
+  display: inline-block;
+  transform: translateY(105%) rotate(6deg);
+  opacity: 0;
+  animation: kinetic-rise 0.9s var(--ease-emphasized) forwards;
+}
+@keyframes kinetic-rise {
+  to { transform: none; opacity: 1; }
+}
+
+/* Endless horizontal ticker. */
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 38s linear infinite;
+}
+@keyframes marquee {
+  to { transform: translateX(-50%); }
+}
+
+/* Scroll-driven scene motion where supported (Chrome, Edge); elsewhere it stays still. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .scene-media {
+      animation: scene-media linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 60%;
+    }
+    .scene-index {
+      animation: scene-index linear both;
+      animation-timeline: view();
+      animation-range: entry 0% exit 100%;
+    }
+  }
+}
+@keyframes scene-media {
+  from { transform: scale(0.88) translateY(40px); opacity: 0.2; filter: saturate(0.4); }
+  to { transform: none; opacity: 1; filter: none; }
+}
+@keyframes scene-index {
+  from { transform: translateY(30%); }
+  to { transform: translateY(-30%); }
 }

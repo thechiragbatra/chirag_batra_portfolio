@@ -7,6 +7,7 @@ import { LogPanel } from '../components/LogPanel'
 import { PageHeader } from '../components/PageHeader'
 import { PipelineGraph } from '../components/PipelineGraph'
 import { useDeploymentStream } from '../hooks/useDeploymentStream'
+import { setActivity } from '../lib/activity'
 import { isGithubRepoUrl } from '../lib/githubUrl'
 
 const EXAMPLES = [
@@ -51,6 +52,13 @@ function Deployer({ run, repo }: { run: string | null; repo: string | null }) {
   const elapsed = useElapsed(stream.isBusy, startedAt)
   const inputRef = useRef<HTMLInputElement>(null)
   const { attach } = stream
+  const busy = stream.isBusy
+
+  // The background surges while a deployment streams.
+  useEffect(() => {
+    setActivity('deploy', busy ? 1 : 0)
+    return () => setActivity('deploy', 0)
+  }, [busy])
 
   // Opened on a run someone else started (the AI guide): follow its live stream.
   useEffect(() => {

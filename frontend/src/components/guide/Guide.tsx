@@ -22,6 +22,7 @@ import {
 import { type FormEvent, type KeyboardEvent, type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { prefersReducedMotion } from '../../hooks/useMediaQuery'
+import { setActivity } from '../../lib/activity'
 import {
   askGuide,
   type ChatTurn,
@@ -279,6 +280,12 @@ export function Guide() {
     )
     return () => controller.abort()
   }, [])
+
+  // The background stirs while Smith is working on an answer.
+  useEffect(() => {
+    setActivity('smith', busy ? 0.6 : 0)
+    return () => setActivity('smith', 0)
+  }, [busy])
 
   useEffect(() => saveItems(items.filter((i) => i.role === 'user' || !i.pending)), [items])
 

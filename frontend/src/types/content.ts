@@ -8,6 +8,8 @@ export interface Project {
   liveUrl?: string
   /** In-site route to an interactive demo of the project, e.g. "/lab". */
   demo?: string
+  /** Headline number for the project's scene on the home page. */
+  metric?: { value: string; label: string }
   /** Card image under public/: an architecture diagram or a screenshot, e.g. "/diagrams/foo.svg". */
   diagram?: string
 }
