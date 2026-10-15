@@ -4,7 +4,7 @@
   {"id": "radar-recall", "group": "facts", "question": "What recall does RADAR reach at a 1% false-positive rate?", "cite_any": ["project-1", "resume-project-1", "highlights"], "contain_any": ["89.6"]},
   {"id": "causal", "group": "facts", "question": "Has he worked with causal inference?", "cite_any": ["project-2", "resume-project-2", "lab-overview", "lab-uplift-eval", "lab-method", "skills-statistics-experimentation"]},
   {"id": "llm-skills", "group": "facts", "question": "What LLM skills does he have?", "cite_any": ["skills-deep-learning-llms"]},
-  {"id": "contact", "group": "facts", "question": "How can I contact him?", "cite_any": ["contact", "resume-summary"], "contain_any": ["batrachirag1123@gmail.com", "linkedin"]},
+  {"id": "contact", "group": "facts", "question": "How can I contact him?", "cite_any": ["contact", "resume-summary"], "contain_any": ["batrachirag748@gmail.com", "linkedin"]},
   {"id": "certs", "group": "facts", "question": "Which certifications does he have?", "cite_any": ["certifications"], "contain_any": ["IBM", "Deloitte"]},
   {"id": "deploysmith", "group": "facts", "question": "What is DeploySmith?", "cite_any": ["project-3", "resume-project-3", "deploysmith-pipeline", "site-overview"]},
   {"id": "sandbox", "group": "facts", "question": "How does the sandbox engine keep untrusted code contained?", "cite_any": ["deploysmith-sandbox"]},

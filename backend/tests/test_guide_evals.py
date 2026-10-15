@@ -56,7 +56,7 @@ def test_grade_catches_fabrication_and_off_topic_tool_use() -> None:
 async def test_evaluate_runs_cases_through_the_agent() -> None:
     model = ScriptedModel(
         Turn(calls=[("search_portfolio", {"query": "contact email"})]),
-        Turn(text="Email batrachirag1123@gmail.com [S1]."),
+        Turn(text="Email batrachirag748@gmail.com [S1]."),
     )
     case = {
         "id": "contact",
