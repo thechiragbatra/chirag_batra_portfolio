@@ -1,0 +1,21 @@
+# Builds one DeploySmith image with Cloud Build and pushes it to Artifact Registry.
+# Used by deploy.sh; _DOCKERFILE picks the image, _BUILD_ARG passes VITE_API_URL to the web build.
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -f
+      - ${_DOCKERFILE}
+      - --build-arg
+      - ${_BUILD_ARG}
+      - -t
+      - ${_IMAGE}
+      - .
+images:
+  - ${_IMAGE}
+substitutions:
+  _DOCKERFILE: deploy/gcp/api.Dockerfile
+  _BUILD_ARG: UNUSED=1
+  _IMAGE: ""
+options:
+  logging: CLOUD_LOGGING_ONLY

@@ -96,6 +96,18 @@ production builds. Set `GITHUB_TOKEN` in `.env` if you hit GitHub's anonymous ra
 cd frontend && npm run resume:pdf     # needs Google Chrome; set CHROME=/path/to/chrome elsewhere
 ```
 
+## Deploying to Google Cloud
+
+The site (frontend + API) deploys to Google Cloud Run with one script; see
+[deploy/gcp/README.md](deploy/gcp/README.md):
+
+```sh
+GCP_PROJECT=your-project-id ./deploy/gcp/deploy.sh
+```
+
+The sandbox engine stays local (Cloud Run has no Docker daemon), so the hosted Deployer
+profiles and plans for real and simulates the deploy.
+
 ## Checks
 
 ```sh
