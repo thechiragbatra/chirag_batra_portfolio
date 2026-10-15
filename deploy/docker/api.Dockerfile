@@ -1,5 +1,6 @@
-# DeploySmith API for Google Cloud Run. Build from the repository root:
-#   docker build -f deploy/gcp/api.Dockerfile -t deploysmith-api .
+# DeploySmith API image (Cloud Run, Azure Container Apps, or any container host).
+# Build from the repository root:
+#   docker build -f deploy/docker/api.Dockerfile -t deploysmith-api .
 #
 # The sandbox engine needs a Docker daemon, which Cloud Run does not have, so it stays
 # off here: the profiler and strategist are real (git is installed for shallow clones),

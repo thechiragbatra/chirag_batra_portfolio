@@ -66,7 +66,7 @@ service_urls() {
 hosts_of() { for url in "$@"; do echo -n "${url#https://},"; done | sed 's/,$//'; }
 
 echo "==> Building and deploying the API"
-build deploy/gcp/api.Dockerfile "$REGISTRY/$API:$TAG"
+build deploy/docker/api.Dockerfile "$REGISTRY/$API:$TAG"
 # max-instances=1: deployment runs and their SSE streams live in one process's memory,
 # so every request must reach the same instance. min-instances=0 scales to zero.
 gcloud run deploy "$API" --image "$REGISTRY/$API:$TAG" --region "$REGION" \

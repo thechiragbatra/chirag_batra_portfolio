@@ -79,11 +79,11 @@ jobs:
         run: uv run pytest -q
 
   images:
-    name: Cloud Run images build
+    name: Container images build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Build API image
-        run: docker build -f deploy/gcp/api.Dockerfile -t deploysmith-api .
+        run: docker build -f deploy/docker/api.Dockerfile -t deploysmith-api .
       - name: Build web image
         run: docker build -f deploy/gcp/web.Dockerfile --build-arg VITE_API_URL=https://example.invalid -t deploysmith-web .

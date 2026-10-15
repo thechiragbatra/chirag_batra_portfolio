@@ -4,7 +4,7 @@ Two Cloud Run services, built by Cloud Build into Artifact Registry:
 
 | Service | Image | What it runs |
 | --- | --- | --- |
-| `deploysmith-api` | `api.Dockerfile` | FastAPI + LangGraph pipeline. Real profiler (git shallow clones, static analysis only) and strategist; simulated provisioner and healer |
+| `deploysmith-api` | `deploy/docker/api.Dockerfile` | FastAPI + LangGraph pipeline. Real profiler (git shallow clones, static analysis only) and strategist; simulated provisioner and healer |
 | `deploysmith-web` | `web.Dockerfile` | The Vite build served by nginx, with the API URL baked in |
 
 The sandbox engine is **off** in the cloud: it builds apps in Docker, and Cloud Run has no
@@ -56,7 +56,7 @@ check <https://cloud.google.com/free> and keep the budget alert on.
 ## Test the images locally
 
 ```sh
-docker build -f deploy/gcp/api.Dockerfile -t deploysmith-api .
+docker build -f deploy/docker/api.Dockerfile -t deploysmith-api .
 docker build -f deploy/gcp/web.Dockerfile --build-arg VITE_API_URL=http://localhost:8091 -t deploysmith-web .
 docker run -p 8091:8080 -e CORS_ORIGINS=http://localhost:8092 -e ALLOWED_HOSTS=localhost deploysmith-api
 docker run -p 8092:8080 deploysmith-web      # open http://localhost:8092

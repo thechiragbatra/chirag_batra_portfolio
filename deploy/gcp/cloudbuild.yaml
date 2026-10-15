@@ -14,7 +14,7 @@ steps:
 images:
   - ${_IMAGE}
 substitutions:
-  _DOCKERFILE: deploy/gcp/api.Dockerfile
+  _DOCKERFILE: deploy/docker/api.Dockerfile
   _BUILD_ARG: UNUSED=1
   _IMAGE: ""
 options:

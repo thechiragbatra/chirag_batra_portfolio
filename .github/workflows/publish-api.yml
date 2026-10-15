@@ -11,7 +11,7 @@ on:
       - "backend/**"
       - "frontend/src/data/**"
       - "frontend/public/models/**"
-      - "deploy/gcp/api.Dockerfile"
+      - "deploy/docker/api.Dockerfile"
       - ".github/workflows/publish-api.yml"
   workflow_dispatch:
 
@@ -34,7 +34,7 @@ jobs:
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
       - name: Build
         run: |
-          docker build -f deploy/gcp/api.Dockerfile \
+          docker build -f deploy/docker/api.Dockerfile \
             --label org.opencontainers.image.source="https://github.com/${{ github.repository }}" \
             -t "$IMAGE:${GITHUB_SHA::7}" -t "$IMAGE:latest" .
       - name: Push
