@@ -53,8 +53,30 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - name: Lint
         run: npm run lint
+      - name: Tests
+        run: npm test
       - name: Typecheck and build
         run: npm run build
+
+  ml:
+    name: Churn Lab training code (pytest, ruff)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ml/churn
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: ml/churn/uv.lock
+      - name: Install Python and dependencies
+        run: uv python install 3.12 && uv sync --frozen
+      - name: Lint
+        run: uvx ruff check . && uvx ruff format --check .
+      - name: Tests
+        # Offline: the tests build their own small datasets.
+        run: uv run pytest -q
 
   images:
     name: Cloud Run images build
