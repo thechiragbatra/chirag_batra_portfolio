@@ -8,17 +8,20 @@ import { Magnetic } from '../components/fx/Magnetic'
 import { Reveal } from '../components/fx/Reveal'
 import { ScrambleText } from '../components/fx/ScrambleText'
 import { TypeCycle } from '../components/fx/TypeCycle'
+import { PlannedCard } from '../components/PlannedCard'
 import { ProjectCard } from '../components/ProjectCard'
 import highlightsData from '../data/highlights.json'
+import plannedData from '../data/planned.json'
 import projectsData from '../data/projects.json'
 import resumeData from '../data/resume.json'
-import type { Highlight, Project, Resume } from '../types/content'
+import type { Highlight, PlannedProject, Project, Resume } from '../types/content'
 
 const projects: Project[] = projectsData
 const highlights: Highlight[] = highlightsData
+const planned: PlannedProject[] = plannedData
 const resume: Resume = resumeData
 
-const BUILDS = ['machine learning models', 'data pipelines', 'full-stack ML apps', 'self-healing deployers']
+const BUILDS = ['real-time ML systems', 'LLM agents', 'causal uplift models', 'self-healing deployers']
 
 function Hero() {
   return (
@@ -43,8 +46,9 @@ function Hero() {
           className="animate-fade-up mt-4 max-w-xl leading-relaxed text-zinc-600 dark:text-zinc-400"
           style={{ animationDelay: '450ms' }}
         >
-          Data science undergrad who ships models as working products: risk analytics at IBM,
-          churn and uplift modeling, and this site&apos;s own multi-agent deployment pipeline.
+          Class of 2027 data science student who builds ML systems end to end: streaming fraud
+          detection on AWS, causal uplift modeling, and this site&apos;s own multi-agent deployment
+          pipeline. Looking for ML engineering and data science roles.
         </p>
         <div className="animate-fade-up mt-8 flex flex-wrap gap-3" style={{ animationDelay: '600ms' }}>
           <Magnetic>
@@ -121,6 +125,30 @@ export default function Projects() {
           ))}
         </div>
       </section>
+
+      {planned.length > 0 && (
+        <section aria-labelledby="building-heading" className="mt-20">
+          <Reveal className="mb-8">
+            <p className="mb-2 font-mono text-xs tracking-[0.2em] text-violet-600 uppercase dark:text-violet-400">
+              On the bench
+            </p>
+            <h2 id="building-heading" className="font-display text-3xl font-bold sm:text-4xl">
+              Currently building
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+              Designed and scoped, with evaluation plans written before any code. These are works in
+              progress, not finished results.
+            </p>
+          </Reveal>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {planned.map((project, i) => (
+              <Reveal key={project.title} delay={(i % 3) * 120}>
+                <PlannedCard project={project} />
+              </Reveal>
+            ))}
+          </div>
+        </section>
+      )}
     </>
   )
 }

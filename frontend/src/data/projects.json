@@ -1,19 +1,5 @@
 [
   {
-    "title": "DeploySmith OS",
-    "description": "This site. A portfolio that doubles as a multi-agent deployment platform: four LangGraph agents profile a GitHub repo, plan its hosting, build it inside a hardened Docker sandbox and health-check the result, streaming every step to the browser. Deploys are immutable, with build logs and one-click rollback.",
-    "tags": [
-      "React",
-      "TypeScript",
-      "FastAPI",
-      "LangGraph",
-      "Docker",
-      "SSE"
-    ],
-    "githubUrl": "https://github.com/thechiragbatra/deploysmith",
-    "diagram": "/diagrams/deploysmith.svg"
-  },
-  {
     "title": "RADAR: Real-time Agentic Detection and Reporting",
     "description": "Production-shaped fraud detection on AWS. Transactions are scored off a Kinesis stream in 0.4 ms median (717 req/s in the load test) by an XGBoost model that reaches 89.6% recall at a 1% false-positive rate on 606k synthetic transactions; hourly drift monitoring triggers champion/challenger retraining, and a Bedrock tool-use agent investigates every flagged transaction and commits a schema-validated verdict. About 60 AWS resources in Terraform, CI with OIDC deploys, 42 tests.",
     "tags": [
@@ -40,6 +26,20 @@
     ],
     "githubUrl": "https://github.com/thechiragbatra/customer-churn-mlops",
     "diagram": "/projects/customer-churn-mlops.jpg"
+  },
+  {
+    "title": "DeploySmith OS",
+    "description": "This site. A portfolio that doubles as a multi-agent deployment platform: four LangGraph agents profile a GitHub repo, plan its hosting, build it inside a hardened Docker sandbox and health-check the result, streaming every step to the browser. Deploys are immutable, with build logs and one-click rollback.",
+    "tags": [
+      "React",
+      "TypeScript",
+      "FastAPI",
+      "LangGraph",
+      "Docker",
+      "SSE"
+    ],
+    "githubUrl": "https://github.com/thechiragbatra/deploysmith",
+    "diagram": "/diagrams/deploysmith.svg"
   },
   {
     "title": "Proactive Academic Intervention System",

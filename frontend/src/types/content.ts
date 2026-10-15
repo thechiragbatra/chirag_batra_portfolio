@@ -59,6 +59,15 @@ export interface Resume {
   skills: SkillGroup[]
 }
 
+/** A project with a design doc but no code yet (src/data/planned.json). Shown as "in development". */
+export interface PlannedProject {
+  title: string
+  summary: string
+  /** One-phrase skill area it demonstrates, e.g. "LLM integration". */
+  focus: string
+  tags: string[]
+}
+
 /** Headline numbers on the home hero (src/data/highlights.json). */
 export interface Highlight {
   value: number

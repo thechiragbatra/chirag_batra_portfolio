@@ -1,13 +1,22 @@
 {
   "basics": {
     "name": "Chirag Batra",
-    "title": "Computer Science (Data Science) Undergraduate",
+    "title": "B.Tech CS (Data Science) · Class of 2027",
     "location": "Dehradun, India",
-    "summary": "Computer Science (Data Science) undergraduate with hands-on experience building end-to-end machine learning and data analytics solutions in Python. Skilled in exploratory data analysis, feature engineering, predictive modeling, and deploying models as working applications. Experienced across financial risk analytics, customer churn modeling, and multi-source data pipelines.",
+    "summary": "Final-year Computer Science (Data Science) student graduating in 2027, targeting ML engineering and data science roles. I build ML systems end to end and measure them honestly: a real-time fraud detection system on AWS (XGBoost, 89.6% recall at a 1% false-positive rate, 0.4 ms median scoring, Bedrock investigation agent, Terraform), causal uplift modeling that cut simulated retention spend by 56%, and a multi-agent LLM deployment platform built with LangGraph and Docker. Two data internships, including IBM.",
     "links": [
-      { "label": "Email", "url": "mailto:batrachirag1123@gmail.com" },
-      { "label": "LinkedIn", "url": "https://www.linkedin.com/in/chirag-batra-ds" },
-      { "label": "GitHub", "url": "https://github.com/thechiragbatra" }
+      {
+        "label": "Email",
+        "url": "mailto:batrachirag1123@gmail.com"
+      },
+      {
+        "label": "LinkedIn",
+        "url": "https://www.linkedin.com/in/chirag-batra-ds"
+      },
+      {
+        "label": "GitHub",
+        "url": "https://github.com/thechiragbatra"
+      }
     ]
   },
   "experience": [
@@ -52,41 +61,155 @@
   ],
   "projects": [
     {
+      "name": "RADAR: Real-time Agentic Detection and Reporting",
+      "description": "Streaming fraud detection on AWS: XGBoost scoring at 0.4 ms median (717 req/s in load tests) with 89.6% recall at 1% FPR on 606k synthetic transactions, beating rules (66.8%) and logistic regression (73.7%). Hourly PSI drift monitoring triggers champion/challenger retraining; a Bedrock tool-use agent investigates flagged transactions and returns schema-validated verdicts. ~60 AWS resources in Terraform, CI with OIDC deploys, 42 tests.",
+      "tech": [
+        "Python",
+        "XGBoost",
+        "AWS (Kinesis, Lambda, Fargate, SQS)",
+        "Amazon Bedrock",
+        "Terraform",
+        "FastAPI"
+      ],
+      "url": "https://github.com/thechiragbatra/RADAR-Real-time-Agentic-Detection-and-Reporting"
+    },
+    {
       "name": "Customer Churn Prediction and Retention Uplift Modeling",
       "description": "Churn model on a 7,032-customer telecom dataset reaching 0.82 AUC-ROC with XGBoost. Uplift modeling identified persuadable customers, cutting simulated retention campaign spend by 56% while maintaining retention rates. Streamlit and FastAPI dashboard with SHAP explainability; experiments tracked in MLflow.",
-      "tech": ["Python", "XGBoost", "CausalML", "SHAP", "MLflow", "FastAPI", "Streamlit"]
+      "tech": [
+        "Python",
+        "XGBoost",
+        "CausalML",
+        "SHAP",
+        "MLflow",
+        "FastAPI",
+        "Streamlit"
+      ],
+      "url": "https://github.com/thechiragbatra/customer-churn-mlops"
+    },
+    {
+      "name": "DeploySmith OS",
+      "description": "A portfolio that doubles as a multi-agent deployment platform: LangGraph agents statically profile a GitHub repo, plan its hosting, build it in hardened Docker containers and health-check the result, streaming every step over SSE. Immutable deploys with build logs and one-click rollback; 200+ pytest tests.",
+      "tech": [
+        "Python",
+        "LangGraph",
+        "FastAPI",
+        "Docker",
+        "React",
+        "TypeScript"
+      ],
+      "url": "https://github.com/thechiragbatra/deploysmith"
     },
     {
       "name": "Proactive Academic Intervention System",
       "description": "End-to-end ML web app analyzing 5,000+ records to predict at-risk individuals, reaching 0.887 ROC-AUC with class-balanced Logistic Regression. Automated feature engineering from MySQL, a max-heap priority queue for ranking, and sliding-window anomaly detection. Flask backend deployed on Render.",
-      "tech": ["Python", "Scikit-learn", "Flask", "MySQL", "Render"]
+      "tech": [
+        "Python",
+        "Scikit-learn",
+        "Flask",
+        "MySQL",
+        "Render"
+      ],
+      "url": "https://github.com/thechiragbatra/proactive-academic-intervention-system"
     }
   ],
   "skills": [
-    { "category": "Languages", "items": ["Python", "SQL", "Java", "JavaScript"] },
+    {
+      "category": "Languages",
+      "items": [
+        "Python",
+        "SQL",
+        "TypeScript",
+        "Java",
+        "Bash"
+      ]
+    },
     {
       "category": "Machine Learning",
-      "items": ["Scikit-learn", "XGBoost", "Random Forest", "Logistic Regression", "Uplift Modeling", "CausalML", "SHAP", "Model Evaluation", "Feature Engineering", "Classification", "Predictive Modeling"]
+      "items": [
+        "Scikit-learn",
+        "XGBoost",
+        "LightGBM",
+        "Feature Engineering",
+        "Model Evaluation",
+        "Imbalanced Learning (SMOTE)",
+        "SHAP Explainability",
+        "Hyperparameter Tuning",
+        "Time-series Analysis"
+      ]
     },
     {
-      "category": "Data Analysis",
-      "items": ["Pandas", "NumPy", "EDA", "Data Cleaning", "Data Aggregation", "Statistical Analysis", "Data Visualization"]
+      "category": "Deep Learning & LLMs",
+      "items": [
+        "PyTorch",
+        "Hugging Face Transformers",
+        "LoRA / QLoRA (PEFT)",
+        "RAG",
+        "Embeddings & Vector Search",
+        "LangGraph Agents",
+        "Tool Use & Structured Output",
+        "LLM Evaluation",
+        "Claude API",
+        "Amazon Bedrock",
+        "vLLM"
+      ]
     },
     {
-      "category": "Data Engineering & MLOps",
-      "items": ["ETL Pipelines", "Data Preprocessing", "MLflow", "Model Deployment", "REST APIs"]
+      "category": "Statistics & Experimentation",
+      "items": [
+        "Hypothesis Testing",
+        "A/B Testing",
+        "Causal Inference",
+        "Uplift Modeling (CausalML)",
+        "Drift Detection (PSI)",
+        "Probability & Statistics"
+      ]
     },
     {
-      "category": "Databases & Backend",
-      "items": ["MySQL", "SQL", "SQLAlchemy", "Database Design", "FastAPI", "Flask", "Streamlit", "React"]
+      "category": "MLOps & Cloud",
+      "items": [
+        "Docker",
+        "AWS (Lambda, Fargate, Kinesis, SQS, DynamoDB, S3)",
+        "Terraform",
+        "GitHub Actions CI/CD",
+        "MLflow",
+        "Model Serving (FastAPI)",
+        "Monitoring & Retraining"
+      ]
     },
     {
-      "category": "Tools & Platforms",
-      "items": ["Git", "GitHub", "Jupyter Notebook", "Tableau", "Power BI", "Excel", "Render", "Netlify"]
+      "category": "Data Engineering",
+      "items": [
+        "Pandas",
+        "NumPy",
+        "Polars",
+        "ETL Pipelines",
+        "PostgreSQL / pgvector",
+        "MySQL",
+        "SQLAlchemy",
+        "Data Modeling"
+      ]
+    },
+    {
+      "category": "Visualization & BI",
+      "items": [
+        "Matplotlib",
+        "Seaborn",
+        "Plotly",
+        "Streamlit",
+        "Tableau",
+        "Power BI"
+      ]
     },
     {
       "category": "CS Fundamentals",
-      "items": ["Data Structures & Algorithms", "Object-Oriented Programming", "DBMS"]
+      "items": [
+        "Data Structures & Algorithms",
+        "Object-Oriented Programming",
+        "DBMS",
+        "Operating Systems",
+        "Computer Networks"
+      ]
     }
   ]
 }

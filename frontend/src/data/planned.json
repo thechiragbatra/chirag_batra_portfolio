@@ -1,0 +1,41 @@
+[
+  {
+    "title": "Filing Lens",
+    "summary": "Agentic RAG over Indian companies' annual reports: hybrid search with reranking, a LangGraph agent with calculator and table tools, and answers where every number cites its page, or abstains. Built around a golden evaluation set and a CI gate that blocks regressions.",
+    "focus": "LLM integration",
+    "tags": [
+      "Claude API",
+      "LangGraph",
+      "RAG",
+      "pgvector",
+      "vLLM",
+      "Langfuse"
+    ]
+  },
+  {
+    "title": "SQL Copilot",
+    "summary": "QLoRA fine-tuning of an open-weight 7B code model for text-to-SQL, with an execution sandbox for self-correction, served on vLLM and benchmarked against a frontier model on accuracy, latency and cost per 1,000 queries.",
+    "focus": "LLM fine-tuning",
+    "tags": [
+      "PyTorch",
+      "Hugging Face",
+      "QLoRA",
+      "TRL",
+      "vLLM",
+      "W&B"
+    ]
+  },
+  {
+    "title": "Two-Stage Recommender",
+    "summary": "Production-style recommendations on the 31M-transaction H&M dataset: two-tower retrieval with FAISS, a LightGBM LambdaRank ranker on point-in-time features, a sub-100 ms serving budget and a simulated A/B test.",
+    "focus": "Recommender systems",
+    "tags": [
+      "PyTorch",
+      "FAISS",
+      "LightGBM",
+      "Polars",
+      "MLflow",
+      "FastAPI"
+    ]
+  }
+]
