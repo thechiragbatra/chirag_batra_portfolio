@@ -149,7 +149,7 @@ class Engine:
                         "set the build output directory"
                     )
                 size = await asyncio.to_thread(
-                    copy_tree_without_links, output, deploy_dir / "site", MAX_SITE_BYTES
+                    copy_tree_without_links, output, deploy_dir / "site", MAX_SITE_BYTES, source
                 )
                 rel = output.relative_to(source)
                 await log(f"Published {rel}/ ({size // 1024} KB)")
@@ -206,7 +206,7 @@ class Engine:
             source=source,
             workdir=recipe.workdir,
             network=dk.APPS_NETWORK,
-            env={**recipe.env, "PORT": str(APP_PORT)},
+            env={**recipe.env, **recipe.run_env, "PORT": str(APP_PORT)},
             limits=dk.RUN_LIMITS,
             name=name,
             detach=True,
@@ -314,6 +314,10 @@ def find_output_dir(workdir: Path) -> Path | None:
         for child in sorted(candidate.iterdir()):
             if child.is_dir() and not child.is_symlink():
                 for nested in (child, child / "browser"):
+                    # The build ran repo code that could leave `browser` as a symlink to a
+                    # host directory; never return a link.
+                    if nested.is_symlink():
+                        continue
                     if (nested / "index.html").is_file():
                         return nested
     if (workdir / "index.html").is_file():

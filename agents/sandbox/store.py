@@ -142,9 +142,19 @@ class Store:
         return removed
 
 
-def copy_tree_without_links(src: Path, dest: Path, max_bytes: int) -> int:
+def copy_tree_without_links(
+    src: Path, dest: Path, max_bytes: int, within: Path | None = None
+) -> int:
     """Copy regular files only. Symlinks made inside a container could point at host
-    paths once outside it, so they are dropped rather than followed. Returns bytes copied."""
+    paths once outside it, so they are dropped rather than followed. Returns bytes copied.
+
+    os.walk always opens `src` itself, so `src` must not be a link and, when `within` is
+    given, must resolve inside it; otherwise a build could publish an arbitrary host dir.
+    """
+    if src.is_symlink():
+        raise ValueError("refusing to copy through a symlink")
+    if within is not None and not src.resolve().is_relative_to(within.resolve()):
+        raise ValueError("output directory escapes the build tree")
     total = 0
     for dirpath, dirnames, filenames in os.walk(src, followlinks=False):
         current = Path(dirpath)

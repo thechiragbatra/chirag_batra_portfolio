@@ -473,3 +473,37 @@ async def test_reload_router_reports_start_failure(tmp_path: Path, cli: Any) -> 
     cli(running=False, run_result=(125, "docker: port is already allocated"))
     with pytest.raises(dk.SandboxError, match="could not start the router"):
         await router_mod.reload_router(Store(tmp_path))
+
+
+# --- review fixes -------------------------------------------------------------------
+
+
+def test_find_output_dir_ignores_symlinked_browser_dir(tmp_path: Path) -> None:
+    host = tmp_path / "host-project"
+    host.mkdir()
+    (host / "index.html").write_text("x")
+    (host / ".env").write_text("SECRET=1")
+    work = tmp_path / "work"
+    (work / "dist" / "app").mkdir(parents=True)
+    os.symlink(host, work / "dist" / "app" / "browser")
+    assert find_output_dir(work) is None
+
+
+def test_copy_refuses_symlinked_or_escaping_source(tmp_path: Path) -> None:
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (outside / "index.html").write_text("x")
+    build = tmp_path / "build"
+    build.mkdir()
+    os.symlink(outside, build / "dist")
+    with pytest.raises(ValueError, match="symlink"):
+        copy_tree_without_links(build / "dist", tmp_path / "out", 10_000, build)
+    with pytest.raises(ValueError, match="escapes"):
+        copy_tree_without_links(outside, tmp_path / "out2", 10_000, build)
+
+
+def test_node_server_install_keeps_dev_dependencies() -> None:
+    comp = component(kind="backend", framework="next", start_command="npm start")
+    recipe = recipe_for(comp)
+    assert "NODE_ENV" not in recipe.env
+    assert recipe.run_env["NODE_ENV"] == "production"

@@ -43,6 +43,9 @@ class Recipe:
     build: str | None = None
     start: str | None = None
     env: dict[str, str] = field(default_factory=dict)
+    # Only for the running app. NODE_ENV=production during install would make npm skip
+    # devDependencies (typescript, next build tooling), breaking the build step.
+    run_env: dict[str, str] = field(default_factory=dict)
 
 
 def component_workdir(component: Component) -> str:
@@ -101,9 +104,11 @@ def recipe_for(component: Component, has_lockfile: bool = False) -> Recipe:
             return Recipe("static", NODE_IMAGE, workdir, install, build, env=dict(_NODE_ENV))
         if not component.start_command:
             raise UnsupportedComponent(f"{framework} app has no start script")
-        env = {**_NODE_ENV, "NODE_ENV": "production", "HOST": "0.0.0.0"}
         start = _node_runner(component.start_command)
-        return Recipe("server", NODE_IMAGE, workdir, install, build, start, env)
+        run_env = {"NODE_ENV": "production", "HOST": "0.0.0.0"}
+        return Recipe(
+            "server", NODE_IMAGE, workdir, install, build, start, dict(_NODE_ENV), run_env
+        )
 
     # Python servers: a venv inside the deploy copy, so the run container sees it too.
     if not component.start_command:
