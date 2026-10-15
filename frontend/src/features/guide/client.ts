@@ -1,7 +1,7 @@
-// Client for Smith, the portfolio guide agent (backend/guide_api.py): status, and a
+// Client for Smith, the portfolio guide agent (backend/app/routers/guide.py): status, and a
 // streamed chat whose server-sent events arrive over a POST (EventSource cannot POST).
 
-import { API_URL } from './api'
+import { API_URL } from '../../lib/api'
 import { parseSse } from './sse'
 
 export type GuideAction =

@@ -1,6 +1,6 @@
 // Colors shared by the Churn Lab charts and page.
 
-import type { Segment } from '../../lib/ml/churnLab'
+import type { Segment } from './churnLab'
 
 export const SEGMENT_TINT: Record<Segment, string> = {
   persuadable: '#10b981',

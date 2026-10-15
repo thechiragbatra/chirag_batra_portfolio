@@ -2,7 +2,7 @@
 // preserveAspectRatio="none") so circles and labels never stretch.
 
 import { useId } from 'react'
-import { type Contribution, FEATURE_LABELS, formatValue, type Segment, SEGMENTS } from '../../lib/ml/churnLab'
+import { type Contribution, FEATURE_LABELS, formatValue, type Segment, SEGMENTS } from './churnLab'
 import { SEGMENT_TINT, STRATEGIES, type Strategy } from './palette'
 
 const SPRING = 'var(--dur-spring-settle) var(--spring-settle)'

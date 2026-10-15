@@ -1,5 +1,5 @@
 import { Navigate, Route } from 'react-router-dom'
-import { Layout } from './components/Layout'
+import { Layout } from './components/layout/Layout'
 import Apps from './pages/Apps'
 import Deployer from './pages/Deployer'
 import Lab from './pages/Lab'

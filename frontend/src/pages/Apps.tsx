@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { PageHeader } from '../components/PageHeader'
+import { PageHeader } from '../components/ui/PageHeader'
 import { deleteApp, getDeployLog, listApps, rollbackApp, stopApp } from '../lib/api'
 import type { App, AppsResponse, Deployment } from '../types/apps'
 

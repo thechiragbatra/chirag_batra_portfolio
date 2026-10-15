@@ -1,8 +1,8 @@
 import { CircleCheck, CircleX, ExternalLink } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { confetti } from '../lib/confetti'
-import type { DeploymentState } from '../types/events'
+import { confetti } from './confetti'
+import type { DeploymentState } from '../../types/events'
 
 export function DeploymentSummary({ result, error }: { result: DeploymentState | null; error: string | null }) {
   const ref = useRef<HTMLElement>(null)

@@ -1,4 +1,4 @@
-// Mirror of backend/apps.py response models — update by hand when they change.
+// Mirror of backend/app/routers/apps.py response models — update by hand when they change.
 import type { Component } from './events'
 
 export type DeployStatus = 'building' | 'ready' | 'failed'

@@ -1,8 +1,8 @@
 import { LoaderCircle, X } from 'lucide-react'
 import { useId, useState, type FormEvent, type ReactNode } from 'react'
-import { isGithubRepoUrl } from '../lib/githubUrl'
-import { previewProject, saveProject } from '../lib/projectEditor'
-import type { Project } from '../types/content'
+import { isGithubRepoUrl } from '../../lib/githubUrl'
+import { previewProject, saveProject } from './projectEditor'
+import type { Project } from '../../types/content'
 
 const inputClass =
   'w-full min-w-0 rounded-lg border border-zinc-300 bg-white/80 px-3 py-2 text-sm placeholder:text-zinc-400 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20 focus:outline-none dark:border-zinc-700 dark:bg-black/40'

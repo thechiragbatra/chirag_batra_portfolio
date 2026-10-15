@@ -1,10 +1,10 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, ScrollRestoration, useLocation } from 'react-router-dom'
-import { useReducedMotion } from '../hooks/useMediaQuery'
+import { useReducedMotion } from '../../hooks/useMediaQuery'
 import { ArrowUpRight, Mail } from 'lucide-react'
-import resumeData from '../data/resume.json'
-import { ShaderBackground } from './fx/ShaderBackground'
-import { Guide } from './guide/Guide'
+import resumeData from '../../data/resume.json'
+import { ShaderBackground } from '../fx/ShaderBackground'
+import { Guide } from '../../features/guide/Guide'
 import { Logo } from './Logo'
 
 const NAV = [

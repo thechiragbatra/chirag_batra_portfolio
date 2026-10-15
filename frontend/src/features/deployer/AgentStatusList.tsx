@@ -1,5 +1,5 @@
 import { Circle, CircleCheck, CircleX, LoaderCircle, type LucideIcon } from 'lucide-react'
-import { AGENT_NAMES, MAX_REPAIR_ATTEMPTS, type AgentName, type AgentStatus } from '../types/events'
+import { AGENT_NAMES, MAX_REPAIR_ATTEMPTS, type AgentName, type AgentStatus } from '../../types/events'
 import { AGENT_META } from './agentMeta'
 
 const STATUS_STYLE: Record<AgentStatus, { icon: LucideIcon; className: string; label: string }> = {

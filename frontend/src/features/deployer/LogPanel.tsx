@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from 'react'
-import type { LogLine } from '../hooks/useDeploymentStream'
-import type { AgentName, LogLevel } from '../types/events'
+import type { LogLine } from './useDeploymentStream'
+import type { AgentName, LogLevel } from '../../types/events'
 
 const LEVEL_CLASS: Record<LogLevel, string> = {
   info: 'text-zinc-300',

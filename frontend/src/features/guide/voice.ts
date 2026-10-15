@@ -3,7 +3,7 @@
 // feature-detected; where a browser lacks them the controls are simply not shown.
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { speakable } from '../../lib/speech'
+import { speakable } from './speech'
 
 // Minimal typings: speech recognition is not in TypeScript's DOM library.
 interface RecognitionResult {

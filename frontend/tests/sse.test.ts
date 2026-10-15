@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { parseSse } from '../src/lib/sse.ts'
+import { parseSse } from '../src/features/guide/sse.ts'
 
 test('parses complete events and keeps the partial tail', () => {
   const { events, rest } = parseSse('data: {"type":"token","text":"Hi"}\n\ndata: {"type":"do')

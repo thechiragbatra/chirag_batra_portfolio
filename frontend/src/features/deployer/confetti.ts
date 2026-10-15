@@ -1,5 +1,5 @@
 // Dependency-free confetti burst on a temporary full-screen canvas.
-import { prefersReducedMotion } from '../hooks/useMediaQuery'
+import { prefersReducedMotion } from '../../hooks/useMediaQuery'
 
 const COLORS = ['#34d399', '#22d3ee', '#a78bfa', '#f472b6', '#fbbf24', '#ffffff']
 

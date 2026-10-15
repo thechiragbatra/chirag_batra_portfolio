@@ -1,5 +1,5 @@
 // Client for the dev-only project editor served by plugins/projectEditor.ts.
-import type { Project } from '../types/content'
+import type { Project } from '../../types/content'
 
 const BASE = '/__dev/projects'
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react'
-import { createDeployment, deploymentEventsUrl } from '../lib/api'
+import { createDeployment, deploymentEventsUrl } from '../../lib/api'
 import {
   AGENT_NAMES,
   type AgentName,
@@ -7,7 +7,7 @@ import {
   type DeploymentEvent,
   type DeploymentState,
   type LogLevel,
-} from '../types/events'
+} from '../../types/events'
 
 export type Phase = 'idle' | 'starting' | 'streaming' | 'succeeded' | 'failed'
 

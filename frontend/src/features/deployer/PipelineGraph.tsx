@@ -1,7 +1,7 @@
 import { ChevronLeft } from 'lucide-react'
 import { Fragment } from 'react'
-import type { Phase } from '../hooks/useDeploymentStream'
-import { AGENT_NAMES, MAX_REPAIR_ATTEMPTS, type AgentName, type AgentStatus } from '../types/events'
+import type { Phase } from './useDeploymentStream'
+import { AGENT_NAMES, MAX_REPAIR_ATTEMPTS, type AgentName, type AgentStatus } from '../../types/events'
 import { AGENT_META } from './agentMeta'
 
 interface Props {

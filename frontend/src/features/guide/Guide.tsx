@@ -32,7 +32,7 @@ import {
   guideViewFor,
   sendCustomerToLab,
   sendFeedback,
-} from '../../lib/guide'
+} from './client'
 import { canListen, canSpeak, speak, stopSpeaking, useSpeechInput } from './voice'
 
 interface Step {

@@ -1,10 +1,10 @@
 import { ExternalLink, FlaskConical, FolderGit2, RotateCcw, ShieldCheck } from 'lucide-react'
 import { type ReactNode, useEffect, useId, useMemo, useState } from 'react'
-import { DecisionMap, RiskGauge, RocCurve, ShapBars, TargetingChart } from '../components/lab/charts'
-import { segmentColor, STRATEGIES } from '../components/lab/palette'
+import { DecisionMap, RiskGauge, RocCurve, ShapBars, TargetingChart } from '../features/lab/charts'
+import { segmentColor, STRATEGIES } from '../features/lab/palette'
 import { Reveal } from '../components/fx/Reveal'
-import { PageHeader } from '../components/PageHeader'
-import { onLabCustomer, setGuideView, takeLabCustomer } from '../lib/guide'
+import { PageHeader } from '../components/ui/PageHeader'
+import { onLabCustomer, setGuideView, takeLabCustomer } from '../features/guide/client'
 import {
   type Customer,
   FEATURE_LABELS,
@@ -15,7 +15,7 @@ import {
   type Segment,
   SEGMENTS,
   withChange,
-} from '../lib/ml/churnLab'
+} from '../features/lab/churnLab'
 
 const TRAINING_CODE = 'https://github.com/thechiragbatra/deploysmith/tree/main/ml/churn'
 const SHOWN_REASONS = 6

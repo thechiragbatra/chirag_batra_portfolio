@@ -1,5 +1,5 @@
 import { FileText, Hammer } from 'lucide-react'
-import type { PlannedProject } from '../types/content'
+import type { PlannedProject } from '../../types/content'
 
 /** A project that exists as a design doc only. Clearly labelled so nobody mistakes it for shipped work. */
 export function PlannedCard({ project }: { project: PlannedProject }) {

@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
-import { type CompactModel, expectedMargin, predictMargin, shapValues, sigmoid } from '../src/lib/ml/trees.ts'
+import { type CompactModel, expectedMargin, predictMargin, shapValues, sigmoid } from '../src/features/lab/trees.ts'
 
 interface LabFile {
   features: unknown[]

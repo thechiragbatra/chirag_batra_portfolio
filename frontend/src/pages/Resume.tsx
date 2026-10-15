@@ -2,7 +2,7 @@ import { Award, Download, ExternalLink, FolderGit2, GraduationCap, Link2, Mail, 
 import type { CSSProperties, ReactNode } from 'react'
 import { Magnetic } from '../components/fx/Magnetic'
 import { ScrambleText } from '../components/fx/ScrambleText'
-import { Tabs, type TabItem } from '../components/Tabs'
+import { Tabs, type TabItem } from '../components/ui/Tabs'
 import resumeData from '../data/resume.json'
 import type { Resume as ResumeData } from '../types/content'
 

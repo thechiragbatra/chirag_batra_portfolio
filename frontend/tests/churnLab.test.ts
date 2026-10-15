@@ -13,7 +13,7 @@ import {
   score,
   segmentOf,
   withChange,
-} from '../src/lib/ml/churnLab.ts'
+} from '../src/features/lab/churnLab.ts'
 
 const lab = JSON.parse(readFileSync(new URL('../public/models/churn-lab.json', import.meta.url), 'utf8')) as LabBundle
 const base: Customer = lab.presets[0].values

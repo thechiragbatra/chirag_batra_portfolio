@@ -18,9 +18,9 @@ import {
 import { type ReactNode, useEffect, useState } from 'react'
 import { CountUp } from '../components/fx/CountUp'
 import { Reveal } from '../components/fx/Reveal'
-import { PageHeader } from '../components/PageHeader'
+import { PageHeader } from '../components/ui/PageHeader'
 import evalsData from '../data/guide-evals.json'
-import { type GuideStats, guideStats, openSmith } from '../lib/guide'
+import { type GuideStats, guideStats, openSmith } from '../features/guide/client'
 
 /** Written by `python -m agents.guide.evals --publish` (scores and questions, no answers). */
 interface EvalSummary {
