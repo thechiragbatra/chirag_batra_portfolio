@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DeploySmith OS</title>
+</head>
+<body>
+  <script>
+    // GitHub Pages SPA fallback: rewrite any route to index.html
+    // Preserve the path and query so React Router renders the right page.
+    var path = window.location.pathname;
+    var search = window.location.search;
+    var hash = window.location.hash;
+    var url = '/index.html' + search + hash;
+    window.history.replaceState({}, document.title, url);
+    window.location.replace(url);
+  </script>
+</body>
+</html>

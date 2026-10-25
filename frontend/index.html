@@ -1,41 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DeploySmith OS</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <header>
-    <h1>DeploySmith OS</h1>
-    <p id="api-status">Checking API&hellip;</p>
-  </header>
-
-  <main>
-    <section class="card">
-      <h2>Deploy a repository</h2>
-      <form id="deploy-form">
-        <label for="repo-url">GitHub repository URL</label>
-        <input type="url" id="repo-url" placeholder="https://github.com/owner/repo" required />
-        <button type="button" id="btn-health">Check API</button>
-        <button type="submit">Start deployment</button>
-      </form>
-      <div id="deploy-result" class="hidden"></div>
-    </section>
-
-    <section class="card">
-      <h2>Event stream</h2>
-      <div id="events" class="event-log"></div>
-    </section>
-
-    <section class="card">
-      <h2>Apps</h2>
-      <button type="button" id="btn-apps">Refresh apps</button>
-      <div id="apps-list" class="app-list"></div>
-    </section>
-  </main>
-
-  <script src="app.js" data-api-base="http://localhost:8000"></script>
-</body>
+<!doctype html>
+<html lang="en" class="dark" data-vt="route">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Chirag Batra: data science portfolio and multi-agent deployment platform." />
+    <meta name="theme-color" content="#030308" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap"
+    />
+    <title>Chirag Batra · DeploySmith OS</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
