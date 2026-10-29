@@ -25,16 +25,14 @@ const passages: PortfolioPassage[] = [
     href: '/resume',
     sourceLabel: 'Résumé · Profile',
   },
-  ...resume.experience.flatMap((experience, experienceIndex) =>
-    experience.highlights.map((text, highlightIndex) => ({
-      id: `experience-${experienceIndex}-${highlightIndex}`,
-      title: `${experience.role} · ${experience.company}`,
-      kind: 'Experience' as const,
-      text,
-      href: '/resume',
-      sourceLabel: `Résumé · ${experience.company}`,
-    })),
-  ),
+  ...resume.experience.map((experience, experienceIndex) => ({
+    id: `experience-${experienceIndex}`,
+    title: `${experience.role} · ${experience.company}`,
+    kind: 'Experience' as const,
+    text: experience.highlights.join(' '),
+    href: '/resume',
+    sourceLabel: `Résumé · ${experience.company}`,
+  })),
   ...projects.map((project, index) => ({
     id: `project-${index}`,
     title: project.title,
