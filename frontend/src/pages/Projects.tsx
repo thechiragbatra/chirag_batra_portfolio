@@ -22,7 +22,7 @@ function Hero() {
   return (
     <section className="relative flex min-h-[calc(100svh-9rem)] flex-col justify-center pb-10">
       <p className="eyebrow animate-fade-up">
-        {resume.basics.name} — AI engineer · {resume.basics.location}
+        AI Engineer candidate · B.Tech CS (Data Science), 2027 · {resume.basics.location}
       </p>
       <h1 className="font-display mt-6 text-[clamp(2.7rem,7.2vw,7.8rem)] leading-[0.9] font-extrabold text-white">
         <KineticText text="I build AI" delay={150} />
@@ -109,6 +109,11 @@ function Scene({ project, index }: { project: Project; index: number }) {
               {number}
             </span>
             <span className="eyebrow">{project.tags.slice(0, 2).join(' · ')}</span>
+            {project.status && (
+              <span className="rounded-full border border-cyan-300/25 bg-cyan-300/[0.07] px-2.5 py-1 font-mono text-[10px] tracking-[0.12em] text-cyan-200 uppercase">
+                {project.status}
+              </span>
+            )}
           </div>
           <h3
             className={`font-display mt-5 leading-[0.95] font-extrabold text-white ${
@@ -118,6 +123,7 @@ function Scene({ project, index }: { project: Project; index: number }) {
             {name}
           </h3>
           {subtitle && <p className="mt-3 font-serif text-2xl text-zinc-300">{subtitle}</p>}
+          {project.context && <p className="mt-2 font-mono text-xs tracking-wide text-zinc-500">{project.context}</p>}
           {project.metric && (
             <p className="mt-6 flex items-baseline gap-3">
               <span className="font-display text-aurora text-6xl font-extrabold sm:text-7xl">{project.metric.value}</span>
@@ -125,6 +131,22 @@ function Scene({ project, index }: { project: Project; index: number }) {
             </p>
           )}
           <p className="mt-6 max-w-xl leading-relaxed text-zinc-400">{project.description}</p>
+          {(project.contribution || project.keyDecision) && (
+            <dl className="mt-6 grid gap-4 border-l border-cyan-300/20 pl-4 sm:grid-cols-2 sm:gap-6">
+              {project.contribution && (
+                <div>
+                  <dt className="font-mono text-[10px] tracking-[0.18em] text-cyan-200/75 uppercase">Contribution</dt>
+                  <dd className="mt-1.5 text-sm leading-relaxed text-zinc-300">{project.contribution}</dd>
+                </div>
+              )}
+              {project.keyDecision && (
+                <div>
+                  <dt className="font-mono text-[10px] tracking-[0.18em] text-violet-200/75 uppercase">Key design choice</dt>
+                  <dd className="mt-1.5 text-sm leading-relaxed text-zinc-300">{project.keyDecision}</dd>
+                </div>
+              )}
+            </dl>
+          )}
           <ul className="mt-6 flex flex-wrap gap-1.5" aria-label="Technologies">
             {project.tags.map((tag) => (
               <li key={tag} className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 font-mono text-[11px] text-zinc-300">
@@ -142,9 +164,11 @@ function Scene({ project, index }: { project: Project; index: number }) {
                 <FlaskConical className="size-4" aria-hidden /> {project.demo === '/lab' ? 'Try the model' : 'Launch it'}
               </Link>
             )}
-            <a href={project.githubUrl} target="_blank" rel="noreferrer" className={link}>
-              <FolderGit2 className="size-4" aria-hidden /> Source
-            </a>
+            {project.githubUrl && (
+              <a href={project.githubUrl} target="_blank" rel="noreferrer" className={link}>
+                <FolderGit2 className="size-4" aria-hidden /> Source
+              </a>
+            )}
             {project.liveUrl && (
               <a href={project.liveUrl} target="_blank" rel="noreferrer" className={link}>
                 <ExternalLink className="size-4" aria-hidden /> Live
@@ -155,30 +179,35 @@ function Scene({ project, index }: { project: Project; index: number }) {
       </div>
       <div className={flip ? 'lg:order-1' : ''}>
         {project.diagram && (
-          <div className="scene-media group relative">
-            <div
-              aria-hidden
-              className="absolute -inset-6 -z-10 rounded-[2rem] opacity-60 blur-3xl"
-              style={{ background: 'conic-gradient(from 200deg, var(--glow-a), var(--glow-b), var(--glow-c), var(--glow-a))' }}
-            />
-            <div className="overflow-hidden rounded-3xl border border-white/10 bg-black/40 shadow-2xl">
-              <img
-                src={`${import.meta.env.BASE_URL}${project.diagram.replace(/^\//, '')}`}
-                alt={`${project.title} preview`}
-                loading="lazy"
-                className="aspect-video w-full object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-[1.04]"
+          <>
+            <div className="scene-media group relative">
+              <div
+                aria-hidden
+                className="absolute -inset-6 -z-10 rounded-[2rem] opacity-60 blur-3xl"
+                style={{ background: 'conic-gradient(from 200deg, var(--glow-a), var(--glow-b), var(--glow-c), var(--glow-a))' }}
               />
+              <div className="overflow-hidden rounded-3xl border border-white/10 bg-black/40 shadow-2xl">
+                <img
+                  src={`${import.meta.env.BASE_URL}${project.diagram.replace(/^\//, '')}`}
+                  alt={project.diagramAlt ?? `${project.title} preview`}
+                  loading="lazy"
+                  className="aspect-video w-full object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-[1.04]"
+                />
+              </div>
+              {project.githubUrl && (
+                <a
+                  href={project.githubUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`${project.title} on GitHub`}
+                  className="absolute top-4 right-4 grid size-11 place-items-center rounded-full border border-white/20 bg-black/50 text-white opacity-0 backdrop-blur transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+                >
+                  <ArrowUpRight className="size-5" />
+                </a>
+              )}
             </div>
-            <a
-              href={project.githubUrl}
-              target="_blank"
-              rel="noreferrer"
-              aria-label={`${project.title} on GitHub`}
-              className="absolute top-4 right-4 grid size-11 place-items-center rounded-full border border-white/20 bg-black/50 text-white opacity-0 backdrop-blur transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
-            >
-              <ArrowUpRight className="size-5" />
-            </a>
-          </div>
+            {project.diagramCaption && <p className="mt-3 text-xs text-zinc-500">{project.diagramCaption}</p>}
+          </>
         )}
       </div>
     </article>
@@ -214,7 +243,7 @@ export default function Projects() {
         {import.meta.env.DEV && adding && <AddProjectPanel onClose={() => setAdding(false)} />}
         <div className="divide-y divide-white/[0.07]">
           {projects.map((project, i) => (
-            <Scene key={project.githubUrl} project={project} index={i} />
+            <Scene key={project.githubUrl ?? project.title} project={project} index={i} />
           ))}
         </div>
       </section>

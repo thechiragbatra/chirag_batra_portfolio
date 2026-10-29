@@ -143,8 +143,10 @@ export function projectEditor(options: { dataFile: string; githubToken?: string 
               send(res, 200, repoToProject(repo))
             } else if (req.method === 'POST' && url.pathname === '/') {
               const project = validateProject(await readBody(req))
+              const projectUrl = project.githubUrl
+              if (!projectUrl) throw new HttpError(400, 'githubUrl must be a GitHub repository URL.')
               const projects = JSON.parse(await readFile(options.dataFile, 'utf8')) as Project[]
-              if (projects.some((p) => sameRepo(p.githubUrl, project.githubUrl))) {
+              if (projects.some((p) => p.githubUrl && sameRepo(p.githubUrl, projectUrl))) {
                 throw new HttpError(409, 'That repository is already in projects.json.')
               }
               projects.push(project)

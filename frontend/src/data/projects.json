@@ -1,7 +1,22 @@
 [
   {
+    "title": "EventLens AI",
+    "context": "IBM · Data Science Internship",
+    "description": "Financial risk analytics that combines news signals with market data, then estimates portfolio exposure with Value-at-Risk and Monte Carlo projections.",
+    "contribution": "Built the ETL pipeline and Random Forest workflow across 250+ GDELT event-days; delivered analysis through FastAPI services and a React dashboard.",
+    "keyDecision": "Join event sentiment and volatility with live market prices before modeling abnormal returns.",
+    "tags": ["Python", "Random Forest", "GDELT", "FastAPI", "React", "SQLAlchemy"],
+    "diagram": "/diagrams/eventlens.svg",
+    "diagramAlt": "EventLens data and model pipeline diagram",
+    "diagramCaption": "Project architecture · built during IBM internship"
+  },
+  {
     "title": "Hireloop: AI Job Copilot",
-    "description": "An AI job copilot in progress. It turns a resume into a structured profile, ranks jobs from public ATS APIs, and tailors each resume using only facts from that profile. Hybrid retrieval and a LangGraph workflow add human approval, validated LLM outputs, and a faithfulness check that flags unsupported claims.",
+    "context": "Personal project",
+    "status": "In progress",
+    "description": "An AI job copilot that parses a resume into a structured profile, ranks jobs from public ATS APIs, and tailors each resume using facts from that profile.",
+    "contribution": "Designing the end-to-end product, hybrid retrieval pipeline, and LangGraph workflow with human approval and a faithfulness verifier.",
+    "keyDecision": "Ground generated resume claims in structured profile facts, then flag unsupported content for review.",
     "tags": [
       "Python",
       "FastAPI",
@@ -12,11 +27,16 @@
       "Docker"
     ],
     "githubUrl": "https://github.com/thechiragbatra/hireloop",
-    "diagram": "/diagrams/hireloop.svg"
+    "diagram": "/diagrams/hireloop.svg",
+    "diagramAlt": "Illustrative Hireloop job-matching workflow, not a product screenshot",
+    "diagramCaption": "Concept visualization · product in progress"
   },
   {
     "title": "Customer Churn MLOps",
-    "description": "Churn prediction that goes beyond risk scoring. An XGBoost model with SMOTE on 7,032 telecom customers (0.82 AUC-ROC) explains each prediction with SHAP, and T-learner uplift modeling separates persuadable customers from sure things, lost causes and sleeping dogs, cutting simulated retention spend by 56%. Served through FastAPI with a Streamlit dashboard; experiments tracked in MLflow.",
+    "context": "Machine learning · causal uplift",
+    "description": "XGBoost with SMOTE reaches 0.82 AUC-ROC on 7,032 Telco customers. T-learner uplift modeling identifies persuadable customers, reducing simulated campaign spend by 56%.",
+    "contribution": "Built the churn model, uplift segments, SHAP explanations, FastAPI prediction API, and Streamlit dashboard; tracked experiments in MLflow.",
+    "keyDecision": "Target customers by estimated response to an offer, not churn risk alone.",
     "tags": [
       "Python",
       "XGBoost",
@@ -35,7 +55,10 @@
   },
   {
     "title": "Proactive Academic Intervention System",
-    "description": "A full-stack ML application that scores 5,000 student records with a hybrid risk model (70% machine learning, 30% rules), reaching 0.887 ROC-AUC, 0.764 F1, and 79.9% recall for at-risk students. Includes six DSA modules and a Flask dashboard deployed on Render.",
+    "context": "Team project · 3 contributors",
+    "description": "A hybrid student-risk model scores 5,000 records, reaching 0.887 ROC-AUC, 0.764 F1, and 79.9% recall for at-risk students.",
+    "contribution": "Engineered four derived features and six DSA modules; helped deploy the Flask application on Render.",
+    "keyDecision": "Blend model predictions with rule-based signals (70/30) to combine statistical risk with explicit domain rules.",
     "tags": [
       "Python",
       "scikit-learn",
@@ -46,6 +69,8 @@
     "githubUrl": "https://github.com/thechiragbatra/proactive-academic-intervention-system",
     "liveUrl": "https://thechiragbatra.github.io/proactive-academic-intervention-system/",
     "diagram": "/projects/pais.jpg",
+    "diagramAlt": "Proactive Academic Intervention System dashboard",
+    "diagramCaption": "Live application preview",
     "metric": {
       "value": "0.887",
       "label": "ROC-AUC flagging at-risk students"

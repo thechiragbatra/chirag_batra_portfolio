@@ -1,8 +1,8 @@
 [
   {
-    "value": 0.887,
-    "decimals": 3,
-    "label": "ROC-AUC · student risk model"
+    "value": 250,
+    "suffix": "+",
+    "label": "GDELT event-days modeled during IBM internship"
   },
   {
     "value": 56,
@@ -15,8 +15,8 @@
     "label": "AUC-ROC · customer churn model"
   },
   {
-    "value": 5,
-    "suffix": "k+",
-    "label": "student records scored by the risk model"
+    "value": 0.887,
+    "decimals": 3,
+    "label": "ROC-AUC · student risk model"
   }
 ]

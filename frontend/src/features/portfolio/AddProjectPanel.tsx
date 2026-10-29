@@ -37,7 +37,7 @@ const toDraft = (p: Project): Draft => ({
   description: p.description,
   tags: p.tags.join(', '),
   liveUrl: p.liveUrl ?? '',
-  githubUrl: p.githubUrl,
+  githubUrl: p.githubUrl ?? '',
 })
 
 /** Dev-only: fetch a repo's details from GitHub, edit them, then append to projects.json. */

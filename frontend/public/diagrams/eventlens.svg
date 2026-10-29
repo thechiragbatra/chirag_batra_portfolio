@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" fill="none">
+  <defs>
+    <linearGradient id="line" x1="102" y1="112" x2="870" y2="440" gradientUnits="userSpaceOnUse"><stop stop-color="#38E1FF"/><stop offset=".52" stop-color="#8B5CF6"/><stop offset="1" stop-color="#FF4FD2"/></linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#17172A"/><stop offset="1" stop-color="#0A0A14"/></linearGradient>
+    <filter id="soft-glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <style>
+      .signal { stroke-dasharray: 5 11; animation: signal 2.2s linear infinite; }
+      .breath { animation: breath 3.5s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+      @keyframes signal { to { stroke-dashoffset: -32; } }
+      @keyframes breath { 50% { opacity: .48; transform: scale(.96); } }
+      @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; } }
+    </style>
+  </defs>
+  <rect width="960" height="540" rx="28" fill="#07070F"/>
+  <circle cx="475" cy="278" r="218" fill="#745CFF" opacity=".075" filter="url(#soft-glow)"/>
+  <path d="M0 412C171 338 271 467 441 382s338-115 519-20v178H0V412Z" fill="url(#line)" opacity=".08"/>
+  <rect x="24" y="24" width="912" height="492" rx="22" stroke="#FFFFFF" stroke-opacity=".11"/>
+  <path d="M24 78h912" stroke="#FFFFFF" stroke-opacity=".1"/>
+  <circle cx="51" cy="51" r="5" fill="#FF6680"/><circle cx="70" cy="51" r="5" fill="#F8C65C"/><circle cx="89" cy="51" r="5" fill="#4DE0A7"/>
+  <text x="120" y="56" fill="#A7A7BE" font-family="Inter,Arial,sans-serif" font-size="13" letter-spacing="2">EVENTLENS AI · RISK ANALYTICS</text>
+
+  <rect x="56" y="136" width="196" height="118" rx="16" fill="url(#card)" stroke="#FFFFFF" stroke-opacity=".12"/>
+  <circle cx="83" cy="171" r="13" fill="#38E1FF" fill-opacity=".14"/><path d="M77 171h12m-9-4h6m-6 8h8" stroke="#75E9FF" stroke-width="1.3" stroke-linecap="round"/>
+  <text x="105" y="169" fill="#EDEDF7" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="600">GDELT events</text>
+  <text x="76" y="205" fill="#85859D" font-family="Inter,Arial,sans-serif" font-size="10">News sentiment + volatility</text>
+  <text x="76" y="232" fill="#63DDF5" font-family="Inter,Arial,sans-serif" font-size="11">250+ event-days</text>
+
+  <rect x="56" y="286" width="196" height="118" rx="16" fill="url(#card)" stroke="#FFFFFF" stroke-opacity=".12"/>
+  <circle cx="83" cy="321" r="13" fill="#8B5CF6" fill-opacity=".18"/><path d="M76 325h14m-12-7 3 3-3 3m8-6 3 3-3 3" stroke="#C1A9FF" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="105" y="319" fill="#EDEDF7" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="600">Market data</text>
+  <text x="76" y="355" fill="#85859D" font-family="Inter,Arial,sans-serif" font-size="10">Live prices + returns</text>
+  <text x="76" y="382" fill="#BDA9FF" font-family="Inter,Arial,sans-serif" font-size="11">Joined with news signals</text>
+
+  <path class="signal" d="M260 194h59c24 0 25 42 49 42h20m-128 109h59c24 0 25-42 49-42h20" stroke="url(#line)" stroke-width="2"/>
+  <circle class="breath" cx="301" cy="194" r="4" fill="#38E1FF"/><circle class="breath" cx="301" cy="395" r="4" fill="#A989FF"/>
+
+  <rect x="392" y="188" width="178" height="150" rx="20" fill="url(#card)" stroke="url(#line)" stroke-opacity=".6"/>
+  <circle cx="481" cy="236" r="27" fill="#38E1FF" fill-opacity=".1"/>
+  <path d="M466 244v-15m10 15v-23m10 23v-11m10 11v-30" stroke="url(#line)" stroke-width="3" stroke-linecap="round"/>
+  <text x="481" y="286" fill="#F4F4FB" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="600" text-anchor="middle">Random Forest</text>
+  <text x="481" y="309" fill="#8B8BA2" font-family="Inter,Arial,sans-serif" font-size="10" text-anchor="middle">Abnormal return prediction</text>
+
+  <path class="signal" d="M578 263h56" stroke="url(#line)" stroke-width="2"/>
+  <circle class="breath" cx="608" cy="263" r="4" fill="#CA8FFF"/>
+  <rect x="643" y="150" width="247" height="232" rx="20" fill="url(#card)" stroke="#FFFFFF" stroke-opacity=".12"/>
+  <text x="669" y="184" fill="#F4F4FB" font-family="Inter,Arial,sans-serif" font-size="14" font-weight="600">Portfolio risk</text>
+  <text x="669" y="204" fill="#85859D" font-family="Inter,Arial,sans-serif" font-size="10">Exposure estimates · simulation</text>
+  <path d="M670 294c19-8 25-55 43-45s25 56 41 24 25-78 43-66 19 78 39 52 21-36 39-44" stroke="url(#line)" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M670 294c19-8 25-55 43-45s25 56 41 24 25-78 43-66 19 78 39 52 21-36 39-44v42H670v37Z" fill="url(#line)" opacity=".11"/>
+  <path d="M670 313h194" stroke="#FFFFFF" stroke-opacity=".1"/>
+  <text x="670" y="341" fill="#67E4C6" font-family="Inter,Arial,sans-serif" font-size="11">VaR</text>
+  <text x="718" y="341" fill="#8B8BA2" font-family="Inter,Arial,sans-serif" font-size="10">Monte Carlo projections</text>
+
+  <path class="signal" d="M766 388v31H481v-75" stroke="url(#line)" stroke-opacity=".65" stroke-width="1.5"/>
+  <rect x="358" y="426" width="246" height="50" rx="14" fill="#38E1FF" fill-opacity=".07" stroke="#38E1FF" stroke-opacity=".18"/>
+  <circle cx="382" cy="451" r="5" fill="#68E5C4" class="breath"/>
+  <text x="399" y="448" fill="#D7D7E6" font-family="Inter,Arial,sans-serif" font-size="11" font-weight="600">FastAPI → React dashboard</text>
+  <text x="399" y="465" fill="#85859D" font-family="Inter,Arial,sans-serif" font-size="9">Risk reports for portfolio exposure</text>
+</svg>

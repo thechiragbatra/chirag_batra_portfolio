@@ -2,9 +2,13 @@
 
 export interface Project {
   title: string
+  context?: string
+  status?: string
   description: string
+  contribution?: string
+  keyDecision?: string
   tags: string[]
-  githubUrl: string
+  githubUrl?: string
   liveUrl?: string
   /** In-site route to an interactive demo of the project, e.g. "/lab". */
   demo?: string
@@ -12,6 +16,8 @@ export interface Project {
   metric?: { value: string; label: string }
   /** Card image under public/: an architecture diagram or a screenshot, e.g. "/diagrams/foo.svg". */
   diagram?: string
+  diagramAlt?: string
+  diagramCaption?: string
 }
 
 export interface Link {
