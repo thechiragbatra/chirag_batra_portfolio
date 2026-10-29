@@ -2,9 +2,9 @@
 <html lang="en" class="dark" data-vt="route">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Chirag Batra: data science portfolio and multi-agent deployment platform." />
+    <meta name="description" content="Chirag Batra is an AI engineer building machine learning systems, LLM applications, and data products." />
     <meta name="theme-color" content="#030308" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -12,10 +12,11 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap"
     />
-    <title>Chirag Batra · DeploySmith OS</title>
+    <title>Chirag Batra · AI Engineer</title>
   </head>
   <body>
     <div id="root"></div>
+    <script>const p = new URLSearchParams(location.search).get('p'); if (p) { history.replaceState(null, '', p.replace(/~and~/g, '&')); }</script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -4,16 +4,12 @@ import { useReducedMotion } from '../../hooks/useMediaQuery'
 import { ArrowUpRight, Mail } from 'lucide-react'
 import resumeData from '../../data/resume.json'
 import { ShaderBackground } from '../fx/ShaderBackground'
-import { Guide } from '../../features/guide/Guide'
 import { Logo } from './Logo'
 
 const NAV = [
   { to: '/projects', label: 'Work' },
   { to: '/lab', label: 'Lab' },
-  { to: '/smith', label: 'Smith' },
   { to: '/resume', label: 'Résumé' },
-  { to: '/deployer', label: 'Deploy' },
-  { to: '/apps', label: 'Apps' },
 ]
 const { basics } = resumeData
 const YEAR = new Date().getFullYear()
@@ -79,7 +75,7 @@ export function Layout() {
             <Logo className="size-8 transition-transform duration-700 group-hover:rotate-[360deg]" />
             <span className="hidden leading-none sm:block">
               <span className="font-display block text-[15px] font-bold tracking-tight text-white">Chirag Batra</span>
-              <span className="mt-0.5 block font-mono text-[10px] tracking-[0.2em] text-zinc-500 uppercase">DeploySmith OS</span>
+              <span className="mt-0.5 block font-mono text-[10px] tracking-[0.2em] text-zinc-500 uppercase">AI Engineer</span>
             </span>
           </NavLink>
           {/* Scrolls sideways on narrow phones instead of pushing the header off-screen. */}
@@ -123,7 +119,7 @@ export function Layout() {
               <span className="animate-ping-slow absolute inline-flex size-full rounded-full bg-emerald-400" />
               <span className="relative inline-flex size-1.5 rounded-full bg-emerald-400" />
             </span>
-            Open to ML roles
+            Open to AI Engineer roles
           </a>
         </div>
       </header>
@@ -135,8 +131,6 @@ export function Layout() {
           <Outlet />
         </div>
       </main>
-
-      <Guide />
 
       <footer className="site-footer mt-24 border-t border-white/[0.06] px-4 pt-16 pb-28 sm:px-6">
         <div className="mx-auto max-w-6xl">
@@ -168,7 +162,7 @@ export function Layout() {
           <div className="mt-14 flex flex-col gap-3 border-t border-white/[0.06] pt-6 font-mono text-[11px] tracking-[0.12em] text-zinc-500 uppercase sm:flex-row sm:items-center sm:justify-between">
             <span>© {YEAR} {basics.name} · {basics.location}</span>
             <span className="inline-flex items-center gap-2">
-              <span className="size-1.5 rounded-full bg-emerald-400" aria-hidden /> DeploySmith OS · free-tier deployments only
+              <span className="size-1.5 rounded-full bg-emerald-400" aria-hidden /> Building intelligent systems
             </span>
           </div>
         </div>

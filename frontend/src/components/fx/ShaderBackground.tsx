@@ -1,11 +1,9 @@
 import { useEffect, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useReducedMotion } from '../../hooks/useMediaQuery'
-import { activityLevel } from '../../lib/activity'
 
 // A domain-warped noise field (fbm of fbm) tinted cyan, violet and magenta, lit by the
-// cursor, with a vignette and film grain. It flows faster and glows brighter while the
-// site is busy (a deploy streaming, Smith thinking). WebGL 1 for the widest support.
+// cursor, with a vignette and film grain. WebGL 1 for the widest support.
 const FRAGMENT = /* glsl */ `
 precision highp float;
 uniform vec2 u_res;
@@ -143,7 +141,7 @@ export function ShaderBackground() {
       const k = reduced ? 1 : 0.06
       smooth.x += (mouse.x - smooth.x) * k
       smooth.y += (mouse.y - smooth.y) * k
-      smooth.energy += (activityLevel() - smooth.energy) * (reduced ? 1 : 0.03)
+      smooth.energy += (0 - smooth.energy) * (reduced ? 1 : 0.03)
       smooth.intensity += (intensityTarget.current - smooth.intensity) * (reduced ? 1 : 0.04)
       gl.uniform2f(u.res, canvas.width, canvas.height)
       gl.uniform1f(u.time, reduced ? 40 : (now - started) / 1000 + 40)

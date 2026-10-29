@@ -3,10 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="refresh" content="0; url=/index.html" />
-  <title>DeploySmith OS</title>
+  <title>Chirag Batra · AI Engineer</title>
 </head>
 <body>
-  <p>Redirecting&hellip; <a href="/index.html">Go to DeploySmith OS</a></p>
+  <p>Redirecting&hellip; <a href="/deploysmith/">Go to Chirag Batra’s portfolio</a></p>
+  <script>
+    const route = location.pathname.replace(/^\/deploysmith/, '') + location.search + location.hash;
+    location.replace('/deploysmith/?p=' + encodeURIComponent('/deploysmith' + (route || '/')));
+  </script>
 </body>
 </html>

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" fill="none">
+  <defs>
+    <linearGradient id="aurora" x1="128" y1="105" x2="839" y2="449" gradientUnits="userSpaceOnUse"><stop stop-color="#38E1FF"/><stop offset=".52" stop-color="#8B5CF6"/><stop offset="1" stop-color="#FF4FD2"/></linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#17172A"/><stop offset="1" stop-color="#0B0B16"/></linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="12" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <style>
+      .flow { stroke-dasharray: 6 12; animation: flow 2s linear infinite; }
+      .pulse { transform-box: fill-box; transform-origin: center; animation: pulse 3s ease-in-out infinite; }
+      @keyframes flow { to { stroke-dashoffset: -36; } }
+      @keyframes pulse { 50% { opacity: .48; transform: scale(.94); } }
+      @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; } }
+    </style>
+  </defs>
+  <rect width="960" height="540" rx="28" fill="#07070F"/>
+  <path d="M0 380C180 278 265 496 448 367s306-169 512-28v201H0V380Z" fill="url(#aurora)" opacity=".09"/>
+  <circle cx="481" cy="277" r="206" fill="#6B55FF" opacity=".08" filter="url(#glow)"/>
+  <rect x="24" y="24" width="912" height="492" rx="22" stroke="#FFFFFF" stroke-opacity=".11"/>
+  <path d="M24 78h912" stroke="#FFFFFF" stroke-opacity=".1"/>
+  <circle cx="51" cy="51" r="5" fill="#FF6680"/><circle cx="70" cy="51" r="5" fill="#F8C65C"/><circle cx="89" cy="51" r="5" fill="#4DE0A7"/>
+  <text x="120" y="56" fill="#A7A7BE" font-family="Inter,Arial,sans-serif" font-size="13" letter-spacing="2">HIRELOOP · ROLE MATCHING</text>
+  <rect x="60" y="124" width="240" height="322" rx="18" fill="url(#panel)" stroke="#FFFFFF" stroke-opacity=".12"/>
+  <circle cx="96" cy="165" r="18" fill="#38E1FF" fill-opacity=".16"/><path d="M89 165h14m-7-7v14" stroke="#75E9FF" stroke-width="1.5" stroke-linecap="round"/>
+  <text x="126" y="161" fill="#F4F4FB" font-family="Inter,Arial,sans-serif" font-size="15" font-weight="600">Your profile</text>
+  <text x="126" y="180" fill="#83839A" font-family="Inter,Arial,sans-serif" font-size="11">Structured from your resume</text>
+  <text x="84" y="222" fill="#8B8BA2" font-family="Inter,Arial,sans-serif" font-size="10" letter-spacing="1.5">CORE STRENGTHS</text>
+  <rect x="84" y="236" width="70" height="24" rx="12" fill="#FFFFFF" fill-opacity=".06"/><text x="97" y="252" fill="#C8C8DA" font-family="Inter,Arial,sans-serif" font-size="10">Python</text>
+  <rect x="161" y="236" width="91" height="24" rx="12" fill="#FFFFFF" fill-opacity=".06"/><text x="173" y="252" fill="#C8C8DA" font-family="Inter,Arial,sans-serif" font-size="10">Machine learning</text>
+  <rect x="84" y="268" width="72" height="24" rx="12" fill="#FFFFFF" fill-opacity=".06"/><text x="97" y="284" fill="#C8C8DA" font-family="Inter,Arial,sans-serif" font-size="10">FastAPI</text>
+  <rect x="84" y="319" width="184" height="1" fill="#FFFFFF" fill-opacity=".1"/>
+  <text x="84" y="348" fill="#8B8BA2" font-family="Inter,Arial,sans-serif" font-size="10" letter-spacing="1.5">PREFERENCES</text>
+  <text x="84" y="375" fill="#C8C8DA" font-family="Inter,Arial,sans-serif" font-size="12">Remote · India · AI / ML</text>
+  <rect x="84" y="397" width="104" height="5" rx="2.5" fill="url(#aurora)" opacity=".8"/>
+  <path class="flow" d="M310 281h86m168 0h83" stroke="url(#aurora)" stroke-width="2"/>
+  <circle class="pulse" cx="352" cy="281" r="4" fill="#38E1FF"/><circle class="pulse" cx="598" cy="281" r="4" fill="#C27CFF"/>
+  <circle cx="480" cy="281" r="75" fill="#10101F" stroke="url(#aurora)" stroke-opacity=".8"/><circle cx="480" cy="281" r="59" stroke="url(#aurora)" stroke-opacity=".22"/>
+  <path d="m480 238 8 25 25-8-14 22 22 14-26 1-1 26-14-22-22 14 8-25-25-8 25-8-8-25 22 14 14-22 1 26Z" fill="url(#aurora)" class="pulse"/>
+  <text x="480" y="373" fill="#A8A8C1" font-family="Inter,Arial,sans-serif" font-size="10" letter-spacing="1.5" text-anchor="middle">HYBRID RETRIEVAL</text>
+  <rect x="660" y="124" width="240" height="322" rx="18" fill="url(#panel)" stroke="#FFFFFF" stroke-opacity=".12"/>
+  <text x="686" y="161" fill="#F4F4FB" font-family="Inter,Arial,sans-serif" font-size="15" font-weight="600">Matched roles</text>
+  <text x="686" y="181" fill="#83839A" font-family="Inter,Arial,sans-serif" font-size="11">Ranked from public job boards</text>
+  <rect x="682" y="203" width="196" height="82" rx="12" fill="#FFFFFF" fill-opacity=".035" stroke="#38E1FF" stroke-opacity=".36"/>
+  <text x="699" y="228" fill="#EDEDF7" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="600">AI Engineer</text>
+  <text x="699" y="247" fill="#8B8BA2" font-family="Inter,Arial,sans-serif" font-size="10">Applied AI · Remote</text>
+  <rect x="699" y="262" width="120" height="4" rx="2" fill="#FFFFFF" fill-opacity=".1"/><rect x="699" y="262" width="101" height="4" rx="2" fill="url(#aurora)"/>
+  <text x="848" y="269" fill="#7CEBD5" font-family="Inter,Arial,sans-serif" font-size="10" text-anchor="end">84%</text>
+  <rect x="682" y="298" width="196" height="64" rx="12" fill="#FFFFFF" fill-opacity=".025" stroke="#FFFFFF" stroke-opacity=".08"/>
+  <text x="699" y="322" fill="#D7D7E6" font-family="Inter,Arial,sans-serif" font-size="12" font-weight="600">ML Engineer</text>
+  <text x="699" y="342" fill="#8B8BA2" font-family="Inter,Arial,sans-serif" font-size="10">Data products · Bengaluru</text>
+  <rect x="682" y="378" width="196" height="44" rx="12" fill="#38E1FF" fill-opacity=".08"/>
+  <path d="m700 399 4 4 8-9" stroke="#7CEBD5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="722" y="403" fill="#BFD6DC" font-family="Inter,Arial,sans-serif" font-size="10">Only verified profile facts</text>
+</svg>

@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUpRight, ExternalLink, FileText, FlaskConical, FolderGit2, Plus, Sparkles } from 'lucide-react'
+import { ArrowDown, ArrowUpRight, ExternalLink, FileText, FlaskConical, FolderGit2, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AddProjectPanel } from '../features/portfolio/AddProjectPanel'
@@ -6,17 +6,13 @@ import { CountUp } from '../components/fx/CountUp'
 import { KineticText } from '../components/fx/KineticText'
 import { Magnetic } from '../components/fx/Magnetic'
 import { Reveal } from '../components/fx/Reveal'
-import { PlannedCard } from '../features/portfolio/PlannedCard'
 import highlightsData from '../data/highlights.json'
-import plannedData from '../data/planned.json'
 import projectsData from '../data/projects.json'
 import resumeData from '../data/resume.json'
-import { openSmith } from '../features/guide/client'
-import type { Highlight, PlannedProject, Project, Resume } from '../types/content'
+import type { Highlight, Project, Resume } from '../types/content'
 
 const projects: Project[] = projectsData
 const highlights: Highlight[] = highlightsData
-const planned: PlannedProject[] = plannedData
 const resume: Resume = resumeData
 
 // The ticker: a few of the strongest skills from each résumé group.
@@ -24,22 +20,21 @@ const TICKER = resume.skills.flatMap((g) => g.items.slice(0, 3)).slice(0, 18)
 
 function Hero() {
   return (
-    <section data-guide="hero" className="relative flex min-h-[calc(100svh-9rem)] flex-col justify-center pb-10">
+    <section className="relative flex min-h-[calc(100svh-9rem)] flex-col justify-center pb-10">
       <p className="eyebrow animate-fade-up">
-        {resume.basics.name} — ML engineer &amp; data scientist · {resume.basics.location}
+        {resume.basics.name} — AI engineer · {resume.basics.location}
       </p>
       <h1 className="font-display mt-6 text-[clamp(2.7rem,7.2vw,7.8rem)] leading-[0.9] font-extrabold text-white">
-        <KineticText text="I build systems" delay={150} />
+        <KineticText text="I build AI" delay={150} />
         <br />
-        <KineticText text="that" delay={600} />{' '}
-        <KineticText text="think." delay={760} by="word" unitClassName="font-serif text-aurora pr-[0.08em]" />
+        <KineticText text="that thinks." delay={760} by="word" unitClassName="font-serif text-aurora pr-[0.08em]" />
       </h1>
       <p
         className="animate-fade-up mt-8 max-w-xl text-lg leading-relaxed text-zinc-400"
         style={{ animationDelay: '1100ms' }}
       >
-        Class of 2027 data science student shipping ML systems end to end: streaming fraud detection on AWS, causal
-        uplift models, and this site&apos;s own multi-agent deployment platform, with an AI guide you can talk to.
+        Computer Science student building end-to-end AI products, from explainable machine learning to careful,
+        retrieval-powered LLM applications.
       </p>
       <div className="animate-fade-up mt-9 flex flex-wrap gap-3" style={{ animationDelay: '1250ms' }}>
         <Magnetic>
@@ -50,14 +45,6 @@ function Hero() {
             See the work <ArrowDown className="size-4 transition-transform group-hover:translate-y-0.5" aria-hidden />
           </a>
         </Magnetic>
-        <button
-          type="button"
-          onClick={openSmith}
-          className="pressable inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-6 py-3.5 text-sm font-semibold text-white backdrop-blur transition-colors hover:border-cyan-300/50"
-        >
-          <Sparkles className="size-4 text-cyan-300" aria-hidden /> Ask Smith
-          <kbd className="ml-1 hidden rounded border border-white/15 px-1.5 font-mono text-[10px] text-zinc-400 sm:inline">⌘K</kbd>
-        </button>
         <Link
           to="/resume"
           viewTransition
@@ -104,7 +91,7 @@ function Ticker() {
 function Scene({ project, index }: { project: Project; index: number }) {
   const flip = index % 2 === 1
   const number = String(index + 1).padStart(2, '0')
-  // "RADAR: Real-time Agentic ..." shows RADAR big and the expansion as a subtitle.
+  // Keep a short lead title and render the expansion as a subtitle.
   const [name, subtitle] = project.title.includes(':')
     ? [project.title.split(':')[0].trim(), project.title.split(':').slice(1).join(':').trim()]
     : [project.title, null]
@@ -176,7 +163,7 @@ function Scene({ project, index }: { project: Project; index: number }) {
             />
             <div className="overflow-hidden rounded-3xl border border-white/10 bg-black/40 shadow-2xl">
               <img
-                src={project.diagram}
+                src={`${import.meta.env.BASE_URL}${project.diagram.replace(/^\//, '')}`}
                 alt={`${project.title} preview`}
                 loading="lazy"
                 className="aspect-video w-full object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-[1.04]"
@@ -206,7 +193,7 @@ export default function Projects() {
       <Hero />
       <Ticker />
 
-      <section id="work" data-guide="projects" aria-labelledby="work-heading" className="scroll-mt-28 pt-20">
+      <section id="work" aria-labelledby="work-heading" className="scroll-mt-28 pt-20">
         <Reveal className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="eyebrow">Selected work</p>
@@ -232,27 +219,6 @@ export default function Projects() {
         </div>
       </section>
 
-      {planned.length > 0 && (
-        <section data-guide="building" aria-labelledby="building-heading" className="mt-16">
-          <Reveal className="mb-10">
-            <p className="eyebrow">On the bench</p>
-            <h2 id="building-heading" className="font-display mt-3 text-5xl font-extrabold text-white sm:text-6xl">
-              Building <span className="font-serif text-aurora">next</span>
-            </h2>
-            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-zinc-400">
-              Designed and scoped, with evaluation plans written before any code. These are works in progress, not
-              finished results.
-            </p>
-          </Reveal>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {planned.map((project, i) => (
-              <Reveal key={project.title} delay={(i % 3) * 110} variant="scan">
-                <PlannedCard project={project} />
-              </Reveal>
-            ))}
-          </div>
-        </section>
-      )}
     </>
   )
 }

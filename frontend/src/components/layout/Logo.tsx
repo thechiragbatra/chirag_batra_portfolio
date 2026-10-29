@@ -1,4 +1,4 @@
-/** Brand mark: a "D" inside a slowly rotating conic ring. */
+/** Personal monogram framed by the site's animated aurora ring. */
 export function Logo({ className = 'size-8' }: { className?: string }) {
   return (
     <span className={`relative inline-grid place-items-center ${className}`} aria-hidden>
@@ -9,7 +9,7 @@ export function Logo({ className = 'size-8' }: { className?: string }) {
         }}
       />
       <span className="absolute inset-[2px] rounded-[8px] bg-white dark:bg-ink" />
-      <span className="font-display text-aurora relative text-[0.95em] font-bold">D</span>
+      <span className="font-display text-aurora relative text-[0.54em] font-extrabold tracking-[-0.12em]">CB</span>
     </span>
   )
 }

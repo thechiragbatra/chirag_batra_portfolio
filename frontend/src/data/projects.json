@@ -1,21 +1,18 @@
 [
   {
-    "title": "RADAR: Real-time Agentic Detection and Reporting",
-    "description": "Production-shaped fraud detection on AWS. Transactions are scored off a Kinesis stream in 0.4 ms median (717 req/s in the load test) by an XGBoost model that reaches 89.6% recall at a 1% false-positive rate on 606k synthetic transactions; hourly drift monitoring triggers champion/challenger retraining, and a Bedrock tool-use agent investigates every flagged transaction and commits a schema-validated verdict. About 60 AWS resources in Terraform, CI with OIDC deploys, 42 tests.",
+    "title": "Hireloop: AI Job Copilot",
+    "description": "An AI job copilot in progress. It turns a resume into a structured profile, ranks jobs from public ATS APIs, and tailors each resume using only facts from that profile. Hybrid retrieval and a LangGraph workflow add human approval, validated LLM outputs, and a faithfulness check that flags unsupported claims.",
     "tags": [
       "Python",
-      "XGBoost",
-      "AWS",
-      "Terraform",
-      "Amazon Bedrock",
-      "FastAPI"
+      "FastAPI",
+      "LangGraph",
+      "RAG",
+      "React",
+      "PostgreSQL",
+      "Docker"
     ],
-    "githubUrl": "https://github.com/thechiragbatra/RADAR-Real-time-Agentic-Detection-and-Reporting",
-    "diagram": "/diagrams/radar.svg",
-    "metric": {
-      "value": "89.6%",
-      "label": "fraud recall at a 1% false-positive rate"
-    }
+    "githubUrl": "https://github.com/thechiragbatra/hireloop",
+    "diagram": "/diagrams/hireloop.svg"
   },
   {
     "title": "Customer Churn MLOps",
@@ -37,27 +34,8 @@
     }
   },
   {
-    "title": "DeploySmith OS",
-    "description": "This site. A portfolio that doubles as a multi-agent deployment platform: four LangGraph agents profile a GitHub repo, plan its hosting, build it inside a hardened Docker sandbox and health-check the result, streaming every step to the browser. Deploys are immutable, with build logs and one-click rollback.",
-    "tags": [
-      "React",
-      "TypeScript",
-      "FastAPI",
-      "LangGraph",
-      "Docker",
-      "SSE"
-    ],
-    "githubUrl": "https://github.com/thechiragbatra/deploysmith",
-    "diagram": "/diagrams/deploysmith.svg",
-    "metric": {
-      "value": "4",
-      "label": "LangGraph agents, streaming live"
-    },
-    "demo": "/deployer"
-  },
-  {
     "title": "Proactive Academic Intervention System",
-    "description": "Flags at-risk students four to six weeks before finals, while there is still time to act. A class-balanced logistic regression (0.887 ROC-AUC, 79.9% recall) blended with rule-based signals scores a 5,000-student cohort into risk bands, and six classical DSA modules, from a max-heap priority queue to sliding-window attendance anomalies, power a Flask dashboard deployed on Render.",
+    "description": "A full-stack ML application that scores 5,000 student records with a hybrid risk model (70% machine learning, 30% rules), reaching 0.887 ROC-AUC, 0.764 F1, and 79.9% recall for at-risk students. Includes six DSA modules and a Flask dashboard deployed on Render.",
     "tags": [
       "Python",
       "scikit-learn",

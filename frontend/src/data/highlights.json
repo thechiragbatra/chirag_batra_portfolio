@@ -1,24 +1,22 @@
 [
   {
-    "value": 89.6,
-    "decimals": 1,
-    "suffix": "%",
-    "label": "fraud recall at a 1% false-positive rate (RADAR)"
-  },
-  {
-    "value": 0.4,
-    "decimals": 1,
-    "suffix": " ms",
-    "label": "median model scoring latency on AWS Fargate"
+    "value": 0.887,
+    "decimals": 3,
+    "label": "ROC-AUC · student risk model"
   },
   {
     "value": 56,
     "suffix": "%",
-    "label": "lower retention spend from uplift modeling"
+    "label": "lower simulated retention campaign spend"
   },
   {
-    "value": 0.887,
-    "decimals": 3,
-    "label": "ROC-AUC flagging at-risk students"
+    "value": 0.82,
+    "decimals": 2,
+    "label": "AUC-ROC · customer churn model"
+  },
+  {
+    "value": 5,
+    "suffix": "k+",
+    "label": "student records scored by the risk model"
   }
 ]

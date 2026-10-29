@@ -213,7 +213,7 @@ export default function Resume() {
           </div>
           <Magnetic>
             <a
-              href="/resume.pdf"
+              href={`${import.meta.env.BASE_URL}resume.pdf`}
               download
               className="shine-hover pressable inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-zinc-950 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-shadow hover:shadow-emerald-500/50 dark:bg-white dark:text-zinc-950"
             >

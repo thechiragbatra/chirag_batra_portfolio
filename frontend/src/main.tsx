@@ -6,7 +6,9 @@ import './index.css'
 
 // The data router is what makes <Link viewTransition> run page changes through the
 // View Transitions API (the plain BrowserRouter ignores it).
-const router = createBrowserRouter(createRoutesFromElements(routes))
+const router = createBrowserRouter(createRoutesFromElements(routes), {
+  basename: import.meta.env.BASE_URL === '/' ? '/' : import.meta.env.BASE_URL.replace(/\/$/, ''),
+})
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
