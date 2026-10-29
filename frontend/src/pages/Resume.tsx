@@ -177,8 +177,8 @@ const tabs: TabItem[] = [
 export default function Resume() {
   const { basics } = resume
   return (
-    <>
-      <section className="glass-strong glow-border relative mb-10 overflow-hidden rounded-3xl p-6 sm:p-8" data-glow>
+    <div className="resume-page">
+      <section className="resume-hero glass-strong glow-border relative mb-10 overflow-hidden rounded-3xl p-6 sm:p-8" data-glow>
         <div
           aria-hidden
           className="absolute -top-24 -right-24 size-72 rounded-full opacity-40 blur-3xl"
@@ -229,6 +229,6 @@ export default function Resume() {
         </div>
       </section>
       <Tabs items={tabs} label="Resume sections" />
-    </>
+    </div>
   )
 }

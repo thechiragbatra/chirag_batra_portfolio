@@ -13,7 +13,7 @@ export function PageHeader({
   titleRef?: Ref<HTMLHeadingElement>
 }) {
   return (
-    <div className="mb-12 pt-4">
+    <div className="page-header mb-12 pt-4">
       {eyebrow && <p className="eyebrow mb-4">{eyebrow}</p>}
       <h1
         ref={titleRef}

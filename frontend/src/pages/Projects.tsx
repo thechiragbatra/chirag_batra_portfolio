@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUpRight, Award, BrainCircuit, ExternalLink, FileText, FlaskConical, FolderGit2, GraduationCap, Mail, Plus, Sparkles } from 'lucide-react'
+import { ArrowDown, ArrowUpRight, Award, BrainCircuit, ExternalLink, FileText, FlaskConical, FolderGit2, GraduationCap, Mail, Plus, Sparkles, Waves } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AddProjectPanel } from '../features/portfolio/AddProjectPanel'
@@ -28,9 +28,9 @@ function Hero() {
             AI &amp; ML Engineer · B.Tech CS (Data Science), 2027 · {resume.basics.location}
           </p>
           <h1 className="font-display mt-6 text-[clamp(2.7rem,7.2vw,7.8rem)] leading-[0.9] font-extrabold text-white">
-            <KineticText text="Intelligence," delay={150} />
+            <KineticText text="I turn data" delay={150} />
             <br />
-            <KineticText text="engineered." delay={760} by="word" unitClassName="font-serif text-aurora pr-[0.08em]" />
+            <KineticText text="into decisions." delay={760} by="word" unitClassName="font-serif text-aurora pr-[0.08em]" />
           </h1>
           <p
             className="animate-fade-up mt-8 max-w-xl text-lg leading-relaxed text-zinc-400"
@@ -60,6 +60,10 @@ function Hero() {
         </div>
 
         <div className="hero-visual glass-strong relative mx-auto aspect-[0.95] w-full max-w-[32rem] overflow-hidden rounded-[2rem]" aria-hidden="true">
+          <div className="hero-readout absolute top-5 right-5 left-5 flex items-center justify-between font-mono text-[9px] tracking-[0.18em] uppercase sm:top-7 sm:right-7 sm:left-7">
+            <span>Neural systems / 001</span>
+            <span className="hero-live flex items-center gap-2"><span className="led size-1.5 rounded-full bg-cyan-200" /> Live signal</span>
+          </div>
           <div aria-hidden className="hero-grid absolute inset-0" />
           <div className="hero-orbit hero-orbit-one" aria-hidden />
           <div className="hero-orbit hero-orbit-two" aria-hidden />
@@ -85,8 +89,16 @@ function Hero() {
           <div className="hero-label hero-label-bottom glass absolute right-[10%] bottom-[15%] rounded-xl px-3 py-2">
             <span className="flex items-center gap-2 font-mono text-[10px] tracking-wide text-zinc-200"><ArrowUpRight className="size-3 text-violet-200" /> REAL-WORLD IMPACT</span>
           </div>
+          <div className="hero-data-chip hero-data-left absolute top-[43%] left-[5%] rounded-xl px-3 py-2">
+            <span className="block font-mono text-[8px] tracking-[0.16em] text-zinc-500 uppercase">Signal stream</span>
+            <span className="mt-1 flex items-center gap-2 font-display text-lg font-bold text-white"><Waves className="size-4 text-cyan-200" /> 250<span className="text-[10px] text-zinc-400">+ events</span></span>
+          </div>
+          <div className="hero-data-chip hero-data-right absolute right-[4%] bottom-[35%] rounded-xl px-3 py-2">
+            <span className="block font-mono text-[8px] tracking-[0.16em] text-zinc-500 uppercase">Model score</span>
+            <span className="mt-1 block font-display text-lg font-bold text-white">0.887 <span className="font-mono text-[9px] font-normal text-cyan-100">ROC-AUC</span></span>
+          </div>
           <div className="absolute right-5 bottom-5 left-5 flex items-center justify-between border-t border-white/10 pt-4 font-mono text-[9px] tracking-[0.16em] text-zinc-500 uppercase sm:right-7 sm:bottom-7 sm:left-7">
-            <span>Signal → intelligence → action</span><span>Fig. 01</span>
+            <span>Signal → intelligence → action</span><span>CB / 01</span>
           </div>
         </div>
       </div>

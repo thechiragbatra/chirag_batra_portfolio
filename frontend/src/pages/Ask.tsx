@@ -47,7 +47,7 @@ export default function Ask() {
   }
 
   return (
-    <div className="pb-10">
+    <div className="ask-page pb-10">
       <PageHeader eyebrow="Portfolio RAG · Browser-only demo" title={<>Ask the <span className="font-serif text-aurora">evidence.</span></>}>
         Ask about my projects, experience, and technical decisions. Each response is assembled from portfolio passages and linked to its source.
       </PageHeader>

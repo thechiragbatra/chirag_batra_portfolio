@@ -47,9 +47,9 @@ void main() {
                 fbm(p * 1.6 + 2.0 * q + vec2(8.3, 2.8) - t));
   float f = fbm(p * 1.1 + 2.2 * r);
 
-  vec3 cyan = vec3(0.22, 0.88, 1.0);
-  vec3 violet = vec3(0.52, 0.34, 0.98);
-  vec3 magenta = vec3(1.0, 0.30, 0.82);
+  vec3 cyan = vec3(0.22, 0.91, 1.0);
+  vec3 violet = vec3(0.48, 0.29, 1.0);
+  vec3 magenta = vec3(0.68, 1.0, 0.23);
   vec3 col = mix(violet, cyan, smoothstep(0.38, 0.72, q.x));
   col = mix(col, magenta, smoothstep(0.48, 0.80, r.y));
 
