@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUpRight, ExternalLink, FileText, FlaskConical, FolderGit2, Plus } from 'lucide-react'
+import { ArrowDown, ArrowUpRight, Award, ExternalLink, FileText, FlaskConical, FolderGit2, GraduationCap, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AddProjectPanel } from '../features/portfolio/AddProjectPanel'
@@ -85,6 +85,89 @@ function Ticker() {
         ))}
       </div>
     </div>
+  )
+}
+
+function Toolkit() {
+  const education = resume.education[0]
+
+  return (
+    <section id="toolkit" aria-labelledby="toolkit-heading" className="scroll-mt-28 pt-28">
+      <Reveal>
+        <p className="eyebrow">Skills · certifications · education</p>
+        <h2 id="toolkit-heading" className="font-display mt-3 max-w-3xl text-5xl leading-[0.95] font-extrabold text-white sm:text-7xl">
+          The tools behind <span className="font-serif text-aurora">the work.</span>
+        </h2>
+        <p className="mt-5 max-w-2xl text-sm leading-relaxed text-zinc-400">
+          A practical toolkit for taking machine-learning ideas from data preparation to evaluation and deployment.
+        </p>
+      </Reveal>
+
+      <div className="mt-10 grid items-start gap-8 lg:grid-cols-[1.25fr_0.75fr] lg:gap-12">
+        <section aria-labelledby="skills-heading">
+          <div className="mb-4 flex items-center gap-3">
+            <span className="grid size-9 place-items-center rounded-xl border border-cyan-200/15 bg-cyan-200/[0.06] font-mono text-xs text-cyan-100">01</span>
+            <h3 id="skills-heading" className="font-display text-xl font-semibold text-white">Technical skills</h3>
+          </div>
+          <dl className="grid gap-3 sm:grid-cols-2">
+            {resume.skills.map((group, index) => (
+              <Reveal key={group.category} delay={index * 70} className="glass-strong glow-border rounded-2xl p-4 sm:p-5">
+                <dt className="font-mono text-[10px] tracking-[0.14em] text-cyan-100/75 uppercase">{group.category}</dt>
+                <dd className="mt-3 flex flex-wrap gap-1.5">
+                  {group.items.map((item) => (
+                    <span key={item} className="rounded-full border border-white/[0.08] bg-white/[0.035] px-2.5 py-1 text-[11px] text-zinc-300">
+                      {item}
+                    </span>
+                  ))}
+                </dd>
+              </Reveal>
+            ))}
+          </dl>
+        </section>
+
+        <div className="space-y-8">
+          <section aria-labelledby="certifications-heading">
+            <div className="mb-4 flex items-center gap-3">
+              <span className="grid size-9 place-items-center rounded-xl border border-amber-200/15 bg-amber-200/[0.06] text-amber-100">
+                <Award className="size-4" aria-hidden />
+              </span>
+              <h3 id="certifications-heading" className="font-display text-xl font-semibold text-white">Certifications</h3>
+            </div>
+            <ul className="space-y-2.5">
+              {resume.certifications.map((certification, index) => (
+                <li key={`${certification.issuer}-${certification.name}`} className="glass-strong flex gap-3 rounded-2xl p-4" style={{ animationDelay: `${index * 80}ms` }}>
+                  <span aria-hidden className="mt-1.5 size-1.5 shrink-0 rounded-full bg-gradient-to-r from-amber-200 to-violet-300" />
+                  <span>
+                    <span className="block text-sm font-medium leading-snug text-zinc-100">{certification.name}</span>
+                    <span className="mt-1 block font-mono text-[10px] tracking-wide text-zinc-500">
+                      {certification.issuer}{certification.date ? ` · ${certification.date}` : ''}
+                    </span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          {education && (
+            <section aria-labelledby="education-heading">
+              <div className="mb-4 flex items-center gap-3">
+                <span className="grid size-9 place-items-center rounded-xl border border-violet-200/15 bg-violet-200/[0.06] text-violet-100">
+                  <GraduationCap className="size-4" aria-hidden />
+                </span>
+                <h3 id="education-heading" className="font-display text-xl font-semibold text-white">Education</h3>
+              </div>
+              <div className="glass-strong rounded-2xl p-5">
+                <p className="font-display text-lg font-semibold text-white">{education.school}</p>
+                <p className="mt-1 text-sm leading-relaxed text-zinc-300">{education.degree}</p>
+                <p className="mt-3 font-mono text-[10px] tracking-[0.12em] text-zinc-500 uppercase">
+                  {education.start} – {education.end}{education.details ? ` · ${education.details}` : ''}
+                </p>
+              </div>
+            </section>
+          )}
+        </div>
+      </div>
+    </section>
   )
 }
 
@@ -247,7 +330,7 @@ export default function Projects() {
           ))}
         </div>
       </section>
-
+      <Toolkit />
     </>
   )
 }

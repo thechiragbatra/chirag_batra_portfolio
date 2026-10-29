@@ -3,7 +3,7 @@
     "name": "Chirag Batra",
     "title": "B.Tech CS (Data Science) · Class of 2027",
     "location": "Dehradun, India",
-    "summary": "Computer Science (Data Science) undergraduate, batch of 2027, building ML systems end to end in Python across data pipelines, model training, explainability, and API deployment. Two internships, a live-deployed ML web app, and Hireloop, an LLM job copilot in progress. Seeking an AI Engineer role.",
+    "summary": "Computer Science (Data Science) undergraduate (batch of 2027) who builds ML systems end to end in Python: data pipelines, model training, explainability, and REST API deployment. Two internships, a live-deployed ML web app, and Hireloop, an LLM job copilot with retrieval, agents, and evals, in progress. Seeking an AI Engineer role.",
     "links": [
       {
         "label": "Email",
@@ -55,9 +55,23 @@
     }
   ],
   "certifications": [
-    "Data Science Tools, IBM SkillsBuild",
-    "Data Analytics Virtual Experience Program, Deloitte Australia (Forage)",
-    "Data Structures and Algorithms using Python, Tutedude"
+    {
+      "name": "Agentic AI Certified Foundations Associate",
+      "issuer": "Oracle University",
+      "date": "Oct 2026"
+    },
+    {
+      "name": "Data Science Tools",
+      "issuer": "IBM SkillsBuild"
+    },
+    {
+      "name": "Data Analytics Virtual Experience Program",
+      "issuer": "Deloitte Australia (Forage)"
+    },
+    {
+      "name": "Data Structures and Algorithms using Python",
+      "issuer": "Tutedude"
+    }
   ],
   "projects": [
     {
@@ -103,13 +117,13 @@
   ],
   "skills": [
     {
-      "category": "Languages",
+      "category": "Programming Languages",
       "items": ["Python", "SQL", "Java", "JavaScript"]
     },
     {
       "category": "Machine Learning and AI",
       "items": [
-        "Scikit-learn", "XGBoost", "Random Forest", "Logistic Regression", "Uplift Modeling (CausalML)", "SHAP", "Feature Engineering", "Model Evaluation", "LLM Applications", "RAG", "LangGraph"
+        "Scikit-learn", "XGBoost", "Random Forest", "Logistic Regression", "Uplift Modeling (CausalML)", "SHAP", "Feature Engineering", "Model Evaluation", "LLM Applications", "RAG", "Agentic AI", "LangGraph"
       ]
     },
     {
@@ -133,7 +147,7 @@
     {
       "category": "Computer Science Fundamentals",
       "items": [
-        "Data Structures and Algorithms", "Object-Oriented Programming", "Database Management Systems"
+        "Data Structures and Algorithms", "OOP", "Database Management Systems"
       ]
     }
   ]

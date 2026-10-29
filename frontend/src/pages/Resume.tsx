@@ -95,25 +95,31 @@ const tabs: TabItem[] = [
             </TimelineItem>
           ))}
         </Timeline>
-        {resume.certifications.length > 0 && (
-          <div>
-            <h3 className="font-display mb-3 flex items-center gap-2 text-lg font-semibold">
-              <Award className="size-5 text-amber-500" aria-hidden /> Certifications
-            </h3>
-            <ul className="grid gap-3 sm:grid-cols-3">
-              {resume.certifications.map((c, i) => (
-                <li
-                  key={c}
-                  className="glass-strong glow-border animate-fade-up rounded-2xl p-4 text-sm leading-snug text-zinc-700 dark:text-zinc-300"
-                  style={stagger(i + 2, 120)}
-                >
-                  {c}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
       </div>
+    ),
+  },
+  {
+    id: 'certifications',
+    label: 'Certifications',
+    content: (
+      <ul className="grid gap-4 sm:grid-cols-2">
+        {resume.certifications.map((certification, i) => (
+          <li
+            key={`${certification.issuer}-${certification.name}`}
+            className="glass-strong glow-border animate-fade-up flex gap-4 rounded-2xl p-5"
+            style={stagger(i, 120)}
+          >
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-amber-200/15 bg-amber-200/[0.06] text-amber-200">
+              <Award className="size-5" aria-hidden />
+            </span>
+            <span>
+              <span className="font-display block font-semibold text-white">{certification.name}</span>
+              <span className="mt-1 block text-sm text-zinc-400">{certification.issuer}</span>
+              {certification.date && <span className="mt-2 block font-mono text-[10px] tracking-[0.12em] text-zinc-500 uppercase">{certification.date}</span>}
+            </span>
+          </li>
+        ))}
+      </ul>
     ),
   },
   {

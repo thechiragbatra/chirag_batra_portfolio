@@ -8,7 +8,7 @@ const resume: Resume = resumeData
 export type PortfolioPassage = {
   id: string
   title: string
-  kind: 'Experience' | 'Project' | 'Profile' | 'Skills'
+  kind: 'Experience' | 'Project' | 'Profile' | 'Skills' | 'Certification'
   text: string
   href: string
   sourceLabel: string
@@ -50,6 +50,14 @@ const passages: PortfolioPassage[] = [
     text: group.items.join(', '),
     href: '/resume',
     sourceLabel: `Résumé · ${group.category}`,
+  })),
+  ...resume.certifications.map((certification, index) => ({
+    id: `certification-${index}`,
+    title: certification.name,
+    kind: 'Certification' as const,
+    text: `${certification.name} ${certification.issuer} ${certification.date ?? ''}`,
+    href: '/resume',
+    sourceLabel: `Résumé · ${certification.issuer}`,
   })),
 ]
 

@@ -54,6 +54,12 @@ export interface SkillGroup {
   items: string[]
 }
 
+export interface Certification {
+  name: string
+  issuer: string
+  date?: string
+}
+
 export interface Resume {
   basics: {
     name: string
@@ -64,7 +70,7 @@ export interface Resume {
   }
   experience: Experience[]
   education: Education[]
-  certifications: string[]
+  certifications: Certification[]
   projects: ResumeProject[]
   skills: SkillGroup[]
 }
