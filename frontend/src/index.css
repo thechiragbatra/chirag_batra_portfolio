@@ -156,6 +156,12 @@ body {
   background: color-mix(in oklab, var(--glow-a) 35%, transparent);
 }
 
+/* Keep keyboard navigation easy to track against the dark canvas. */
+:focus-visible {
+  outline: 2px solid var(--glow-a);
+  outline-offset: 4px;
+}
+
 @utility font-display {
   font-family: var(--font-display);
   letter-spacing: -0.035em;

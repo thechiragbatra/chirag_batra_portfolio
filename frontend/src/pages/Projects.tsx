@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUpRight, Award, ExternalLink, FileText, FlaskConical, FolderGit2, GraduationCap, Plus } from 'lucide-react'
+import { ArrowDown, ArrowUpRight, Award, ExternalLink, FileText, FlaskConical, FolderGit2, GraduationCap, Mail, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AddProjectPanel } from '../features/portfolio/AddProjectPanel'
@@ -19,22 +19,23 @@ const resume: Resume = resumeData
 const TICKER = resume.skills.flatMap((g) => g.items.slice(0, 3)).slice(0, 18)
 
 function Hero() {
+  const email = resume.basics.links.find((link) => link.url.startsWith('mailto:'))?.url
   return (
     <section className="relative flex min-h-[calc(100svh-9rem)] flex-col justify-center pb-10">
       <p className="eyebrow animate-fade-up">
-        AI Engineer candidate · B.Tech CS (Data Science), 2027 · {resume.basics.location}
+        AI &amp; ML Engineer · B.Tech CS (Data Science), 2027 · {resume.basics.location}
       </p>
       <h1 className="font-display mt-6 text-[clamp(2.7rem,7.2vw,7.8rem)] leading-[0.9] font-extrabold text-white">
-        <KineticText text="I build AI" delay={150} />
+        <KineticText text="I build useful" delay={150} />
         <br />
-        <KineticText text="that thinks." delay={760} by="word" unitClassName="font-serif text-aurora pr-[0.08em]" />
+        <KineticText text="AI systems." delay={760} by="word" unitClassName="font-serif text-aurora pr-[0.08em]" />
       </h1>
       <p
         className="animate-fade-up mt-8 max-w-xl text-lg leading-relaxed text-zinc-400"
         style={{ animationDelay: '1100ms' }}
       >
-        Computer Science student building end-to-end AI products, from explainable machine learning to careful,
-        retrieval-powered LLM applications.
+        I&apos;m Chirag, a Computer Science student who takes AI ideas from raw data to working products—combining
+        machine learning, retrieval, and thoughtful evaluation.
       </p>
       <div className="animate-fade-up mt-9 flex flex-wrap gap-3" style={{ animationDelay: '1250ms' }}>
         <Magnetic>
@@ -52,6 +53,14 @@ function Hero() {
         >
           <FileText className="size-4" aria-hidden /> Résumé
         </Link>
+        {email && (
+          <a
+            href={email}
+            className="pressable inline-flex items-center gap-2 rounded-full px-5 py-3.5 text-sm font-semibold text-zinc-300 transition-colors hover:text-white"
+          >
+            <Mail className="size-4" aria-hidden /> Get in touch
+          </a>
+        )}
       </div>
 
       <dl className="mt-16 grid grid-cols-2 border-t border-white/10 lg:grid-cols-4">
@@ -68,6 +77,44 @@ function Hero() {
           </Reveal>
         ))}
       </dl>
+    </section>
+  )
+}
+
+function About() {
+  return (
+    <section id="about" aria-labelledby="about-heading" className="scroll-mt-28 py-24 sm:py-32">
+      <Reveal className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
+        <div>
+          <p className="eyebrow">A little about how I work</p>
+          <h2 id="about-heading" className="font-display mt-3 text-5xl leading-[0.95] font-extrabold text-white sm:text-6xl">
+            From signal <span className="font-serif text-aurora">to system.</span>
+          </h2>
+        </div>
+        <div>
+          <p className="text-lg leading-relaxed text-zinc-200">
+            I enjoy the full path from a messy real-world problem to a tool someone can use. My work spans data
+            pipelines, interpretable models, APIs, and AI products grounded in reliable retrieval.
+          </p>
+          <p className="mt-5 max-w-2xl leading-relaxed text-zinc-400">
+            Across data science internships and independent projects, I focus on making model behavior understandable
+            and evaluating systems against evidence—not just a compelling demo. I&apos;m currently building toward an
+            AI Engineer role and exploring practical agentic workflows.
+          </p>
+          <ul className="mt-8 grid gap-3 sm:grid-cols-3" aria-label="Areas of focus">
+            {[
+              ['Build', 'End-to-end ML products'],
+              ['Explain', 'Interpretable, useful results'],
+              ['Evaluate', 'Grounded systems with checks'],
+            ].map(([verb, detail]) => (
+              <li key={verb} className="glass-strong rounded-2xl p-4">
+                <span className="font-mono text-[10px] tracking-[0.16em] text-cyan-200 uppercase">{verb}</span>
+                <span className="mt-2 block text-sm leading-snug text-zinc-200">{detail}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </Reveal>
     </section>
   )
 }
@@ -304,6 +351,7 @@ export default function Projects() {
     <>
       <Hero />
       <Ticker />
+      <About />
 
       <section id="work" aria-labelledby="work-heading" className="scroll-mt-28 pt-20">
         <Reveal className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
