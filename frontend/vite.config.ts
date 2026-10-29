@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { defineConfig, loadEnv } from 'vite'
 import { projectEditor } from './plugins/projectEditor.ts'
 
-// Read .env from the repo root so frontend and backend share one file.
+// Read the optional GITHUB_TOKEN for the local project editor from the repository root.
 const envDir = '..'
 
 // https://vite.dev/config/

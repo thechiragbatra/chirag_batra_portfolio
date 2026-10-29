@@ -36,6 +36,8 @@ npm run preview
 
 Portfolio content lives in `frontend/src/data/`. Project visuals and the downloadable résumé are in `frontend/public/`.
 
+The Churn Uplift Lab's model training and export source is in `ml/churn/`; the exported browser model is `frontend/public/models/churn-lab.json`.
+
 ## GitHub Pages deployment
 
 The workflow at [`.github/workflows/frontend-deploy.yml`](.github/workflows/frontend-deploy.yml) builds `frontend/` and deploys `frontend/dist/` to GitHub Pages on every push to `main`. Set the repository’s Pages source to **GitHub Actions**. The production build uses the `/deploysmith/` project-site path.

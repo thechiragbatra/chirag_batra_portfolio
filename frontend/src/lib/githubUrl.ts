@@ -1,5 +1,4 @@
-// Fast client-side check for instant feedback. The backend (agents/skills/github_url.py)
-// is authoritative for deployments and rejects anything this lets through.
+// Fast client-side check for instant feedback in the local portfolio project editor.
 const GITHUB_REPO_URL =
   /^https:\/\/(?:www\.)?github\.com\/(?<owner>[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38})\/(?<repo>[A-Za-z0-9._-]{1,100}?)(?:\.git)?\/?$/
 

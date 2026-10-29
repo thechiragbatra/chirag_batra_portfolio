@@ -56,7 +56,7 @@ async function fetchRepo(url: string, token: string | undefined): Promise<Github
 
   const headers: Record<string, string> = {
     Accept: 'application/vnd.github+json',
-    'User-Agent': 'deploysmith-dev',
+    'User-Agent': 'chirag-portfolio-dev',
     'X-GitHub-Api-Version': '2022-11-28',
   }
   if (token) headers.Authorization = `Bearer ${token}`
@@ -131,7 +131,7 @@ const sameRepo = (a: string, b: string) => a.toLowerCase().replace(/\/$/, '') ==
 
 export function projectEditor(options: { dataFile: string; githubToken?: string }): Plugin {
   return {
-    name: 'deploysmith:project-editor',
+    name: 'portfolio:project-editor',
     apply: 'serve',
     configureServer(server) {
       server.middlewares.use(PROJECT_EDITOR_BASE, (req, res) => {

@@ -1,23 +1,30 @@
-# DeploySmith OS
+# Portfolio repository
 
-Personal developer portfolio that doubles as a multi-agent deployment platform.
+This repository contains Chirag Batra's static AI engineering portfolio. The deployed site is the React/Vite app in `frontend/`; GitHub Pages builds it from `frontend/dist/`.
 
-## Stack
-- frontend/: React + Vite + TypeScript + Tailwind + lucide-react (React Flow added in Phase 3)
-- backend/: Python 3.11+, FastAPI, LangGraph, pydantic v2
-- agents/: Python modules imported by backend (profiler, strategist, provisioner, healer)
-- shared/: JSON Schema as source of truth for types shared between Python and TS
+## Keep
 
-## Rules
-- Free-tier hosting only: Vercel/Netlify/Cloudflare Pages (frontend), Render/HF Spaces (backend), Neon/Supabase/Turso (DB), or the local sandbox engine. Never route to a paid platform.
-- This site itself is hosted on Azure (deploy/azure/: Container Apps + Static Web Apps, Azure for Students), with Google Cloud Run (deploy/gcp/) kept as an alternative. Both stay inside free allowances: scale to zero, one API replica at most, no always-on or billed extras (Log Analytics, container registries). Never add paid services or raise those caps without asking.
-- NEVER execute code from a target repo on the host. Clone shallow and analyze statically.
-  The only exception is the sandbox engine (agents/sandbox/): repo code (install, build,
-  run) may execute solely inside its hardened Docker containers (non-root, all caps
-  dropped, no-new-privileges, resource limits, no host mounts except a per-deploy copy;
-  install on the default bridge because it needs package registries, build with no
-  network, internal-only network at runtime). Never weaken those flags.
-- No secrets in code or git. Use .env + .env.example. All API keys are read from env.
-- Verify before declaring done: run linters, tests, and the dev servers. Show me the output.
-- Keep changes small and commit per logical step. Ask before adding dependencies not listed here.
-- Add type hints everywhere; add pytest tests for every agent function.
+- Portfolio pages and shared UI in `frontend/src/`.
+- Résumé and project content in `frontend/src/data/` and static assets in `frontend/public/`.
+- The browser-based Churn Uplift Lab and its model training/export source in `ml/churn/`.
+- The local-only project editor in `frontend/plugins/projectEditor.ts`.
+- The GitHub Pages deploy workflow and frontend CI.
+
+There is no portfolio backend. Keep runtime pages static and make interactive demos work in the browser.
+
+## Development
+
+```sh
+cd frontend
+npm ci
+npm run dev
+npm run lint
+npm test
+npm run build
+```
+
+Pushes to `main` deploy the production build through `.github/workflows/frontend-deploy.yml`. For repository project pages, the production Vite base is `/deploysmith/`.
+
+The Churn Lab model is exported to `frontend/public/models/churn-lab.json`; training and model tests live in `ml/churn/`.
+
+Do not commit secrets. `GITHUB_TOKEN` is optional and only used by the local project editor to look up public repository details.

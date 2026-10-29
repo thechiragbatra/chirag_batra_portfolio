@@ -1,7 +1,6 @@
 # Secrets
 .env
 .env.*
-!.env.example
 
 # Python
 __pycache__/
@@ -18,12 +17,3 @@ dist/
 # OS / editor
 .DS_Store
 .idea/
-
-# Sandbox engine state (deploys, build logs, router config)
-.deploysmith/
-
-# Guide agent eval reports (agents/guide/evals.py)
-guide-eval-report.json
-
-# Smith feedback (thumbs up/down with the question), local only
-.guide/
