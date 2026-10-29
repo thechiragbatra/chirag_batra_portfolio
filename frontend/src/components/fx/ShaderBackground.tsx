@@ -187,6 +187,40 @@ export function ShaderBackground() {
       {/* Fallback when WebGL is unavailable: the canvas stays transparent until ready. */}
       <div className="shader-fallback absolute inset-0" />
       <canvas ref={canvasRef} className="shader-canvas absolute inset-0 size-full" />
+      <svg className="neural-mesh absolute inset-0 size-full" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="mesh-signal" x1="0" y1="0" x2="1" y2="1">
+            <stop stopColor="#55e8ff" stopOpacity="0.05" />
+            <stop offset="0.5" stopColor="#9876ff" stopOpacity="0.72" />
+            <stop offset="1" stopColor="#b7ff55" stopOpacity="0.08" />
+          </linearGradient>
+          <radialGradient id="mesh-node">
+            <stop stopColor="#fff" />
+            <stop offset="0.3" stopColor="#55e8ff" />
+            <stop offset="1" stopColor="#9876ff" stopOpacity="0.12" />
+          </radialGradient>
+        </defs>
+        <g className="mesh-links" stroke="url(#mesh-signal)" fill="none">
+          <path d="M-30 210 115 120 248 206 390 96 520 185 650 104 784 205 922 105 1060 190 1200 92 1470 205" />
+          <path d="M-20 500 115 390 248 470 390 350 520 445 650 335 784 462 922 346 1060 442 1200 328 1470 480" />
+          <path d="M-20 780 115 670 248 748 390 638 520 725 650 622 784 744 922 632 1060 720 1200 616 1470 765" />
+          <path d="m115 120 0 270m133-184v264m142-374v288m130-199v260m130-341v287m134-186v281m138-358v281m138-196v274m140-372v288" />
+          <path d="m248 206 142 144m130 95 130-110m134 127 138-116m138 96 140-114M115 390l133 80m142-120 130 95m130-110 134 127m138-116 138 96m140-114 270 152" />
+          <path className="mesh-packet" d="M-30 210 115 120 248 206 390 96 520 185 650 104 784 205 922 105 1060 190 1200 92 1470 205" />
+          <path className="mesh-packet mesh-packet-delay" d="M-20 780 115 670 248 748 390 638 520 725 650 622 784 744 922 632 1060 720 1200 616 1470 765" />
+        </g>
+        <g className="mesh-nodes" fill="url(#mesh-node)">
+          <circle cx="115" cy="120" r="5" /><circle cx="248" cy="206" r="4" /><circle cx="390" cy="96" r="6" />
+          <circle cx="520" cy="185" r="4" /><circle cx="650" cy="104" r="5" /><circle cx="784" cy="205" r="7" />
+          <circle cx="922" cy="105" r="4" /><circle cx="1060" cy="190" r="6" /><circle cx="1200" cy="92" r="5" />
+          <circle cx="115" cy="390" r="6" /><circle cx="248" cy="470" r="4" /><circle cx="390" cy="350" r="5" />
+          <circle cx="520" cy="445" r="7" /><circle cx="650" cy="335" r="4" /><circle cx="784" cy="462" r="5" />
+          <circle cx="922" cy="346" r="6" /><circle cx="1060" cy="442" r="4" /><circle cx="1200" cy="328" r="7" />
+          <circle cx="115" cy="670" r="4" /><circle cx="248" cy="748" r="6" /><circle cx="390" cy="638" r="4" />
+          <circle cx="520" cy="725" r="5" /><circle cx="650" cy="622" r="7" /><circle cx="784" cy="744" r="4" />
+          <circle cx="922" cy="632" r="5" /><circle cx="1060" cy="720" r="7" /><circle cx="1200" cy="616" r="4" />
+        </g>
+      </svg>
       <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_60%,var(--bg))]" />
     </div>
   )

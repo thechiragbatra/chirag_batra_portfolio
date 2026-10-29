@@ -1085,6 +1085,25 @@ body {
   column-gap: 0.7rem;
 }
 .resume-pointer-dot { margin-top: 0.55rem; }
+.resume-pointer-dot { box-shadow: 0 0 9px rgb(85 232 255 / 0.55); animation: synapse-pulse 3.6s ease-in-out infinite; }
+
+/* Low-contrast neural mesh: connecting lines and firing nodes form the site's signature. */
+.neural-mesh {
+  opacity: 0.24;
+  mix-blend-mode: screen;
+  mask-image: linear-gradient(to bottom, transparent, black 13%, black 74%, transparent);
+}
+.mesh-links { stroke-width: 0.8; opacity: 0.48; }
+.mesh-links path:not(.mesh-packet) { stroke-dasharray: 2 12; }
+.mesh-packet { stroke: var(--glow-a); stroke-width: 1.5; stroke-dasharray: 2 38; opacity: 0.72; filter: drop-shadow(0 0 5px rgb(183 255 85 / 0.8)); animation: mesh-travel 18s linear infinite; }
+.mesh-packet-delay { animation-delay: -9s; }
+.mesh-nodes circle { opacity: 0.45; transform-box: fill-box; transform-origin: center; animation: node-glow 5s ease-in-out infinite; }
+.mesh-nodes circle:nth-child(3n) { animation-delay: -1.6s; }
+.mesh-nodes circle:nth-child(3n + 1) { animation-delay: -3.3s; }
+.project-scene::before { filter: drop-shadow(0 0 8px rgb(152 118 255 / 0.7)); }
+@keyframes mesh-travel { to { stroke-dashoffset: -400; } }
+@keyframes node-glow { 0%, 100% { opacity: 0.28; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.3); } }
+@keyframes synapse-pulse { 0%, 100% { box-shadow: 0 0 5px rgb(85 232 255 / 0.35); } 50% { box-shadow: 0 0 12px rgb(85 232 255 / 0.8); } }
 
 @media (min-width: 1024px) {
   .project-scene { min-height: 38rem; }
@@ -1104,9 +1123,11 @@ body {
   .project-scene .scene-index { font-size: 4.1rem; }
   .footer-panel { border-radius: 1.5rem; }
   .resume-pointers { grid-template-rows: none; grid-auto-flow: row; grid-auto-columns: auto; row-gap: 0.7rem; }
+  .neural-mesh { opacity: 0.14; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .hero-visual::before, .hero-visual::after { animation: none; }
   .project-scene { transition: none; }
+  .mesh-packet, .mesh-nodes circle, .resume-pointer-dot { animation: none; }
 }
