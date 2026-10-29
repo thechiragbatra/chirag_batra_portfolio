@@ -40,8 +40,10 @@ const passages: PortfolioPassage[] = [
     text: [project.context, project.description, project.contribution, project.keyDecision, project.tags.join(', ')]
       .filter(Boolean)
       .join(' '),
-    href: project.githubUrl ?? '/projects#work',
-    sourceLabel: project.githubUrl ? `${project.title} · GitHub` : `Portfolio · ${project.title}`,
+    href: project.githubVisibility === 'private' ? '/projects#work' : (project.githubUrl ?? '/projects#work'),
+    sourceLabel: project.githubVisibility === 'private'
+      ? `Portfolio · ${project.title}`
+      : project.githubUrl ? `${project.title} · GitHub` : `Portfolio · ${project.title}`,
   })),
   ...resume.skills.map((group, index) => ({
     id: `skills-${index}`,

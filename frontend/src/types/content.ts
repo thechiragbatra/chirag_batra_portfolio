@@ -9,6 +9,7 @@ export interface Project {
   keyDecision?: string
   tags: string[]
   githubUrl?: string
+  githubVisibility?: string
   liveUrl?: string
   /** In-site route to an interactive demo of the project, e.g. "/lab". */
   demo?: string
@@ -47,6 +48,7 @@ export interface ResumeProject {
   description: string
   tech: string[]
   url?: string
+  visibility?: string
 }
 
 export interface SkillGroup {

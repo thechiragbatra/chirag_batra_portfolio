@@ -75,6 +75,13 @@
   ],
   "projects": [
     {
+      "name": "Bharat Market Pro: Equity Research & ULIP Monitor (7th-semester team project)",
+      "description": "An Indian-equity research terminal and ULIP fund monitor that unifies NSE prices, company fundamentals, filings, news, and insurer fact-sheets. It uses deterministic extraction and validation for insurer PDFs and measures guidance signals against 5-, 20-, and 60-session forward returns relative to NIFTY.",
+      "tech": ["TypeScript", "React", "PostgreSQL", "Python", "Hono", "Drizzle ORM", "Docker"],
+      "url": "https://github.com/thechiragbatra/bharat-market-pro",
+      "visibility": "private"
+    },
+    {
       "name": "Hireloop: AI Job Copilot (Ongoing)",
       "description": "Building a full-stack AI job copilot that parses a resume into a structured profile, ranks jobs from public ATS APIs, and tailors each resume using only facts from the user's profile. The system combines hybrid retrieval, a LangGraph workflow with human approval, validated LLM outputs, and a faithfulness verifier that flags unsupported claims.",
       "tech": [

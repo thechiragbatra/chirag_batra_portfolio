@@ -138,8 +138,8 @@ const tabs: TabItem[] = [
                 </span>
               ))}
               {p.url && (
-                <a href={p.url} target="_blank" rel="noreferrer" className="ml-1 inline-flex items-center gap-1 text-xs font-medium text-emerald-700 hover:underline dark:text-emerald-400">
-                  <ExternalLink className="size-3.5" /> View
+                  <a href={p.url} target="_blank" rel="noreferrer" className="ml-1 inline-flex items-center gap-1 text-xs font-medium text-emerald-700 hover:underline dark:text-emerald-400">
+                    <ExternalLink className="size-3.5" /> {p.visibility === 'private' ? 'Private source' : 'View'}
                 </a>
               )}
             </div>

@@ -1,5 +1,18 @@
 [
   {
+    "title": "Bharat Market Pro: Equity Research & ULIP Monitor",
+    "context": "UPES · Data Science minor project · 7th semester · team of four",
+    "status": "Private repository",
+    "description": "An Indian-equity research terminal and ULIP insurance-fund monitor that brings NSE end-of-day prices, company fundamentals, filings, news, and insurer fact-sheets into one PostgreSQL-backed workspace, with company research, portfolio-level fund analysis, and a grounded AI assistant.",
+    "keyDecision": "Keep insurer fact-sheet extraction deterministic and offline, validate parsed records before storage, then snapshot guidance signals and score outcomes at 5-, 20-, and 60-session horizons against NIFTY.",
+    "tags": ["TypeScript", "React", "PostgreSQL", "Python", "PDF parsing", "NSE data", "Hono", "Drizzle ORM", "Docker"],
+    "githubUrl": "https://github.com/thechiragbatra/bharat-market-pro",
+    "githubVisibility": "private",
+    "diagram": "/diagrams/bharat-market-pro.svg",
+    "diagramAlt": "Bharat Market Pro architecture: market and insurer data flow through deterministic extraction and validation into a research terminal with a measured guidance loop",
+    "diagramCaption": "Data flow · deterministic ULIP extraction · measured outcomes"
+  },
+  {
     "title": "EventLens AI",
     "context": "IBM · Data Science Internship",
     "description": "Financial risk analytics that combines news signals with market data, then estimates portfolio exposure with Value-at-Risk and Monte Carlo projections.",

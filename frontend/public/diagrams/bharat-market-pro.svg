@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" fill="none">
+  <defs>
+    <linearGradient id="surface" x1="72" y1="34" x2="1515" y2="864" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#17142e"/><stop offset="1" stop-color="#090b19"/>
+    </linearGradient>
+    <linearGradient id="signal" x1="218" y1="295" x2="1378" y2="620" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#55e8ff"/><stop offset=".52" stop-color="#9876ff"/><stop offset="1" stop-color="#b7ff55"/>
+    </linearGradient>
+    <linearGradient id="soft" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#55e8ff" stop-opacity=".12"/><stop offset="1" stop-color="#9876ff" stop-opacity=".035"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <pattern id="grid" width="38" height="38" patternUnits="userSpaceOnUse"><path d="M38 0H0v38" stroke="#afa4ff" stroke-opacity=".07"/></pattern>
+  </defs>
+  <rect width="1600" height="900" rx="40" fill="url(#surface)"/>
+  <rect x="1" y="1" width="1598" height="898" rx="39" stroke="#a99aff" stroke-opacity=".22" stroke-width="2"/>
+  <rect width="1600" height="900" rx="40" fill="url(#grid)"/>
+  <text x="76" y="86" fill="#b7ff55" font-family="monospace" font-size="17" letter-spacing="5">BHARAT MARKET PRO / SYSTEM MAP</text>
+  <text x="76" y="130" fill="#f5f1ff" font-family="Inter,Arial,sans-serif" font-size="30" font-weight="700">Research with evidence. Signals with scorecards.</text>
+
+  <g font-family="Inter,Arial,sans-serif">
+    <rect x="74" y="220" width="300" height="190" rx="22" fill="url(#soft)" stroke="#55e8ff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="105" y="265" fill="#55e8ff" font-family="monospace" font-size="14" letter-spacing="3">01 / MARKET DATA</text>
+    <text x="105" y="310" fill="#f4f0ff" font-size="24" font-weight="700">Indian equities</text>
+    <text x="105" y="350" fill="#b7b1ca" font-size="17">NSE prices · filings · news</text>
+    <text x="105" y="380" fill="#b7b1ca" font-size="17">Company fundamentals</text>
+
+    <rect x="74" y="485" width="300" height="190" rx="22" fill="url(#soft)" stroke="#9876ff" stroke-opacity=".55" stroke-width="2"/>
+    <text x="105" y="530" fill="#b39cff" font-family="monospace" font-size="14" letter-spacing="3">02 / SOURCE DOCUMENTS</text>
+    <text x="105" y="575" fill="#f4f0ff" font-size="24" font-weight="700">ULIP fact-sheets</text>
+    <text x="105" y="615" fill="#b7b1ca" font-size="17">10 insurers · varied PDF layouts</text>
+    <text x="105" y="645" fill="#b7b1ca" font-size="17">Offline deterministic parsing</text>
+
+    <path d="M374 315h80v155M374 580h80V470" stroke="url(#signal)" stroke-width="3"/>
+    <circle cx="454" cy="470" r="8" fill="#55e8ff" filter="url(#glow)"/>
+    <rect x="455" y="368" width="270" height="204" rx="24" fill="#111027" stroke="#9876ff" stroke-opacity=".6" stroke-width="2"/>
+    <text x="487" y="412" fill="#b7ff55" font-family="monospace" font-size="13" letter-spacing="2">03 / PIPELINE</text>
+    <text x="487" y="458" fill="#f4f0ff" font-size="23" font-weight="700">Parse · normalize</text>
+    <text x="487" y="491" fill="#f4f0ff" font-size="23" font-weight="700">validate · reconcile</text>
+    <text x="487" y="532" fill="#a8a1be" font-size="15">No model required for extraction</text>
+
+    <path d="M725 470h70" stroke="url(#signal)" stroke-width="3"/>
+    <circle cx="795" cy="470" r="8" fill="#9876ff" filter="url(#glow)"/>
+    <rect x="796" y="368" width="250" height="204" rx="24" fill="#111027" stroke="#55e8ff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="828" y="412" fill="#55e8ff" font-family="monospace" font-size="13" letter-spacing="2">04 / DATA LAYER</text>
+    <text x="828" y="468" fill="#f4f0ff" font-size="25" font-weight="700">PostgreSQL</text>
+    <text x="828" y="507" fill="#a8a1be" font-size="16">Curated market + fund data</text>
+    <text x="828" y="538" fill="#a8a1be" font-size="16">Validated records · coverage</text>
+
+    <path d="M1046 470h58v-205h65m-65 205h65m-65 0v205h65" stroke="url(#signal)" stroke-width="3"/>
+    <circle cx="1104" cy="470" r="8" fill="#b7ff55" filter="url(#glow)"/>
+    <rect x="1168" y="190" width="350" height="150" rx="22" fill="#111027" stroke="#9876ff" stroke-opacity=".6" stroke-width="2"/>
+    <text x="1200" y="232" fill="#b39cff" font-family="monospace" font-size="13" letter-spacing="2">05A / RESEARCH DESK</text>
+    <text x="1200" y="279" fill="#f4f0ff" font-size="23" font-weight="700">Companies · portfolios</text>
+    <text x="1200" y="311" fill="#a8a1be" font-size="16">Fund transparency · grounded AI</text>
+
+    <rect x="1168" y="395" width="350" height="150" rx="22" fill="#111027" stroke="#55e8ff" stroke-opacity=".55" stroke-width="2"/>
+    <text x="1200" y="437" fill="#55e8ff" font-family="monospace" font-size="13" letter-spacing="2">05B / MEASUREMENT LOOP</text>
+    <text x="1200" y="484" fill="#f4f0ff" font-size="23" font-weight="700">Snapshot → evaluate</text>
+    <text x="1200" y="516" fill="#a8a1be" font-size="16">5 / 20 / 60 sessions · vs NIFTY</text>
+
+    <rect x="1168" y="600" width="350" height="150" rx="22" fill="#111027" stroke="#b7ff55" stroke-opacity=".5" stroke-width="2"/>
+    <text x="1200" y="642" fill="#b7ff55" font-family="monospace" font-size="13" letter-spacing="2">05C / PRESENTATION</text>
+    <text x="1200" y="689" fill="#f4f0ff" font-size="23" font-weight="700">Research terminal</text>
+    <text x="1200" y="721" fill="#a8a1be" font-size="16">Market signals with uncertainty</text>
+  </g>
+
+  <g fill="#55e8ff" opacity=".85" filter="url(#glow)">
+    <circle cx="401" cy="315" r="4"/><circle cx="401" cy="580" r="4"/><circle cx="759" cy="470" r="4"/><circle cx="1138" cy="265" r="4"/><circle cx="1138" cy="470" r="4"/><circle cx="1138" cy="675" r="4"/>
+  </g>
+  <text x="76" y="826" fill="#817b9b" font-family="monospace" font-size="13" letter-spacing="3">UPES · DATA SCIENCE MINOR PROJECT · 7TH SEMESTER · TEAM OF FOUR</text>
+</svg>

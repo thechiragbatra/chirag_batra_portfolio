@@ -336,7 +336,7 @@ function Scene({ project, index }: { project: Project; index: number }) {
             )}
             {project.githubUrl && (
               <a href={project.githubUrl} target="_blank" rel="noreferrer" className={link}>
-                <FolderGit2 className="size-4" aria-hidden /> Source
+                <FolderGit2 className="size-4" aria-hidden /> {project.githubVisibility === 'private' ? 'Private source' : 'Source'}
               </a>
             )}
             {project.liveUrl && (
