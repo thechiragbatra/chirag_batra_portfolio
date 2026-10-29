@@ -70,10 +70,10 @@ const tabs: TabItem[] = [
             subtitle={`${job.company} · ${job.location}`}
             meta={`${job.start} – ${job.end}`}
           >
-            <ul className="mt-3 space-y-2 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
+            <ul className="resume-pointers mt-3 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
               {job.highlights.map((h) => (
-                <li key={h} className="flex gap-2.5">
-                  <span aria-hidden className="mt-2 size-1.5 shrink-0 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-400" />
+                <li key={h}>
+                  <span aria-hidden className="resume-pointer-dot mt-2 size-1.5 shrink-0 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-400" />
                   {h}
                 </li>
               ))}

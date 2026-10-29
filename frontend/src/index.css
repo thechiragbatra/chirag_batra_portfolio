@@ -1070,6 +1070,21 @@ body {
 .site-main .hover\:text-emerald-300:hover { color: #d2ff91; }
 .site-main [role="tablist"] { border-radius: 999px; padding: 0.3rem; }
 .site-main [role="tablist"] button { min-height: 2.65rem; padding-inline: 1.25rem; border-radius: 999px; }
+.resume-pointers {
+  display: grid;
+  grid-template-rows: repeat(2, minmax(0, auto));
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  column-gap: 2rem;
+  row-gap: 0.8rem;
+}
+.resume-pointers li {
+  display: grid;
+  grid-template-columns: 0.4rem minmax(0, 1fr);
+  align-items: start;
+  column-gap: 0.7rem;
+}
+.resume-pointer-dot { margin-top: 0.55rem; }
 
 @media (min-width: 1024px) {
   .project-scene { min-height: 38rem; }
@@ -1088,6 +1103,7 @@ body {
   .project-scene { margin-block: 0.9rem; padding: 1.2rem; border-radius: 1.35rem; }
   .project-scene .scene-index { font-size: 4.1rem; }
   .footer-panel { border-radius: 1.5rem; }
+  .resume-pointers { grid-template-rows: none; grid-auto-flow: row; grid-auto-columns: auto; row-gap: 0.7rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
