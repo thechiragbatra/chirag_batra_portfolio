@@ -60,7 +60,7 @@ export function Layout() {
   }, [pathname])
 
   return (
-    <div className="relative flex min-h-dvh flex-col overflow-x-clip">
+    <div className="app-shell relative flex min-h-dvh flex-col overflow-x-clip">
       <ShaderBackground />
       <a
         href="#main"
@@ -71,8 +71,8 @@ export function Layout() {
 
       <ScrollRestoration />
       <header data-scrolled={scrolled || undefined} className="site-header sticky top-0 z-40 px-3 pt-3 sm:px-5">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 rounded-2xl border border-white/[0.07] bg-[#06060e]/60 px-3 py-2 shadow-[0_10px_40px_-20px_rgb(0_0_0/0.9)] backdrop-blur-xl sm:gap-6 sm:px-4">
-          <NavLink to="/projects" viewTransition={!reduced} className="group flex shrink-0 items-center gap-2.5">
+        <div className="header-inner mx-auto flex max-w-7xl items-center gap-3 rounded-2xl border border-white/[0.07] bg-[#06060e]/60 px-3 py-2 shadow-[0_10px_40px_-20px_rgb(0_0_0/0.9)] backdrop-blur-xl sm:gap-6 sm:px-4">
+          <NavLink to="/projects" viewTransition={!reduced} className="brand group flex shrink-0 items-center gap-2.5">
             <Logo className="size-8 transition-transform duration-700 group-hover:rotate-[360deg]" />
             <span className="hidden leading-none sm:block">
               <span className="font-display block text-[15px] font-bold tracking-tight text-white">Chirag Batra</span>
@@ -82,7 +82,7 @@ export function Layout() {
           {/* Scrolls sideways on narrow phones instead of pushing the header off-screen. */}
           <nav
             ref={navRef}
-            className="relative flex min-w-0 flex-1 justify-start gap-0.5 overflow-x-auto [scrollbar-width:none] sm:justify-center [&::-webkit-scrollbar]:hidden"
+            className="main-nav relative flex min-w-0 flex-1 justify-start gap-0.5 overflow-x-auto [scrollbar-width:none] sm:justify-center [&::-webkit-scrollbar]:hidden"
             aria-label="Main"
           >
             {NAV.map(({ to, label }) => (
@@ -114,7 +114,7 @@ export function Layout() {
           </nav>
           <a
             href={`mailto:${EMAIL}`}
-            className="hidden shrink-0 items-center gap-2 rounded-full border border-white/10 px-3 py-1.5 font-mono text-[10px] tracking-[0.16em] text-zinc-300 uppercase transition-colors hover:border-cyan-300/50 hover:text-white lg:inline-flex"
+            className="role-availability hidden shrink-0 items-center gap-2 rounded-full border border-white/10 px-3 py-1.5 font-mono text-[10px] tracking-[0.16em] text-zinc-300 uppercase transition-colors hover:border-cyan-300/50 hover:text-white lg:inline-flex"
           >
             <span className="relative flex size-1.5">
               <span className="animate-ping-slow absolute inline-flex size-full rounded-full bg-emerald-400" />
@@ -125,7 +125,7 @@ export function Layout() {
         </div>
       </header>
 
-      <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6 sm:py-14">
+      <main id="main" className="site-main mx-auto w-full max-w-7xl flex-1 px-4 py-10 sm:px-6 sm:py-14">
         {/* Keyed by route so every navigation replays the entrance animation (the blur-in
             is the fallback where the View Transitions API is unavailable). */}
         <div key={pathname} data-page className="animate-blur-in">
@@ -133,12 +133,15 @@ export function Layout() {
         </div>
       </main>
 
-      <footer className="site-footer mt-24 border-t border-white/[0.06] px-4 pt-16 pb-28 sm:px-6">
+      <footer className="site-footer mt-24 border-t border-white/[0.06] px-4 pt-16 pb-20 sm:px-6">
         <div className="mx-auto max-w-6xl">
-          <p className="eyebrow">What next</p>
+          <div className="footer-panel grid gap-10 rounded-[2rem] border border-white/[0.08] bg-white/[0.025] p-6 sm:p-10 lg:grid-cols-[1fr_auto] lg:items-end lg:p-12">
+          <div>
+          <p className="eyebrow">Have a good problem?</p>
           <p className="font-display mt-4 max-w-4xl text-4xl leading-[0.95] font-extrabold text-white sm:text-6xl lg:text-7xl">
             Let&apos;s build something that <span className="font-serif text-aurora">thinks.</span>
           </p>
+          </div>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <a
               href={`mailto:${EMAIL}`}
@@ -159,6 +162,7 @@ export function Layout() {
                   {l.label} <ArrowUpRight className="size-3.5" aria-hidden />
                 </a>
               ))}
+          </div>
           </div>
           <div className="mt-14 flex flex-col gap-3 border-t border-white/[0.06] pt-6 font-mono text-[11px] tracking-[0.12em] text-zinc-500 uppercase sm:flex-row sm:items-center sm:justify-between">
             <span>© {YEAR} {basics.name} · {basics.location}</span>

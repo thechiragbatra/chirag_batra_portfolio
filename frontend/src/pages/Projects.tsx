@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUpRight, Award, ExternalLink, FileText, FlaskConical, FolderGit2, GraduationCap, Mail, Plus } from 'lucide-react'
+import { ArrowDown, ArrowUpRight, Award, BrainCircuit, ExternalLink, FileText, FlaskConical, FolderGit2, GraduationCap, Mail, Plus, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AddProjectPanel } from '../features/portfolio/AddProjectPanel'
@@ -21,49 +21,77 @@ const TICKER = resume.skills.flatMap((g) => g.items.slice(0, 3)).slice(0, 18)
 function Hero() {
   const email = resume.basics.links.find((link) => link.url.startsWith('mailto:'))?.url
   return (
-    <section className="relative flex min-h-[calc(100svh-9rem)] flex-col justify-center pb-10">
-      <p className="eyebrow animate-fade-up">
-        AI &amp; ML Engineer · B.Tech CS (Data Science), 2027 · {resume.basics.location}
-      </p>
-      <h1 className="font-display mt-6 text-[clamp(2.7rem,7.2vw,7.8rem)] leading-[0.9] font-extrabold text-white">
-        <KineticText text="I build useful" delay={150} />
-        <br />
-        <KineticText text="AI systems." delay={760} by="word" unitClassName="font-serif text-aurora pr-[0.08em]" />
-      </h1>
-      <p
-        className="animate-fade-up mt-8 max-w-xl text-lg leading-relaxed text-zinc-400"
-        style={{ animationDelay: '1100ms' }}
-      >
-        I&apos;m Chirag, a Computer Science student who takes AI ideas from raw data to working products—combining
-        machine learning, retrieval, and thoughtful evaluation.
-      </p>
-      <div className="animate-fade-up mt-9 flex flex-wrap gap-3" style={{ animationDelay: '1250ms' }}>
-        <Magnetic>
-          <a
-            href="#work"
-            className="shine-hover pressable group inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-semibold text-zinc-950 shadow-[0_0_50px_-10px_var(--glow-a)]"
+    <section className="hero-section relative flex min-h-[calc(100svh-9rem)] flex-col justify-center pb-10">
+      <div className="grid items-center gap-12 py-10 lg:grid-cols-[1.12fr_0.88fr] lg:gap-8">
+        <div className="hero-copy">
+          <p className="eyebrow animate-fade-up">
+            AI &amp; ML Engineer · B.Tech CS (Data Science), 2027 · {resume.basics.location}
+          </p>
+          <h1 className="font-display mt-6 text-[clamp(2.7rem,7.2vw,7.8rem)] leading-[0.9] font-extrabold text-white">
+            <KineticText text="Intelligence," delay={150} />
+            <br />
+            <KineticText text="engineered." delay={760} by="word" unitClassName="font-serif text-aurora pr-[0.08em]" />
+          </h1>
+          <p
+            className="animate-fade-up mt-8 max-w-xl text-lg leading-relaxed text-zinc-400"
+            style={{ animationDelay: '1100ms' }}
           >
-            See the work <ArrowDown className="size-4 transition-transform group-hover:translate-y-0.5" aria-hidden />
-          </a>
-        </Magnetic>
-        <Link
-          to="/resume"
-          viewTransition
-          className="pressable inline-flex items-center gap-2 rounded-full px-5 py-3.5 text-sm font-semibold text-zinc-300 transition-colors hover:text-white"
-        >
-          <FileText className="size-4" aria-hidden /> Résumé
-        </Link>
-        {email && (
-          <a
-            href={email}
-            className="pressable inline-flex items-center gap-2 rounded-full px-5 py-3.5 text-sm font-semibold text-zinc-300 transition-colors hover:text-white"
-          >
-            <Mail className="size-4" aria-hidden /> Get in touch
-          </a>
-        )}
+            I&apos;m Chirag, a Computer Science student who takes AI ideas from raw data to working products—combining
+            machine learning, retrieval, and thoughtful evaluation.
+          </p>
+          <div className="animate-fade-up mt-9 flex flex-wrap gap-3" style={{ animationDelay: '1250ms' }}>
+            <Magnetic>
+              <a
+                href="#work"
+                className="shine-hover pressable group inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-semibold text-zinc-950 shadow-[0_0_50px_-10px_var(--glow-a)]"
+              >
+                Explore projects <ArrowDown className="size-4 transition-transform group-hover:translate-y-0.5" aria-hidden />
+              </a>
+            </Magnetic>
+            <Link to="/resume" viewTransition className="hero-secondary pressable inline-flex items-center gap-2 rounded-full px-5 py-3.5 text-sm font-semibold text-zinc-300 transition-colors hover:text-white">
+              <FileText className="size-4" aria-hidden /> Résumé
+            </Link>
+            {email && (
+              <a href={email} className="hero-secondary pressable inline-flex items-center gap-2 rounded-full px-5 py-3.5 text-sm font-semibold text-zinc-300 transition-colors hover:text-white">
+                <Mail className="size-4" aria-hidden /> Get in touch
+              </a>
+            )}
+          </div>
+        </div>
+
+        <div className="hero-visual glass-strong relative mx-auto aspect-[0.95] w-full max-w-[32rem] overflow-hidden rounded-[2rem]" aria-hidden="true">
+          <div aria-hidden className="hero-grid absolute inset-0" />
+          <div className="hero-orbit hero-orbit-one" aria-hidden />
+          <div className="hero-orbit hero-orbit-two" aria-hidden />
+          <svg className="hero-network absolute inset-0 size-full" viewBox="0 0 500 520" fill="none" aria-hidden="true">
+            <path d="M98 136 229 212 368 122M229 212l-93 150m93-150 148 150M136 362l145 82 96-82" />
+            <path className="network-flow" d="M98 136 229 212 368 122M229 212l-93 150m93-150 148 150M136 362l145 82 96-82" />
+            {[ [98,136], [229,212], [368,122], [136,362], [377,362], [281,444] ].map(([cx, cy], i) => (
+              <g key={`${cx}-${cy}`} className={`network-node network-node-${i}`}>
+                <circle cx={cx} cy={cy} r="18" />
+                <circle cx={cx} cy={cy} r="4" />
+              </g>
+            ))}
+          </svg>
+          <div className="hero-core absolute inset-0 m-auto grid size-24 place-items-center rounded-[1.8rem]">
+            <BrainCircuit className="size-10" strokeWidth={1.4} aria-hidden />
+          </div>
+          <div className="hero-label hero-label-top glass absolute top-[12%] left-[9%] rounded-xl px-3 py-2">
+            <span className="flex items-center gap-2 font-mono text-[10px] tracking-wide text-zinc-200"><span className="led size-1.5 rounded-full bg-cyan-200" /> DATA IN</span>
+          </div>
+          <div className="hero-label hero-label-right glass absolute top-[22%] right-[7%] rounded-xl px-3 py-2">
+            <span className="flex items-center gap-2 font-mono text-[10px] tracking-wide text-zinc-200"><Sparkles className="size-3 text-cyan-200" /> MODEL</span>
+          </div>
+          <div className="hero-label hero-label-bottom glass absolute right-[10%] bottom-[15%] rounded-xl px-3 py-2">
+            <span className="flex items-center gap-2 font-mono text-[10px] tracking-wide text-zinc-200"><ArrowUpRight className="size-3 text-violet-200" /> REAL-WORLD IMPACT</span>
+          </div>
+          <div className="absolute right-5 bottom-5 left-5 flex items-center justify-between border-t border-white/10 pt-4 font-mono text-[9px] tracking-[0.16em] text-zinc-500 uppercase sm:right-7 sm:bottom-7 sm:left-7">
+            <span>Signal → intelligence → action</span><span>Fig. 01</span>
+          </div>
+        </div>
       </div>
 
-      <dl className="mt-16 grid grid-cols-2 border-t border-white/10 lg:grid-cols-4">
+      <dl className="hero-metrics mt-10 grid grid-cols-2 border-t border-white/10 lg:grid-cols-4">
         {highlights.map((h, i) => (
           <Reveal
             key={h.label}
@@ -228,7 +256,7 @@ function Scene({ project, index }: { project: Project; index: number }) {
   const link =
     'inline-flex items-center gap-1.5 rounded-full border border-white/12 px-4 py-2 text-sm font-medium text-zinc-200 transition-colors hover:border-white/35 hover:text-white'
   return (
-    <article className="relative grid items-center gap-10 py-16 sm:py-24 lg:grid-cols-2 lg:gap-16">
+    <article className="project-scene relative grid items-center gap-10 py-16 sm:py-24 lg:grid-cols-2 lg:gap-16">
       <div className={flip ? 'lg:order-2' : ''}>
         <Reveal>
           <div className="flex items-baseline gap-4">
