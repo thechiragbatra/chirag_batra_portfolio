@@ -11,7 +11,7 @@ const envDir = '..'
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, envDir, '')
   return {
-    base: process.env.GITHUB_ACTIONS ? '/deploysmith/' : '/',
+    base: process.env.GITHUB_ACTIONS ? '/chirag_batra_portfolio/' : '/',
     plugins: [
       react(),
       tailwindcss(),

@@ -2,7 +2,7 @@
 
 Personal portfolio and résumé site for my work in machine learning, data science, and applied AI.
 
-**[View the portfolio](https://thechiragbatra.github.io/deploysmith/)** · [Résumé PDF](https://thechiragbatra.github.io/deploysmith/resume.pdf) · [GitHub](https://github.com/thechiragbatra) · [LinkedIn](https://www.linkedin.com/in/chirag-batra-ds)
+**[View the portfolio](https://thechiragbatra.github.io/chirag_batra_portfolio/)** · [Résumé PDF](https://thechiragbatra.github.io/chirag_batra_portfolio/resume.pdf) · [GitHub](https://github.com/thechiragbatra) · [LinkedIn](https://www.linkedin.com/in/chirag-batra-ds)
 
 Built with React, TypeScript, Vite, and Tailwind CSS. The site is a static GitHub Pages deployment; the portfolio and interactive Churn Uplift Lab run without a backend.
 
@@ -40,7 +40,7 @@ The Churn Uplift Lab's model training and export source is in `ml/churn/`; the e
 
 ## GitHub Pages deployment
 
-The workflow at [`.github/workflows/frontend-deploy.yml`](.github/workflows/frontend-deploy.yml) builds `frontend/` and deploys `frontend/dist/` to GitHub Pages on every push to `main`. Set the repository’s Pages source to **GitHub Actions**. The production build uses the `/deploysmith/` project-site path.
+The workflow at [`.github/workflows/frontend-deploy.yml`](.github/workflows/frontend-deploy.yml) builds `frontend/` and deploys `frontend/dist/` to GitHub Pages on every push to `main`. Set the repository’s Pages source to **GitHub Actions**. The production build uses the `/chirag_batra_portfolio/` project-site path.
 
 ## Contact
 

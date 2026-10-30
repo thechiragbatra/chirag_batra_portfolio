@@ -23,7 +23,7 @@ npm test
 npm run build
 ```
 
-Pushes to `main` deploy the production build through `.github/workflows/frontend-deploy.yml`. For repository project pages, the production Vite base is `/deploysmith/`.
+Pushes to `main` deploy the production build through `.github/workflows/frontend-deploy.yml`. For repository project pages, the production Vite base is `/chirag_batra_portfolio/`.
 
 The Churn Lab model is exported to `frontend/public/models/churn-lab.json`; training and model tests live in `ml/churn/`.
 
