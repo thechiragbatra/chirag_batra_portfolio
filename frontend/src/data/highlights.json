@@ -18,5 +18,11 @@
     "value": 0.887,
     "decimals": 3,
     "label": "ROC-AUC · student risk model"
+  },
+  {
+    "value": 47,
+    "prefix": "₹",
+    "suffix": "K",
+    "label": "raised through Ten Smiles Foundation campaigns"
   }
 ]

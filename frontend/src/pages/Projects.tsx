@@ -103,12 +103,12 @@ function Hero() {
         </div>
       </div>
 
-      <dl className="hero-metrics mt-10 grid grid-cols-2 border-t border-white/10 lg:grid-cols-4">
+      <dl className="hero-metrics mt-10 grid grid-cols-2 border-t border-white/10 lg:grid-cols-5">
         {highlights.map((h, i) => (
           <Reveal
             key={h.label}
             delay={i * 110}
-            className={`border-white/10 py-6 pr-4 ${i % 2 ? 'pl-4 border-l' : ''} ${i > 0 && i % 2 === 0 ? 'lg:border-l lg:pl-4' : ''} ${i > 1 ? 'border-t lg:border-t-0' : ''}`}
+            className={`border-white/10 py-6 pr-4 ${i % 2 ? 'border-l pl-4' : ''} ${i > 0 ? 'lg:border-l lg:pl-4' : ''} ${i > 1 && i % 2 === 0 ? 'border-t lg:border-t-0' : ''}`}
           >
             <dd className="font-display text-3xl font-extrabold text-white sm:text-5xl">
               <CountUp value={h.value} decimals={h.decimals} prefix={h.prefix} suffix={h.suffix} />
@@ -398,7 +398,7 @@ export default function Projects() {
           <div>
             <p className="eyebrow">Selected work</p>
             <h2 id="work-heading" className="font-display mt-3 text-5xl font-extrabold text-white sm:text-7xl">
-              Things I&apos;ve <span className="font-serif text-aurora">shipped</span>
+              Selected <span className="font-serif text-aurora">builds</span>
             </h2>
           </div>
           {import.meta.env.DEV && !adding && (
